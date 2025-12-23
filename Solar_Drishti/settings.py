@@ -37,6 +37,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'forecasting',
 ]
 
 MIDDLEWARE = [
@@ -49,7 +50,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-ROOT_URLCONF = 'project.urls'
+ROOT_URLCONF = 'Solar_Drishti.urls'
 
 TEMPLATES = [
     {
@@ -66,7 +67,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'project.wsgi.application'
+WSGI_APPLICATION = 'Solar_Drishti.wsgi.application'
 
 
 # Database
