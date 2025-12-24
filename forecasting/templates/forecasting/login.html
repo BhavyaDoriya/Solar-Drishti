@@ -4,108 +4,27 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login | SolarDrishti Insights</title>
-    
     <link rel="icon" href="https://img.icons8.com/fluency/48/sun.png" type="image/x-icon">
-    
     <script src="https://accounts.google.com/gsi/client" async defer></script>
-
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
-    
     <style>
-        :root {
-            --primary-orange: #ff9100;
-            --secondary-blue: #2c3e50;
-            --bg-color: #f0f2f5;
-            --text-color: #1a1a1a;
-            --glass-bg: rgba(255, 255, 255, 0.85);
-        }
-
-        [data-theme="dark"] {
-            --bg-color: #0b0e14;
-            --text-color: #f1f1f1;
-            --glass-bg: rgba(28, 33, 40, 0.95);
-        }
-
-        body {
-            font-family: 'Poppins', sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            transition: 0.5s ease;
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .navbar {
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(15px);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .login-section {
-            flex: 1;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 80px 20px;
-        }
-
-        .login-card {
-            background: var(--glass-bg);
-            backdrop-filter: blur(20px);
-            border-radius: 30px;
-            overflow: hidden;
-            max-width: 850px;
-            width: 100%;
-            box-shadow: 0 25px 60px rgba(0,0,0,0.15);
-            display: flex;
-        }
-
-        .login-sidebar {
-            background: linear-gradient(135deg, var(--secondary-blue), #1a1a1a);
-            color: white;
-            padding: 40px;
-            width: 40%;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            text-align: center;
-        }
-
+        :root { --primary-orange: #ff9100; --secondary-blue: #2c3e50; --bg-color: #f0f2f5; --text-color: #1a1a1a; --glass-bg: rgba(255, 255, 255, 0.85); }
+        [data-theme="dark"] { --bg-color: #0b0e14; --text-color: #f1f1f1; --glass-bg: rgba(28, 33, 40, 0.95); }
+        body { font-family: 'Poppins', sans-serif; background-color: var(--bg-color); color: var(--text-color); transition: 0.5s ease; min-height: 100vh; display: flex; flex-direction: column; }
+        .navbar { background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(15px); border-bottom: 1px solid rgba(255, 255, 255, 0.1); }
+        .login-section { flex: 1; display: flex; align-items: center; justify-content: center; padding: 100px 20px 50px 20px; }
+        .login-card { background: var(--glass-bg); backdrop-filter: blur(20px); border-radius: 30px; overflow: hidden; max-width: 850px; width: 100%; box-shadow: 0 25px 60px rgba(0,0,0,0.15); display: flex; }
+        .login-sidebar { background: linear-gradient(135deg, var(--secondary-blue), #1a1a1a); color: white; padding: 40px; width: 40%; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; }
         .login-form-container { padding: 60px; width: 60%; }
-
-        @media (max-width: 768px) {
-            .login-card { flex-direction: column; }
-            .login-sidebar { width: 100%; padding: 30px; }
-            .login-form-container { width: 100%; padding: 40px; }
-        }
-
-        .form-control {
-            border-radius: 15px;
-            border: 1px solid rgba(0,0,0,0.1);
-            background: rgba(0,0,0,0.02);
-        }
-
+        .form-control { border-radius: 15px; border: 1px solid rgba(0,0,0,0.1); background: rgba(0,0,0,0.02); }
         [data-theme="dark"] .form-control { background: rgba(255,255,255,0.05); color: white; }
-
-        .btn-login {
-            background: linear-gradient(45deg, var(--primary-orange), #ff6d00);
-            border: none; color: white; font-weight: 700;
-            padding: 14px; border-radius: 15px;
-        }
-
-        #celestial-anchor {
-            position: fixed; bottom: 25px; right: 25px; z-index: 2000;
-            cursor: pointer; filter: drop-shadow(0 0 15px rgba(255, 145, 0, 0.4));
-            width: 80px; height: 80px;
-        }
+        .btn-login { background: linear-gradient(45deg, var(--primary-orange), #ff6d00); border: none; color: white; font-weight: 700; padding: 14px; border-radius: 15px; }
+        #celestial-anchor { position: fixed; bottom: 25px; right: 25px; z-index: 2000; cursor: pointer; width: 80px; height: 80px; }
     </style>
 </head>
-<body>
-
+<body onload="initApp()">
     <header>
         <nav class="navbar navbar-expand-lg fixed-top shadow-sm">
             <div class="container">
@@ -116,6 +35,11 @@
                     <ul class="navbar-nav ms-auto align-items-center">
                         <li class="nav-item"><a class="nav-link px-3" href="{% url 'home' %}">Home</a></li>
                         <li class="nav-item"><a class="nav-link px-3" href="/about/">About</a></li>
+                        {% if user.is_authenticated %}
+                            <li class="nav-item"><a class="btn btn-outline-warning ms-lg-3 px-4 rounded-pill" href="{% url 'logout' %}">Logout</a></li>
+                        {% else %}
+                            <li class="nav-item"><a class="btn btn-warning ms-lg-3 px-4 rounded-pill text-white" href="{% url 'login' %}">Login</a></li>
+                        {% endif %}
                     </ul>
                 </div>
             </div>
@@ -129,101 +53,73 @@
                 <h2 class="fw-bold">Ready to shine?</h2>
                 <p class="small opacity-75">Connect with Google for instant data access.</p>
             </div>
-
             <div class="login-form-container text-center">
                 <h3 class="fw-bold mb-1">Welcome Back</h3>
                 <p class="text-muted small mb-4">Choose your preferred login method</p>
 
-                <form id="loginForm" method="POST" onsubmit="handleLogin(event)">
+                <form id="loginForm" method="POST" action="{% url 'login' %}">
                     {% csrf_token %}
                     <div class="form-floating mb-3">
                         <input type="text" name="username" class="form-control" id="loginUsername" placeholder="Username" required>
                         <label for="loginUsername">Username</label>
                     </div>
-                    
                     <div class="form-floating mb-3">
                         <input type="password" name="password" class="form-control" id="loginPassword" placeholder="Password" required>
                         <label for="loginPassword">Password</label>
                     </div>
 
                     <button type="submit" class="btn btn-login w-100 mb-4 shadow">Sign In</button>
-
-                    <div class="separator d-flex align-items-center mb-4">
-                        <hr class="flex-grow-1"> <span class="mx-2 small text-muted">OR</span> <hr class="flex-grow-1">
-                    </div>
-
-                    <div id="g_id_onload"
-                         data-client_id="720615112942-okm42cqmp0d7tbvcn3c5lthi68vd7312.apps.googleusercontent.com"
-                         data-callback="handleCredentialResponse"
-                         data-auto_prompt="false">
-                    </div>
-                    <div class="g_id_signin" 
-                         data-type="standard" 
-                         data-shape="pill" 
-                         data-theme="outline" 
-                         data-text="signin_with" 
-                         data-size="large" 
-                         data-logo_alignment="left"
-                         style="width: 100%;">
-                    </div>
-
-                    <div class="text-center mt-4">
-                        <p class="small text-muted">New to SolarDrishti? <a href="{% url 'signup' %}" class="text-warning text-decoration-none fw-bold">Sign Up</a></p>
-                    </div>
+                    
+                    <div class="separator d-flex align-items-center mb-4"><hr class="flex-grow-1"><span class="mx-2 small text-muted">OR</span><hr class="flex-grow-1"></div>
+                    
+                    <div id="g_id_onload" data-client_id="720615112942-okm42cqmp0d7tbvcn3c5lthi68vd7312.apps.googleusercontent.com" data-callback="handleCredentialResponse" data-auto_prompt="false"></div>
+                    <div class="g_id_signin" data-type="standard" data-shape="pill" data-theme="outline" data-size="large" style="width: 100%;"></div>
                 </form>
             </div>
         </div>
     </main>
 
     <aside id="celestial-anchor" onclick="toggleTheme()">
-        <svg width="100%" height="100%" viewBox="0 0 100 100">
-            <circle id="main-circle" cx="50" cy="50" r="40" fill="#FFD700" />
-            <g id="eyes">
-                <circle cx="35" cy="45" r="7" fill="white" />
-                <circle id="left-iris" class="iris" cx="35" cy="45" r="3.5" fill="black" />
-                <circle cx="65" cy="45" r="7" fill="white" />
-                <circle id="right-iris" class="iris" cx="65" cy="45" r="3.5" fill="black" />
-            </g>
-            <path id="mouth" d="M 40 65 Q 50 75 60 65" stroke="black" stroke-width="2" fill="none" stroke-linecap="round" />
-        </svg>
+        <svg viewBox="0 0 100 100"><circle id="main-circle" cx="50" cy="50" r="40" fill="#FFD700"/><g id="eyes"><circle cx="35" cy="45" r="7" fill="white"/><circle class="iris" cx="35" cy="45" r="3.5" fill="black"/><circle cx="65" cy="45" r="7" fill="white"/><circle class="iris" cx="65" cy="45" r="3.5" fill="black"/></g><path d="M 40 65 Q 50 75 60 65" stroke="black" stroke-width="2" fill="none"/></svg>
     </aside>
 
+    <input type="hidden" id="loginStatus" value="{{ login_success|yesno:'true,false' }}">
+    <input type="hidden" id="authFailedMarker" value="{{ auth_failed|yesno:'true,false' }}">
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    
     <script>
-        // Check for saved theme immediately
-        if (localStorage.getItem('theme') === 'dark') {
-            document.body.setAttribute('data-theme', 'dark');
-            document.getElementById('main-circle').setAttribute('fill', '#bdc3c7');
+        function initApp() {
+            if (localStorage.getItem('theme') === 'dark') applyTheme('dark');
+            
+            // Trigger Alert on Failure
+            const authFailed = document.getElementById('authFailedMarker').value;
+            if (authFailed === 'true') {
+                alert("❌ Invalid Credentials!\nPlease check your username and password.");
+            }
+
+            // Redirect on Success
+            const statusElement = document.getElementById('loginStatus');
+            if (statusElement && statusElement.value === 'true') {
+                localStorage.setItem('isLoggedIn', 'true');
+                window.location.href = "{% url 'home' %}";
+            }
         }
 
         function handleCredentialResponse(response) {
-            // Decoding the Google JWT token
-            const base64Url = response.credential.split('.')[1];
-            const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-            const jsonPayload = decodeURIComponent(window.atob(base64).split('').map(function(c) {
-                return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
-            }).join(''));
-
-            const userData = JSON.parse(jsonPayload);
-            localStorage.setItem('isLoggedIn', 'true');
-            alert(`Verified Google Email: ${userData.email}`);
-            window.location.href = "{% url 'home' %}";
-        }
-
-        function handleLogin(e) {
-            e.preventDefault();
-            // In the real Django backend, this will be handled by the Python view
             localStorage.setItem('isLoggedIn', 'true');
             window.location.href = "{% url 'home' %}";
         }
 
         function toggleTheme() {
-            const current = document.body.getAttribute('data-theme');
-            const next = current === 'dark' ? 'light' : 'dark';
-            document.body.setAttribute('data-theme', next);
-            document.getElementById('main-circle').setAttribute('fill', next === 'dark' ? '#bdc3c7' : '#FFD700');
-            localStorage.setItem('theme', next);
+            const isDark = document.body.getAttribute('data-theme') === 'dark';
+            applyTheme(isDark ? 'light' : 'dark');
+            localStorage.setItem('theme', isDark ? 'light' : 'dark');
+        }
+
+        function applyTheme(mode) {
+            const sun = document.getElementById('main-circle');
+            document.body.setAttribute('data-theme', mode);
+            sun.setAttribute('fill', mode === 'dark' ? '#bdc3c7' : '#FFD700');
         }
 
         document.addEventListener('mousemove', (e) => {
