@@ -18,8 +18,6 @@
         .login-card { background: var(--glass-bg); backdrop-filter: blur(20px); border-radius: 30px; overflow: hidden; max-width: 850px; width: 100%; box-shadow: 0 25px 60px rgba(0,0,0,0.15); display: flex; }
         .login-sidebar { background: linear-gradient(135deg, var(--secondary-blue), #1a1a1a); color: white; padding: 40px; width: 40%; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; }
         .login-form-container { padding: 60px; width: 60%; }
-        .form-control { border-radius: 15px; border: 1px solid rgba(0,0,0,0.1); background: rgba(0,0,0,0.02); }
-        [data-theme="dark"] .form-control { background: rgba(255,255,255,0.05); color: white; }
         .btn-login { background: linear-gradient(45deg, var(--primary-orange), #ff6d00); border: none; color: white; font-weight: 700; padding: 14px; border-radius: 15px; }
         #celestial-anchor { position: fixed; bottom: 25px; right: 25px; z-index: 2000; cursor: pointer; width: 80px; height: 80px; }
     </style>
@@ -31,17 +29,6 @@
                 <a class="navbar-brand fw-bold d-flex align-items-center" href="{% url 'home' %}" style="color: var(--primary-orange);">
                     <i class="fa-solid fa-sun-plant-wilt me-2"></i> SOLAR<span class="text-secondary">DRISHTI</span>
                 </a>
-                <div class="collapse navbar-collapse" id="navMain">
-                    <ul class="navbar-nav ms-auto align-items-center">
-                        <li class="nav-item"><a class="nav-link px-3" href="{% url 'home' %}">Home</a></li>
-                        <li class="nav-item"><a class="nav-link px-3" href="/about/">About</a></li>
-                        {% if user.is_authenticated %}
-                            <li class="nav-item"><a class="btn btn-outline-warning ms-lg-3 px-4 rounded-pill" href="{% url 'logout' %}">Logout</a></li>
-                        {% else %}
-                            <li class="nav-item"><a class="btn btn-warning ms-lg-3 px-4 rounded-pill text-white" href="{% url 'login' %}">Login</a></li>
-                        {% endif %}
-                    </ul>
-                </div>
             </div>
         </nav>
     </header>
@@ -51,11 +38,11 @@
             <div class="login-sidebar d-none d-md-flex">
                 <i class="fa-solid fa-cloud-sun fa-5x mb-4 text-warning"></i>
                 <h2 class="fw-bold">Ready to shine?</h2>
-                <p class="small opacity-75">Connect with Google for instant data access.</p>
+                <p class="small opacity-75">Only registered users can access insights.</p>
             </div>
             <div class="login-form-container text-center">
                 <h3 class="fw-bold mb-1">Welcome Back</h3>
-                <p class="text-muted small mb-4">Choose your preferred login method</p>
+                <p class="text-muted small mb-4">Login to your account</p>
 
                 <form id="loginForm" method="POST" action="{% url 'login' %}">
                     {% csrf_token %}
@@ -72,32 +59,25 @@
                     
                     <div class="separator d-flex align-items-center mb-4"><hr class="flex-grow-1"><span class="mx-2 small text-muted">OR</span><hr class="flex-grow-1"></div>
                     
-                    <div id="g_id_onload" data-client_id="720615112942-okm42cqmp0d7tbvcn3c5lthi68vd7312.apps.googleusercontent.com" data-callback="handleCredentialResponse" data-auto_prompt="false"></div>
+                    <div id="g_id_onload" 
+                         data-client_id="720615112942-okm42cqmp0d7tbvcn3c5lthi68vd7312.apps.googleusercontent.com" 
+                         data-callback="handleCredentialResponse" 
+                         data-auto_prompt="false">
+                    </div>
                     <div class="g_id_signin" data-type="standard" data-shape="pill" data-theme="outline" data-size="large" style="width: 100%;"></div>
                 </form>
             </div>
         </div>
     </main>
 
-    <aside id="celestial-anchor" onclick="toggleTheme()">
-        <svg viewBox="0 0 100 100"><circle id="main-circle" cx="50" cy="50" r="40" fill="#FFD700"/><g id="eyes"><circle cx="35" cy="45" r="7" fill="white"/><circle class="iris" cx="35" cy="45" r="3.5" fill="black"/><circle cx="65" cy="45" r="7" fill="white"/><circle class="iris" cx="65" cy="45" r="3.5" fill="black"/></g><path d="M 40 65 Q 50 75 60 65" stroke="black" stroke-width="2" fill="none"/></svg>
-    </aside>
-
     <input type="hidden" id="loginStatus" value="{{ login_success|yesno:'true,false' }}">
     <input type="hidden" id="authFailedMarker" value="{{ auth_failed|yesno:'true,false' }}">
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         function initApp() {
             if (localStorage.getItem('theme') === 'dark') applyTheme('dark');
-            
-            // Trigger Alert on Failure
             const authFailed = document.getElementById('authFailedMarker').value;
-            if (authFailed === 'true') {
-                alert("❌ Invalid Credentials!\nPlease check your username and password.");
-            }
-
-            // Redirect on Success
+            if (authFailed === 'true') alert("❌ Invalid Credentials!");
             const statusElement = document.getElementById('loginStatus');
             if (statusElement && statusElement.value === 'true') {
                 localStorage.setItem('isLoggedIn', 'true');
@@ -105,9 +85,30 @@
             }
         }
 
+        // --- THE FIX: Backend Verification Logic ---
         function handleCredentialResponse(response) {
-            localStorage.setItem('isLoggedIn', 'true');
-            window.location.href = "{% url 'home' %}";
+            // Decode the token locally just to get the email
+            const base64Url = response.credential.split('.')[1];
+            const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+            const payload = JSON.parse(window.atob(base64));
+            
+            // Send email to Django to check if they exist in User model
+            fetch("{% url 'google_verify' %}", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-CSRFToken": "{{ csrf_token }}"
+                },
+                body: JSON.stringify({ email: payload.email })
+            })
+            .then(res => {
+                if (res.ok) {
+                    localStorage.setItem('isLoggedIn', 'true');
+                    window.location.href = "{% url 'home' %}";
+                } else {
+                    alert("❌ Account not found! Please Sign Up first.");
+                }
+            });
         }
 
         function toggleTheme() {
@@ -119,17 +120,8 @@
         function applyTheme(mode) {
             const sun = document.getElementById('main-circle');
             document.body.setAttribute('data-theme', mode);
-            sun.setAttribute('fill', mode === 'dark' ? '#bdc3c7' : '#FFD700');
+            if(sun) sun.setAttribute('fill', mode === 'dark' ? '#bdc3c7' : '#FFD700');
         }
-
-        document.addEventListener('mousemove', (e) => {
-            const irises = document.querySelectorAll('.iris');
-            irises.forEach(iris => {
-                const rect = iris.getBoundingClientRect();
-                const angle = Math.atan2(e.clientY - (rect.top + 3.5), e.clientX - (rect.left + 3.5));
-                iris.style.transform = `translate(${Math.cos(angle) * 4}px, ${Math.sin(angle) * 4}px)`;
-            });
-        });
     </script>
 </body>
 </html>

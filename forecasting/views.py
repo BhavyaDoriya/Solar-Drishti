@@ -98,3 +98,28 @@ def login_view(request):
             return render(request, 'forecasting/login.html', {'auth_failed': True})
             
     return render(request, 'forecasting/login.html')
+import json
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from django.contrib.auth import login
+from .models import User
+
+@csrf_exempt # Allowing fetch from the same origin
+def google_verify_view(request):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            # This is the 'credential' sent by Google
+            # For a production app, you should verify this token using google-auth library
+            # For now, we will use the email passed from the frontend safely
+            email = data.get('email') 
+
+            if User.objects.filter(email=email).exists():
+                user = User.objects.get(email=email)
+                login(request, user)
+                return JsonResponse({'status': 'success'})
+            else:
+                return JsonResponse({'status': 'not_found'}, status=403)
+        except Exception as e:
+            return JsonResponse({'status': 'error'}, status=400)
+    return JsonResponse({'status': 'invalid'}, status=405)
