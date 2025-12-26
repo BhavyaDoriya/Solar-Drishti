@@ -1,11 +1,28 @@
-# Virtual environment
-venv/
-.env/
+# ========== Python ==========
 __pycache__/
-*.py[cod]
-db.sqlite3
-*.sqlite3
+*.pyc
+*.pyo
+*.pyd
+
+# ========== Virtual Environments ==========
+.venv/
+venv/
+
+# ========== Environment Variables ==========
 .env
 .env.*
-.idea/
+
+# ========== Databases ==========
+*.sqlite3
+db.sqlite3
+
+# ========== Jupyter ==========
+.ipynb_checkpoints/
+
+# ========== IDE ==========
 .vscode/
+.idea/
+
+# ========== OS ==========
+.DS_Store
+Thumbs.db
