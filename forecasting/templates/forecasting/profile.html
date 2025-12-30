@@ -171,9 +171,11 @@
         <p class="data-value mb-0 text-success"><i class="fa-solid fa-circle-check me-1"></i> Verified</p>
     </div>
     <div class="col-sm-6">
-        <h2 class="data-label mb-1">Total Contributions</h2>
-        <p class="data-value mb-0">-- Insights</p>
-    </div>
+    <h2 class="data-label mb-1">Total Contributions</h2>
+    <p class="data-value mb-0">
+        <span class="fw-bold text-primary">{{ total_insights|default:0 }}</span> Insights Generated
+    </p>
+</div>
 </section>
 
                     {% if request.user.id == profile_user.id %}

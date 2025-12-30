@@ -136,10 +136,18 @@ def google_verify_view(request):
 # --- Profile & Account Management ---
 
 @login_required
+@login_required
 def profile_view(request, user_id):
     profile_user = get_object_or_404(User, pk=user_id)
-    return render(request, 'forecasting/profile.html', {'profile_user': profile_user})
-
+    
+    # Count predictions across all systems owned by this user
+    # This uses the 'related_name' defined in your models
+    total_insights = Prediction.objects.filter(system__user=profile_user).count()
+    
+    return render(request, 'forecasting/profile.html', {
+        'profile_user': profile_user,
+        'total_insights': total_insights
+    })
 @login_required
 def profile_update_view(request):
     return render(request, 'forecasting/update_profile.html')
