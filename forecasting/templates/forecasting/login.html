@@ -15,11 +15,46 @@
         body { font-family: 'Poppins', sans-serif; background-color: var(--bg-color); color: var(--text-color); transition: 0.5s ease; min-height: 100vh; display: flex; flex-direction: column; }
         .navbar { background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(15px); border-bottom: 1px solid rgba(255, 255, 255, 0.1); }
         .login-section { flex: 1; display: flex; align-items: center; justify-content: center; padding: 100px 20px 50px 20px; }
-        .login-card { background: var(--glass-bg); backdrop-filter: blur(20px); border-radius: 30px; overflow: hidden; max-width: 850px; width: 100%; box-shadow: 0 25px 60px rgba(0,0,0,0.15); display: flex; }
+        
+        /* --- MOBILE CENTER FIX START --- */
+        .login-card { 
+            background: var(--glass-bg); 
+            backdrop-filter: blur(20px); 
+            border-radius: 30px; 
+            overflow: hidden; 
+            max-width: 850px; 
+            width: 100%; 
+            box-shadow: 0 25px 60px rgba(0,0,0,0.15); 
+            display: flex; 
+            flex-direction: row; /* Desktop horizontal flow */
+        }
+        
         .login-sidebar { background: linear-gradient(135deg, var(--secondary-blue), #1a1a1a); color: white; padding: 40px; width: 40%; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; }
-        .login-form-container { padding: 60px; width: 60%; }
+        
+        .login-form-container { 
+            padding: 60px; 
+            width: 60%; 
+            display: flex; 
+            flex-direction: column; 
+            justify-content: center; 
+        }
+
+        /* Adjustments for mobile screens */
+        @media (max-width: 768px) {
+            .login-card {
+                flex-direction: column; /* Stack vertically if sidebar was visible */
+                max-width: 450px; /* Keep a nice slim width on mobile */
+            }
+            .login-form-container {
+                width: 100%; /* Take full width of card */
+                padding: 40px 30px; /* Adjust padding for smaller screens */
+            }
+        }
+        /* --- MOBILE CENTER FIX END --- */
+
         .btn-login { background: linear-gradient(45deg, var(--primary-orange), #ff6d00); border: none; color: white; font-weight: 700; padding: 14px; border-radius: 15px; }
         #celestial-anchor { position: fixed; bottom: 25px; right: 25px; z-index: 2000; cursor: pointer; width: 80px; height: 80px; }
+        .separator hr { border-color: var(--text-color); opacity: 0.2; }
     </style>
 </head>
 <body onload="initApp()">
@@ -40,6 +75,7 @@
                 <h2 class="fw-bold">Ready to shine?</h2>
                 <p class="small opacity-75">Only registered users can access insights.</p>
             </div>
+            
             <div class="login-form-container text-center">
                 <h3 class="fw-bold mb-1">Welcome Back</h3>
                 <p class="text-muted small mb-4">Login to your account</p>
@@ -47,24 +83,28 @@
                 <form id="loginForm" method="POST" action="{% url 'login' %}">
                     {% csrf_token %}
                     <div class="form-floating mb-3">
-                        <input type="text" name="username" class="form-control" id="loginUsername" placeholder="Username" required>
+                        <input type="text" name="username" class="form-control shadow-none" id="loginUsername" placeholder="Username" required>
                         <label for="loginUsername">Username</label>
                     </div>
                     <div class="form-floating mb-3">
-                        <input type="password" name="password" class="form-control" id="loginPassword" placeholder="Password" required>
+                        <input type="password" name="password" class="form-control shadow-none" id="loginPassword" placeholder="Password" required>
                         <label for="loginPassword">Password</label>
                     </div>
 
                     <button type="submit" class="btn btn-login w-100 mb-4 shadow">Sign In</button>
                     
-                    <div class="separator d-flex align-items-center mb-4"><hr class="flex-grow-1"><span class="mx-2 small text-muted">OR</span><hr class="flex-grow-1"></div>
+                    <div class="separator d-flex align-items-center mb-4">
+                        <hr class="flex-grow-1">
+                        <span class="mx-2 small text-muted">OR</span>
+                        <hr class="flex-grow-1">
+                    </div>
                     
                     <div id="g_id_onload" 
                          data-client_id="720615112942-okm42cqmp0d7tbvcn3c5lthi68vd7312.apps.googleusercontent.com" 
                          data-callback="handleCredentialResponse" 
                          data-auto_prompt="false">
                     </div>
-                    <div class="g_id_signin" data-type="standard" data-shape="pill" data-theme="outline" data-size="large" style="width: 100%;"></div>
+                    <div class="g_id_signin d-flex justify-content-center" data-type="standard" data-shape="pill" data-theme="outline" data-size="large" style="width: 100%;"></div>
                 </form>
             </div>
         </div>
@@ -85,14 +125,11 @@
             }
         }
 
-        // --- THE FIX: Backend Verification Logic ---
         function handleCredentialResponse(response) {
-            // Decode the token locally just to get the email
             const base64Url = response.credential.split('.')[1];
             const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
             const payload = JSON.parse(window.atob(base64));
             
-            // Send email to Django to check if they exist in User model
             fetch("{% url 'google_verify' %}", {
                 method: "POST",
                 headers: {

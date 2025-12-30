@@ -13,10 +13,18 @@
     <style>
         :root {
             --primary-orange: #ff9100;
-            --bg-color: #ffffff;
+            --bg-color: linear-gradient(180deg, #e0f2ff 0%, #ffffff 400px); 
             --text-color: #1a1a1a;
-            --card-bg: #f8f9fa;
+            --card-bg: #ffffff;
         }
+        [data-theme="dark"] .navbar-toggler-icon {
+    filter: invert(1) brightness(100%);
+}
+
+/* Also ensure the toggler border is visible */
+    [data-theme="dark"] .navbar-toggler {
+    border-color: rgba(255, 255, 255, 0.1);
+    }
 
         [data-theme="dark"] {
             --bg-color: #0b0e14;
@@ -26,33 +34,43 @@
 
         body {
             font-family: 'Poppins', sans-serif;
-            background-color: var(--bg-color);
+            background: var(--bg-color);
             color: var(--text-color);
             transition: background 0.6s cubic-bezier(0.4, 0, 0.2, 1), color 0.5s ease;
             min-height: 100vh;
         }
 
-        /* --- Navbar Active Link --- */
+        /* --- Global Text Fix for Dark Mode --- */
+        [data-theme="dark"] h1, [data-theme="dark"] h2, [data-theme="dark"] h3, 
+        [data-theme="dark"] h4, [data-theme="dark"] p, [data-theme="dark"] .text-muted {
+            color: #f1f1f1 !important;
+        }
+
+        /* --- Navbar --- */
+        .navbar { background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(15px); border-bottom: 1px solid rgba(255, 255, 255, 0.1); }
+        .nav-link { color: var(--text-color) !important; }
         .nav-link.active-page {
             color: var(--primary-orange) !important;
             font-weight: 700;
             border-bottom: 2px solid var(--primary-orange);
         }
 
-        [data-theme="dark"] h1, [data-theme="dark"] h2, [data-theme="dark"] h3, 
-        [data-theme="dark"] h4, [data-theme="dark"] p, [data-theme="dark"] .text-muted,
-        [data-theme="dark"] .nav-link {
-            color: var(--text-color) !important;
-        }
+        /* --- Auth Modal (Always Black Text) --- */
+        #authModal .modal-content { background: white !important; }
+        #authModal h5, #authModal p { color: #1a1a1a !important; }
 
-        .navbar { background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(15px); border-bottom: 1px solid rgba(255, 255, 255, 0.1); }
-        
         /* --- Carousel --- */
-        .carousel-item { height: 65vh; background-position: center; background-size: cover; }
-        .carousel-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); }
+        .carousel-item { height: 75vh; background-position: center; background-size: cover; }
+        .carousel-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); }
+        .carousel-caption { bottom: 20%; z-index: 10; }
         .carousel-caption h2, .carousel-caption p { color: white !important; }
+        .navbar-brand { color: var(--primary-orange) !important; }
+        .navbar-brand .text-secondary { color: #6c757d !important; }
+        [data-theme="dark"] .navbar-brand .text-secondary { color: #adb5bd !important; }
 
-        /* --- 3D Flip Cards --- */
+        .nav-link.active-page { color: var(--primary-orange) !important; font-weight: 700; border-bottom: 2px solid var(--primary-orange); }
+
+        /* --- 3D Flip Cards (Desktop) --- */
         .flip-card { background-color: transparent; width: 100%; height: 350px; perspective: 1000px; }
         .flip-card-inner {
             position: relative; width: 100%; height: 100%;
@@ -66,16 +84,40 @@
             display: flex; flex-direction: column; justify-content: center;
             align-items: center; padding: 30px; box-shadow: 0 10px 30px rgba(0,0,0,0.08);
         }
-        .flip-card-front { background-color: var(--card-bg); color: var(--text-color); }
+        .flip-card-front { background-color: var(--card-bg); }
         .flip-card-back { background-color: var(--primary-orange); color: white !important; transform: rotateY(180deg); }
         .feature-icon { font-size: 3.5rem; color: var(--primary-orange); margin-bottom: 1rem; }
 
+        /* --- Mobile Action Buttons --- */
+        .mobile-actions { display: none; }
+        @media (max-width: 767px) {
+            .flip-card { display: none; }
+            .mobile-actions { display: block; }
+            .action-btn-mobile {
+                background: var(--card-bg);
+                border-radius: 20px; padding: 22px; margin-bottom: 15px;
+                display: flex; align-items: center; justify-content: space-between;
+                box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+                text-decoration: none; color: var(--text-color) !important;
+                border: 1px solid rgba(0,0,0,0.05);
+            }
+        }
+
+        /* --- Celestial Sunrise & Smile --- */
         #celestial-anchor {
             position: fixed; bottom: 25px; right: 25px; z-index: 2000;
-            cursor: pointer; filter: drop-shadow(0 0 15px rgba(255, 145, 0, 0.4));
-            width: 90px; height: 90px;
+            cursor: pointer; width: 90px; height: 90px;
+            transform: translateY(150px); opacity: 0;
         }
-        .reveal { opacity: 0; transform: translateY(40px); transition: all 0.9s ease-out; }
+        .sunrise-animation { animation: rise 1.5s cubic-bezier(0.17, 0.67, 0.83, 0.67) forwards; }
+        @keyframes rise {
+            0% { transform: translateY(150px) scale(0.5); opacity: 0; }
+            70% { transform: translateY(-10px) scale(1.1); opacity: 1; }
+            100% { transform: translateY(0) scale(1); opacity: 1; }
+        }
+        #mouth { transition: d 0.5s ease-in-out; }
+
+        .reveal { opacity: 0; transform: translateY(30px); transition: all 0.8s ease-out; }
         .reveal.active { opacity: 1; transform: translateY(0); }
     </style>
 </head>
@@ -83,13 +125,13 @@
 
     <div class="modal fade" id="authModal" tabindex="-1">
         <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content shadow-lg border-0 rounded-4">
+            <div class="modal-content border-0 rounded-4">
                 <div class="modal-header border-0">
-                    <h5 class="modal-title fw-bold">SolarDrishti Auth</h5>
+                    <h5 class="fw-bold">SolarDrishti Account</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body text-center p-4">
-                    <p class="text-dark">Access the power of prediction. Choose an option to continue.</p>
+                    <p>Access your personalized solar insights. Sign in or join us to get started.</p>
                     <div class="d-grid gap-3">
                         <button class="btn btn-warning py-3 rounded-pill fw-bold" onclick="handleRedirect('login')">Login</button>
                         <button class="btn btn-outline-dark py-3 rounded-pill fw-bold" onclick="handleRedirect('signup')">Create Account</button>
@@ -102,7 +144,7 @@
     <header>
         <nav class="navbar navbar-expand-lg fixed-top shadow-sm">
             <div class="container">
-                <a class="navbar-brand fw-bold d-flex align-items-center" href="/" style="color: var(--primary-orange);">
+                <a class="navbar-brand fw-bold d-flex align-items-center" href="/">
                     <i class="fa-solid fa-sun-plant-wilt me-2"></i> SOLAR<span class="text-secondary">DRISHTI</span>
                 </a>
                 <button class="navbar-toggler border-0 shadow-none" type="button" data-bs-toggle="collapse" data-bs-target="#navMain">
@@ -110,27 +152,27 @@
                 </button>
                 <div class="collapse navbar-collapse" id="navMain">
                     <ul class="navbar-nav ms-auto align-items-center">
-                        <li class="nav-item"><a class="nav-link px-3" id="nav-home" href="/"><i class="fa-solid fa-house"></i> Home</a></li>
-                        <li class="nav-item"><a class="nav-link px-3" id="nav-predict" href="javascript:void(0)" onclick="guard('/predict')"><i class="fa-solid fa-bolt-lightning"></i> Predict</a></li>
-                        <li class="nav-item"><a class="nav-link px-3" id="nav-history" href="javascript:void(0)" onclick="guard('/history')"><i class="fa-solid fa-clock-rotate-left"></i> History</a></li>
+                        <li class="nav-item"><a class="nav-link px-3" id="nav-home" href="/">Home</a></li>
+                        <li class="nav-item"><a class="nav-link px-3" id="nav-predict" href="javascript:void(0)" onclick="guard(predictURL)">Predict</a></li>
+                        <li class="nav-item"><a class="nav-link px-3" id="nav-history" href="javascript:void(0)" onclick="guard(historyURL)">History</a></li>
                         
+                        {% if user.is_authenticated %}
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle px-3" href="#" id="profileDrop" data-bs-toggle="dropdown">
                                 <i class="fa-solid fa-circle-user"></i> My Account
                             </a>
                             <ul class="dropdown-menu dropdown-menu-end shadow border-0">
-                                <li><a class="dropdown-item" href="javascript:void(0)" onclick="guard('/profile')"><i class="fa-solid fa-id-card"></i> View Profile</a></li>
-                                <li><a class="dropdown-item" href="javascript:void(0)" onclick="guard('/update-profile')"><i class="fa-solid fa-user-pen"></i> Update Details</a></li>
+                                <li><a class="dropdown-item" href="{% url 'profile_view' user_id=request.user.id %}">View Profile</a></li>
+                                <li><a class="dropdown-item" href="{% url 'update_profile' %}">Update Details</a></li>
                                 <li><hr class="dropdown-divider"></li>
-                                <li><a class="dropdown-item text-danger fw-bold" href="javascript:void(0)" onclick="confirmLogout()"><i class="fa-solid fa-power-off"></i> Logout</a></li>
+                                <li><a class="dropdown-item text-danger fw-bold" href="{% url 'logout' %}">Logout</a></li>
                             </ul>
                         </li>
-
+                        {% else %}
                         <li class="nav-item ms-lg-3">
-                            <button class="btn btn-warning rounded-pill px-4 fw-bold shadow" id="authBtn" data-bs-toggle="modal" data-bs-target="#authModal">
-                                Login / Signup
-                            </button>
+                            <button class="btn btn-warning rounded-pill px-4 fw-bold shadow" data-bs-toggle="modal" data-bs-target="#authModal">Login / Signup</button>
                         </li>
+                        {% endif %}
                     </ul>
                 </div>
             </div>
@@ -150,43 +192,48 @@
                         <div class="carousel-overlay"></div>
                         <div class="carousel-caption">
                             <h2 class="display-3 fw-bold">Clean Energy Vision</h2>
-                            <p class="lead">Artificial Intelligence for a sustainable future.</p>
+                            <p class="lead">Harnessing AI to predict a sustainable tomorrow.</p>
                         </div>
                     </div>
-                    <div class="carousel-item" style="background-image: url('https://images.unsplash.com/photo-1592833159155-c62df1b356ee?q=80&w=2070');">
+                    <div class="carousel-item" style="background-image: url('https://images.unsplash.com/photo-1508514177221-188b1cf16e9d?q=80&w=2070');">
                         <div class="carousel-overlay"></div>
                         <div class="carousel-caption">
-                            <h2 class="display-3 fw-bold">Smart Generation</h2>
-                            <p class="lead">Optimize panel performance with smart data.</p>
+                            <h2 class="display-3 fw-bold">Smart Analysis</h2>
+                            <p class="lead">Real-time data processing for solar efficiency.</p>
                         </div>
                     </div>
-                    <div class="carousel-item" style="background-image: url('https://images.unsplash.com/photo-1473341304170-971dccb5ac1e?q=80&w=2070');">
+                    <div class="carousel-item" style="background-image: url('https://images.unsplash.com/photo-1497435334941-8c899ee9e8e9?q=80&w=2070');">
                         <div class="carousel-overlay"></div>
                         <div class="carousel-caption">
-                            <h2 class="display-3 fw-bold">Sustainable Insights</h2>
-                            <p class="lead">Empowering industries with data-driven confidence.</p>
+                            <h2 class="display-3 fw-bold">Future Proof</h2>
+                            <p class="lead">Advanced algorithms for precision energy insights.</p>
                         </div>
                     </div>
                 </div>
-                <button class="carousel-control-prev" type="button" data-bs-target="#solarHero" data-bs-slide="prev"><span class="carousel-control-prev-icon"></span></button>
-                <button class="carousel-control-next" type="button" data-bs-target="#solarHero" data-bs-slide="next"><span class="carousel-control-next-icon"></span></button>
+                <button class="carousel-control-prev" type="button" data-bs-target="#solarHero" data-bs-slide="prev">
+                    <span class="carousel-control-prev-icon"></span>
+                </button>
+                <button class="carousel-control-next" type="button" data-bs-target="#solarHero" data-bs-slide="next">
+                    <span class="carousel-control-next-icon"></span>
+                </button>
             </div>
         </section>
 
-        <section class="container py-5 text-center mt-lg-5">
-            <h2 class="mb-5 fw-bold reveal">How SolarDrishti Works</h2>
-            <div class="row g-4">
+        <section class="container py-5 mt-lg-5">
+            <h2 class="mb-5 fw-bold text-center reveal">How SolarDrishti Works</h2>
+            
+            <div class="row g-4 d-none d-md-flex">
                 <div class="col-md-4 reveal">
                     <div class="flip-card">
                         <div class="flip-card-inner">
                             <div class="flip-card-front">
                                 <div class="feature-icon"><i class="fa-solid fa-magnifying-glass-chart"></i></div>
-                                <h3>Prediction</h3>
+                                <h3 class="fw-bold">Prediction</h3>
                             </div>
                             <div class="flip-card-back">
-                                <h3>AI Predictor</h3>
+                                <h3 class="fw-bold">AI Predictor</h3>
                                 <p>We process irradiance data for precise energy forecasts.</p>
-                                <button class="btn btn-light rounded-pill px-4 fw-bold" onclick="guard('/predict')">Open Tool</button>
+                                <button class="btn btn-light rounded-pill px-4 fw-bold" onclick="guard(predictURL)">Open Tool</button>
                             </div>
                         </div>
                     </div>
@@ -196,12 +243,12 @@
                         <div class="flip-card-inner">
                             <div class="flip-card-front">
                                 <div class="feature-icon"><i class="fa-solid fa-database"></i></div>
-                                <h3>History</h3>
+                                <h3 class="fw-bold">History</h3>
                             </div>
                             <div class="flip-card-back">
-                                <h3>Secure Logs</h3>
+                                <h3 class="fw-bold">Secure Logs</h3>
                                 <p>Access your personal vault of previous solar energy scans.</p>
-                                <button class="btn btn-light rounded-pill px-4 fw-bold" onclick="guard('/history')">Check History</button>
+                                <button class="btn btn-light rounded-pill px-4 fw-bold" onclick="guard(historyURL)">Check History</button>
                             </div>
                         </div>
                     </div>
@@ -211,21 +258,36 @@
                         <div class="flip-card-inner">
                             <div class="flip-card-front">
                                 <div class="feature-icon"><i class="fa-solid fa-user-gear"></i></div>
-                                <h3>Account</h3>
+                                <h3 class="fw-bold">Account</h3>
                             </div>
                             <div class="flip-card-back">
-                                <h3>Manage Setup</h3>
+                                <h3 class="fw-bold">Manage Setup</h3>
                                 <p>Update profile details or remove your data securely.</p>
-                                <button class="btn btn-light rounded-pill px-4 fw-bold" onclick="guard('/profile')">Settings</button>
+                                <button class="btn btn-light rounded-pill px-4 fw-bold" onclick="guard(profileURL)">Settings</button>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
+
+            <div class="mobile-actions px-2">
+                <a href="javascript:void(0)" onclick="guard(predictURL)" class="action-btn-mobile reveal">
+                    <span><i class="fa-solid fa-bolt-lightning me-3 text-warning"></i> AI Predictor</span>
+                    <i class="fa-solid fa-chevron-right opacity-50"></i>
+                </a>
+                <a href="javascript:void(0)" onclick="guard(historyURL)" class="action-btn-mobile reveal">
+                    <span><i class="fa-solid fa-clock-rotate-left me-3 text-primary"></i> View History</span>
+                    <i class="fa-solid fa-chevron-right opacity-50"></i>
+                </a>
+                <a href="javascript:void(0)" onclick="guard(profileURL)" class="action-btn-mobile reveal">
+                    <span><i class="fa-solid fa-user-gear me-3 text-success"></i> Settings</span>
+                    <i class="fa-solid fa-chevron-right opacity-50"></i>
+                </a>
+            </div>
         </section>
     </main>
 
-    <footer class="text-center py-5">
+    <footer class="text-center py-5 mt-5">
         <p class="text-muted small">&copy; 2025 SolarDrishti Project | Built for a Greener Tomorrow</p>
     </footer>
 
@@ -234,76 +296,52 @@
             <circle id="main-circle" cx="50" cy="50" r="40" fill="#FFD700" />
             <g id="eyes">
                 <circle cx="35" cy="45" r="7" fill="white" />
-                <circle id="left-iris" class="iris" cx="35" cy="45" r="3.5" fill="black" />
+                <circle class="iris" cx="35" cy="45" r="3.5" fill="black" />
                 <circle cx="65" cy="45" r="7" fill="white" />
-                <circle id="right-iris" class="iris" cx="65" cy="45" r="3.5" fill="black" />
+                <circle class="iris" cx="65" cy="45" r="3.5" fill="black" />
             </g>
-            <path id="mouth" d="M 40 65 Q 50 75 60 65" stroke="black" stroke-width="2" fill="none" stroke-linecap="round" />
+            <path id="mouth" d="M 40 70 Q 50 70 60 70" stroke="black" stroke-width="2" fill="none" stroke-linecap="round" />
         </svg>
     </aside>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
+    const predictURL = "{% url 'predict' %}";
+    const historyURL = "{% url 'history_view' %}";
+    const profileURL = "{% if user.is_authenticated %}{% url 'profile_view' user_id=request.user.id %}{% else %}#{% endif %}";
+
     function initApp() {
         if (localStorage.getItem('theme') === 'dark') applyTheme('dark');
-        
-        // Check Login Status on Load
-        if (localStorage.getItem('isLoggedIn') === 'true') {
-            updateUIForLoggedInUser();
-        }
+        else applyTheme('light'); 
 
+        // Sunrise Sequence
+        const anchor = document.getElementById('celestial-anchor');
+        const mouth = document.getElementById('mouth');
+        anchor.classList.add('sunrise-animation');
+        setTimeout(() => {
+            mouth.setAttribute('d', 'M 40 65 Q 50 75 60 65'); // Smile!
+        }, 1700);
+
+        // Path Highlights
         const path = window.location.pathname;
-        document.querySelectorAll('.nav-link').forEach(link => link.classList.remove('active-page'));
         if (path.includes('predict')) document.getElementById('nav-predict').classList.add('active-page');
         else if (path.includes('history')) document.getElementById('nav-history').classList.add('active-page');
-        else document.getElementById('nav-home').classList.add('active-page');
-    }
-
-    function updateUIForLoggedInUser() {
-        const authBtn = document.getElementById('authBtn');
-        if (authBtn) {
-            authBtn.innerText = "Logout";
-            authBtn.classList.remove('btn-warning');
-            authBtn.classList.add('btn-outline-danger');
-            authBtn.removeAttribute('data-bs-toggle');
-            authBtn.removeAttribute('data-bs-target');
-            authBtn.onclick = confirmLogout;
-        }
-    }
-
-    // Handles modal options
-     function handleRedirect(type) {
-            const modalElement = document.getElementById('authModal');
-            const modalInstance = bootstrap.Modal.getInstance(modalElement);
-            if (modalInstance) modalInstance.hide();
-           // Fix: Remove any ".html" or extra slashes
-            if (type === 'login') {
-                window.location.href = '/login/'; 
-            }
-            else {
-                window.location.href = '/signup/';
-            }
-        }
-
-    function confirmLogout() {
-        if (confirm("Are you sure you want to log out of SolarDrishti?")) {
-            localStorage.removeItem('isLoggedIn');
-            // Effect: fade body out slightly before redirecting
-            document.body.style.opacity = '0.5';
-            window.location.href = '/'; 
-        }
+        else if (path === '/') document.getElementById('nav-home').classList.add('active-page');
     }
 
     function guard(route) {
-        if (localStorage.getItem('isLoggedIn') !== 'true') {
-            const authModal = new bootstrap.Modal(document.getElementById('authModal'));
-            authModal.show();
-        } else {
+        const isAuthenticated = "{{ user.is_authenticated|yesno:'true,false' }}";
+        if (isAuthenticated === "false") {
+            new bootstrap.Modal(document.getElementById('authModal')).show();
+        } else if (route !== "#") {
             window.location.href = route;
         }
     }
 
-    // --- THEME & ANIMATIONS ---
+    function handleRedirect(type) {
+        window.location.href = (type === 'login') ? '/login/' : '/signup/';
+    }
+
     function toggleTheme() {
         const isDark = document.body.getAttribute('data-theme') === 'dark';
         applyTheme(isDark ? 'light' : 'dark');
@@ -312,12 +350,15 @@
 
     function applyTheme(mode) {
         const sun = document.getElementById('main-circle');
+        const anchor = document.getElementById('celestial-anchor');
         if (mode === 'dark') {
             document.body.setAttribute('data-theme', 'dark');
-            sun.setAttribute('fill', '#bdc3c7');
+            if(sun) sun.setAttribute('fill', '#bdc3c7');
+            if(anchor) anchor.style.filter = "drop-shadow(0 0 15px rgba(200, 220, 255, 0.6))";
         } else {
             document.body.removeAttribute('data-theme');
-            sun.setAttribute('fill', '#FFD700');
+            if(sun) sun.setAttribute('fill', '#FFD700');
+            if(anchor) anchor.style.filter = "drop-shadow(0 0 15px rgba(255, 145, 0, 0.4))";
         }
     }
 
@@ -326,7 +367,7 @@
         irises.forEach(iris => {
             const rect = iris.getBoundingClientRect();
             const angle = Math.atan2(e.clientY - (rect.top + 3.5), e.clientX - (rect.left + 3.5));
-            iris.style.transform = `translate(${Math.cos(angle) * 4}px, ${Math.sin(angle) * 4}px)`;
+            iris.style.transform = `translate(${Math.cos(angle) * 3}px, ${Math.sin(angle) * 3}px)`;
         });
     });
 
@@ -334,6 +375,6 @@
         entries.forEach(entry => { if (entry.isIntersecting) entry.target.classList.add('active'); });
     }, { threshold: 0.1 });
     document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
-</script>
+    </script>
 </body>
 </html>

@@ -135,3 +135,8 @@ DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 
 # Fixes the 'stuck' white screen for Google Login
 SECURE_CROSS_ORIGIN_OPENER_POLICY = 'same-origin-allow-popups'
+SOCIALACCOUNT_ADAPTER = 'allauth.socialaccount.adapter.DefaultSocialAccountAdapter'
+ACCOUNT_AUTHENTICATION_METHOD = "email"
+ACCOUNT_EMAIL_REQUIRED = True
+# This allows a Google login to match an existing email record
+SOCIALACCOUNT_AUTO_SIGNUP = True
