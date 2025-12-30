@@ -1,20 +1,49 @@
-from django.shortcuts import render
+import json
+import random
+import requests
+from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib.auth import authenticate, login, logout, get_user_model
+from django.contrib.auth.models import update_last_login
+from django.contrib.auth.decorators import login_required
+from django.contrib import messages
+from django.http import JsonResponse, HttpResponse
+from django.core.mail import send_mail
+from django.conf import settings
+from django.views.decorators.csrf import csrf_exempt
 
-# Make sure this name matches what you wrote in forecasting/urls.py
+# Import your models
+from .models import SolarSystem, Prediction
+
+# Correctly define the User model for the entire file
+User = get_user_model()
+
+# --- Navigation Views ---
+
 def indexview(request):
     return render(request, 'forecasting/index.html')
 
+from django.db.models import Avg
+
+@login_required
 def history_view(request):
-    return render(request, 'forecasting/history.html')
+    # 1. Get all predictions for the user
+    history_list = Prediction.objects.filter(system__user=request.user).order_by('-target_date')
+    
+    # 2. Calculate real Average Accuracy (only where actual values exist)
+    # Note: We manually calculate avg because 'accuracy' is a property, not a DB field
+    valid_accuracies = [p.accuracy for p in history_list if p.accuracy is not None]
+    avg_acc = sum(valid_accuracies) / len(valid_accuracies) if valid_accuracies else 0
+    
+    # 3. Get actual number of active systems
+    system_count = SolarSystem.objects.filter(user=request.user).count()
+    
+    return render(request, 'forecasting/history.html', {
+        'history_list': history_list,
+        'avg_acc': round(avg_acc, 1),
+        'system_count': system_count
+    })
 
-def login_view(request):
-    return render(request, 'forecasting/login.html')
-
-import random
-from django.core.mail import send_mail
-from django.conf import settings
-from django.http import JsonResponse, HttpResponse
-from django.shortcuts import render
+# --- Authentication & Registration Views ---
 
 def signup_view(request):
     if request.method == 'POST':
@@ -22,14 +51,13 @@ def signup_view(request):
         username = request.POST.get('username')
         password = request.POST.get('password')
 
-        # Check if email already exists in the database
+        # Check if email already exists
         if User.objects.filter(email=email).exists():
             return JsonResponse({
                 'status': 'error', 
                 'message': 'This email is already registered. Please login instead.'
             }, status=400)
 
-        # ... rest of your OTP generation and email sending logic stays the same ...
         otp = str(random.randint(100000, 999999))
         request.session['otp'] = otp
         request.session['temp_user_data'] = {'username': username, 'email': email, 'password': password}
@@ -41,46 +69,28 @@ def signup_view(request):
             return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
 
     return render(request, 'forecasting/signup.html')
-from django.http import JsonResponse, HttpResponse
-from .models import User
 
 def verify_otp(request):
     if request.method == 'POST':
-        # 1. Get the code sent by JavaScript fetch
         user_otp = request.POST.get('otp_code') 
-        # 2. Get the real OTP from the Session
         saved_otp = request.session.get('otp')
         
-        # DEBUG: Print to your terminal to see if they match!
         print(f"User entered: {user_otp}, System saved: {saved_otp}")
         
-        # 3. Compare as strings to be safe
         if str(user_otp) == str(saved_otp):
             data = request.session.get('temp_user_data')
             
-            # Create the user
             User.objects.create_user(
                 username=data['username'],
                 email=data['email'],
                 password=data['password']
             )
             
-            # Clear sensitive data from session
             del request.session['otp']
             del request.session['temp_user_data']
-            
-            return HttpResponse(status=200) # Success
+            return HttpResponse(status=200)
         else:
-            return HttpResponse(status=400) # Mismatch
-
-from django.contrib.auth import authenticate, login
-from django.shortcuts import render
-
-from django.contrib.auth import authenticate, login
-from django.contrib.auth.models import update_last_login # Import this
-
-from django.contrib.auth import authenticate, login
-from django.shortcuts import render
+            return HttpResponse(status=400)
 
 def login_view(request):
     if request.method == 'POST':
@@ -91,35 +101,206 @@ def login_view(request):
         if user:
             login(request, user)
             update_last_login(None, user)
-            # Send success signal
             return render(request, 'forecasting/login.html', {'login_success': True})
         else:
-            # Send failure signal
             return render(request, 'forecasting/login.html', {'auth_failed': True})
             
     return render(request, 'forecasting/login.html')
-import json
-from django.http import JsonResponse
-from django.views.decorators.csrf import csrf_exempt
-from django.contrib.auth import login
-from .models import User
 
-@csrf_exempt # Allowing fetch from the same origin
+@csrf_exempt
 def google_verify_view(request):
     if request.method == 'POST':
         try:
             data = json.loads(request.body)
-            # This is the 'credential' sent by Google
-            # For a production app, you should verify this token using google-auth library
-            # For now, we will use the email passed from the frontend safely
-            email = data.get('email') 
+            raw_email = data.get('email', '')
+            email = raw_email.strip().lower() 
 
-            if User.objects.filter(email=email).exists():
-                user = User.objects.get(email=email)
-                login(request, user)
-                return JsonResponse({'status': 'success'})
-            else:
-                return JsonResponse({'status': 'not_found'}, status=403)
+            user = User.objects.filter(email__iexact=email).first() 
+
+            if not user:
+                username = email.split('@')[0] 
+                user = User.objects.create_user(
+                    username=username,
+                    email=email,
+                    password=None
+                )
+            
+            login(request, user)
+            return JsonResponse({'status': 'success'})
+
         except Exception as e:
-            return JsonResponse({'status': 'error'}, status=400)
+            print(f"Google Login Error: {e}")
+            return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
     return JsonResponse({'status': 'invalid'}, status=405)
+
+# --- Profile & Account Management ---
+
+@login_required
+def profile_view(request, user_id):
+    profile_user = get_object_or_404(User, pk=user_id)
+    return render(request, 'forecasting/profile.html', {'profile_user': profile_user})
+
+@login_required
+def profile_update_view(request):
+    return render(request, 'forecasting/update_profile.html')
+
+@login_required
+def logout_view(request):
+    logout(request)
+    return redirect('home')
+
+@login_required
+def delete_account_view(request):
+    user = request.user
+    user.delete()
+    return redirect('home')
+
+# --- Solar Prediction Logic ---
+
+@login_required
+def predictview(request):
+    systems = SolarSystem.objects.filter(user=request.user)
+    return render(request, 'forecasting/predict.html', {'systems': systems})
+
+@login_required
+def add_system(request):
+    if request.method == "POST":
+        lat = request.POST.get('lat')
+        lon = request.POST.get('lon')
+        name = request.POST.get('name')
+        
+        try:
+            # 1. Convert size to float and check for negative values
+            size = float(request.POST.get('size'))
+            
+            if size <= 0:
+                messages.error(request, "System capacity must be a positive number.")
+                return redirect('predict')
+            
+            # 2. OpenWeather Geocoding logic
+            api_key = "5a82383df52850125b3a28e7c8617e10"
+            geo_url = f"http://api.openweathermap.org/geo/1.0/reverse?lat={lat}&lon={lon}&limit=1&appid={api_key}"
+            
+            try:
+                response = requests.get(geo_url).json()
+                location_name = f"{response[0]['name']}, {response[0]['country']}"
+            except:
+                location_name = "Unknown Location"
+
+            # 3. Create the system
+            SolarSystem.objects.create(
+                user=request.user,
+                name=name,
+                system_size=size,
+                latitude=lat,
+                longitude=lon,
+                location_name=location_name
+            )
+            messages.success(request, f"System '{name}' added successfully!")
+            
+        except ValueError:
+            messages.error(request, "Please enter a valid number for system capacity.")
+            
+    return redirect('predict')
+
+@login_required
+def remove_system(request, system_id):
+    system = get_object_or_404(SolarSystem, id=system_id, user=request.user)
+    system.delete()
+    messages.success(request, f"System '{system.name}' removed successfully.")
+    return redirect('predict')
+from datetime import timedelta
+from django.utils import timezone
+import random
+
+
+@login_required
+def run_prediction(request, system_id):
+    system = get_object_or_404(SolarSystem, id=system_id, user=request.user)
+    target = request.GET.get('day', 'tomorrow') # 'tomorrow' or 'day_after'
+
+    # 1. Calculate the actual Target Date
+    if target == 'day_after':
+        target_date = timezone.now().date() + timedelta(days=2)
+    else:
+        target_date = timezone.now().date() + timedelta(days=1)
+
+    # 2. Cycle & Skip-Week Logic
+    if system.first_use_timestamp:
+        days_passed = (timezone.now() - system.first_use_timestamp).days
+        
+        # If more than 7 days passed and they ARE NOT locked (met requirements)
+        # OR if they skipped a whole extra week (days > 14), give a fresh start
+        if (days_passed >= 7 and not system.is_locked) or days_passed >= 14:
+            system.first_use_timestamp = timezone.now()
+            system.predictions_in_cycle = 0
+            system.actuals_in_cycle = 0
+            system.save()
+
+    # 3. Block if locked (User predicted last week but didn't verify yet)
+    if system.is_locked:
+        messages.warning(request, "Weekly verification required. Enter actual power to unlock.")
+        return redirect('predict')
+
+    # 4. If it's their first time ever predicting (or fresh cycle), start the clock
+    if not system.first_use_timestamp:
+        system.first_use_timestamp = timezone.now()
+
+    # 5. Generate AI Logic (Using target_date)
+    # This is where your ML model would use the target_date to fetch weather forecasts
+    predicted_kw = random.uniform(system.system_size * 0.2, system.system_size * 0.8)
+
+    Prediction.objects.create(
+        system=system,
+        target_date=target_date,  # Crucial for your History Graph
+        day_target=target,
+        pred_value=round(predicted_kw, 2)
+    )
+
+    # 6. Increment usage count for this cycle
+    system.predictions_in_cycle += 1
+    system.save()
+
+    messages.success(request, f"Forecast generated for {target_date.strftime('%b %d')}!")
+    return redirect('predict')
+@login_required
+def update_actual_power(request, system_id):
+    if request.method == "POST":
+        system = get_object_or_404(SolarSystem, id=system_id, user=request.user)
+        val = float(request.POST.get('actual_val'))
+
+        # Find the latest prediction that doesn't have an actual value yet
+        latest_pred = system.predictions.filter(actual_value__isnull=True).latest('timestamp')
+        latest_pred.actual_value = val
+        latest_pred.save()
+
+        # Update cycle counter
+        system.actuals_in_cycle += 1
+        system.save()
+
+        messages.success(request, "Actual power recorded! System status updated.")
+    
+    return redirect('predict')
+
+@login_required
+def profile_update_view(request):
+    if request.method == 'POST':
+        new_username = request.POST.get('username')
+        new_password = request.POST.get('password')
+        
+        # 1. Update Username
+        if User.objects.filter(username=new_username).exclude(id=request.user.id).exists():
+            messages.error(request, "Username already taken.")
+        else:
+            request.user.username = new_username
+            
+            # 2. Update Password if provided
+            if new_password and len(new_password) > 0:
+                request.user.set_password(new_password) # Correctly hashes the password
+                login(request, request.user) # Re-log the user in after password change
+            
+            request.user.save()
+            messages.success(request, "Profile updated successfully!")
+            return redirect('profile_view', user_id=request.user.id)
+            
+    return render(request, 'forecasting/update_profile.html')
