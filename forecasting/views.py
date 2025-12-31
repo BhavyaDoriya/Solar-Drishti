@@ -26,21 +26,27 @@ from django.db.models import Avg
 
 @login_required
 def history_view(request):
-    # 1. Get all predictions for the user
     history_list = Prediction.objects.filter(system__user=request.user).order_by('-target_date')
     
-    # 2. Calculate real Average Accuracy (only where actual values exist)
-    # Note: We manually calculate avg because 'accuracy' is a property, not a DB field
-    valid_accuracies = [p.accuracy for p in history_list if p.accuracy is not None]
-    avg_acc = sum(valid_accuracies) / len(valid_accuracies) if valid_accuracies else 0
+    # FILTER only records that have actual values
+    verified_logs = history_list.filter(actual_value__isnull=False)
     
-    # 3. Get actual number of active systems
-    system_count = SolarSystem.objects.filter(user=request.user).count()
+    if verified_logs.exists():
+        # Better Precision Logic
+        total_error = sum(abs(p.pred_value - p.actual_value) for p in verified_logs)
+        total_actual = sum(p.actual_value for p in verified_logs)
+        
+        if total_actual > 0:
+            avg_acc = max(0, 100 - (total_error / total_actual * 100))
+        else:
+            avg_acc = 0
+    else:
+        avg_acc = 0
     
     return render(request, 'forecasting/history.html', {
         'history_list': history_list,
-        'avg_acc': round(avg_acc, 1),
-        'system_count': system_count
+        'avg_acc': round(avg_acc, 2), # Keep 2 decimal places for accuracy
+        'system_count': SolarSystem.objects.filter(user=request.user).count()
     })
 
 # --- Authentication & Registration Views ---
@@ -312,3 +318,83 @@ def profile_update_view(request):
             return redirect('profile_view', user_id=request.user.id)
             
     return render(request, 'forecasting/update_profile.html')
+from django.shortcuts import get_object_or_404, redirect
+from .models import Prediction
+
+@login_required
+def delete_entry(request, entry_id):
+    if request.method == 'POST':
+        # Get the entry and ensure it belongs to the user (security check)
+        entry = get_object_or_404(Prediction, id=entry_id, system__user=request.user)
+        entry.delete()
+        messages.success(request, "Record deleted successfully.")
+    
+    return redirect('history_view') # Make sure this matches your history URL name
+from django.utils import timezone
+
+from django.utils import timezone
+
+
+from django.utils import timezone
+from django.db.models import Sum, F
+from django.db import transaction
+
+
+from django.db import transaction
+
+from django.utils import timezone
+from django.db import transaction
+from django.db.models import Sum
+
+from django.utils import timezone
+from django.db import transaction
+
+@login_required
+def history_view(request):
+    history_list = Prediction.objects.filter(system__user=request.user).order_by('-target_date')
+    verified_logs = history_list.filter(actual_value__isnull=False)
+    
+    if verified_logs.exists():
+        # High-precision weighted accuracy calculation
+        total_actual = sum(p.actual_value for p in verified_logs)
+        total_error = sum(abs(p.pred_value - p.actual_value) for p in verified_logs)
+        avg_acc_val = max(0, 100 - (total_error / total_actual * 100)) if total_actual > 0 else 0
+    else:
+        avg_acc_val = 0
+    
+    return render(request, 'forecasting/history.html', {
+        'history_list': history_list,
+        'avg_acc': round(avg_acc_val, 2), # Correctly rounded for summary card
+        'system_count': SolarSystem.objects.filter(user=request.user).count()
+    })
+
+@login_required
+def manual_update_actual(request):
+    if request.method == "POST":
+        prediction_id = request.POST.get('prediction_id')
+        try:
+            actual_val = float(request.POST.get('actual_val'))
+        except (ValueError, TypeError):
+            messages.error(request, "Invalid numeric value.")
+            return redirect('history_view')
+        
+        entry = get_object_or_404(Prediction, id=prediction_id, system__user=request.user)
+        
+        # VALIDATION: Prevent future dates
+        if entry.target_date > timezone.now().date():
+            messages.error(request, "You cannot verify output for a future date.")
+            return redirect('history_view')
+
+        # DATABASE UPDATE: Using atomic transaction for reliability
+        with transaction.atomic():
+            was_pending = entry.actual_value is None
+            entry.actual_value = actual_val
+            entry.save() # Forced database commit
+            
+            if was_pending:
+                system = entry.system
+                system.actuals_in_cycle += 1
+                system.save()
+        
+        messages.success(request, f"Yield for {entry.target_date} updated successfully!")
+    return redirect('history_view')

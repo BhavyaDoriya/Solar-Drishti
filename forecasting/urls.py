@@ -25,6 +25,8 @@ urlpatterns = [
     # 4. Submit Actual Power Data (maps to a specific system)
     path('update-actual/<int:system_id>/', views.update_actual_power, name='update_actual_power'),
     path('remove-system/<int:system_id>/', views.remove_system, name='remove_system'),
+    path('delete-entry/<int:entry_id>/', views.delete_entry, name='delete_entry'),
+    path('history/update/', views.manual_update_actual, name='manual_update_actual'),
 
 
 ]

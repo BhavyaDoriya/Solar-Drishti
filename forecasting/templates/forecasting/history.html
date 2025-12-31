@@ -13,22 +13,23 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
-    
+
     <style>
+        [data-theme="dark"] .stat-card .val.text-dark {
+    color: #ffffff !important;
+}
         :root {
             --primary-orange: #ff9100;
             --brand-dark: #1a1a1a;
             --bg-color: #f0f2f5;
             --text-color: #1a1a1a;
-            --glass-card: rgba(255, 255, 255, 0.85);
-            --nav-bg: rgba(255, 255, 255, 0.1);
+            --glass-card: rgba(255, 255, 255, 0.9);
         }
 
         [data-theme="dark"] {
             --bg-color: #0b0e14;
             --text-color: #f1f1f1;
             --glass-card: rgba(28, 33, 40, 0.95);
-            --nav-bg: rgba(0, 0, 0, 0.3);
             --brand-dark: #ffffff;
         }
 
@@ -36,68 +37,53 @@
             font-family: 'Poppins', sans-serif;
             background-color: var(--bg-color);
             color: var(--text-color);
-            transition: 0.5s ease;
+            transition: background 0.5s ease;
             min-height: 100vh;
         }
 
-        /* --- Brand & Navbar --- */
-        .navbar { background: var(--nav-bg); backdrop-filter: blur(15px); border-bottom: 1px solid rgba(255, 255, 255, 0.1); }
-        .brand-orange { color: var(--primary-orange); }
-        .brand-text { color: var(--brand-dark); font-weight: 700; transition: 0.3s; }
-        .nav-link { color: var(--text-color) !important; font-weight: 500; opacity: 0.8; }
-        .nav-link i { margin-right: 8px; color: var(--primary-orange); }
-        .nav-link:hover { opacity: 1; color: var(--primary-orange) !important; }
+        .navbar { background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(15px); border-bottom: 1px solid rgba(255, 145, 0, 0.1); }
+        .nav-link { color: var(--text-color) !important; font-weight: 600; transition: 0.3s; }
+        .nav-link.active { color: var(--primary-orange) !important; border-bottom: 2px solid var(--primary-orange); }
+        .navbar-brand { font-weight: 800; color: var(--primary-orange) !important; letter-spacing: -1px; }
 
-        .navbar-toggler { border-color: var(--primary-orange); }
-        .navbar-toggler-icon { filter: brightness(0) saturate(100%) invert(58%) sepia(91%) rotate(3deg) brightness(103%) contrast(101%); }
-        [data-theme="dark"] .navbar-toggler-icon { filter: invert(1) brightness(200%); }
+        .dashboard-container { padding-top: 110px; }
 
-        .dashboard-container { padding: 100px 15px 50px; }
-
-        /* --- Summary Cards (Now Fixed for Dark Mode) --- */
         .stat-card {
             background: var(--glass-card);
-            backdrop-filter: blur(20px);
-            border-radius: 20px;
-            border: 1px solid rgba(128, 128, 128, 0.1);
-            padding: 20px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+            border-radius: 25px;
+            padding: 30px;
             text-align: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+            border-top: 5px solid var(--primary-orange);
+            margin-bottom: 20px;
         }
-        [data-theme="dark"] .stat-card span, 
-        [data-theme="dark"] .stat-card small { 
-            color: var(--text-color) !important; 
-        }
+        .stat-card small { letter-spacing: 2px; font-weight: 700; color: #64748b; }
+        .stat-card .val { font-size: 2rem; font-weight: 900; }
 
-        /* --- Table Section (LOCKED TO LIGHT THEME) --- */
         .history-card-fixed {
             background: #ffffff !important;
-            border-radius: 25px;
-            border: 1px solid #dee2e6;
-            padding: 25px;
-            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
-            margin-top: 30px;
+            border-radius: 30px;
+            padding: 35px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.1);
+            margin-top: 20px;
         }
-        
-        .history-card-fixed h5, 
-        .history-card-fixed table, 
-        .history-card-fixed th, 
-        .history-card-fixed td {
-            color: #1a1a1a !important;
-        }
+        .history-card-fixed th { color: #94a3b8; text-transform: uppercase; font-size: 0.75rem; font-weight: 800; padding: 15px; }
+        .history-card-fixed td { color: #1e293b; font-weight: 600; padding: 15px; }
 
-        .accuracy-badge { padding: 5px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: bold; }
-        .bg-high { background: rgba(40, 167, 69, 0.2); color: #28a745; }
-        .bg-low { background: rgba(220, 53, 69, 0.2); color: #dc3545; }
+        .accuracy-badge { padding: 6px 14px; border-radius: 50px; font-size: 0.75rem; font-weight: 800; background: #fef3c7; color: #d97706; }
+        .bg-high { background: #dcfce7; color: #166534; }
 
-        .btn-warning { background-color: var(--primary-orange); border: none; color: white; font-weight: 600; }
-        .btn-warning:hover { background-color: #e68200; transform: translateY(-2px); color: white; }
+        .btn-orange { background-color: var(--primary-orange); color: white; border-radius: 50px; font-weight: 700; border: none; padding: 10px 30px; transition: 0.3s; }
+        .btn-orange:hover { background-color: #e68200; transform: translateY(-2px); box-shadow: 0 8px 20px rgba(255, 145, 0, 0.3); color: white; }
 
-        #celestial-anchor { position: fixed; bottom: 25px; right: 25px; z-index: 3000; cursor: pointer; width: 70px; height: 70px; }
+        #celestial-anchor { position: fixed; bottom: 30px; right: 30px; z-index: 3000; cursor: pointer; width: 65px; height: 65px; }
+        .iris { transition: transform 0.1s ease-out; }
 
-        @media (max-width: 768px) {
-            .dashboard-container { padding-top: 90px; }
-        }
+        /* Alert Custom Borders */
+        .border-success-custom { border-left: 5px solid #28a745 !important; }
+        .border-warning-custom { border-left: 5px solid #ffc107 !important; }
+        .border-danger-custom { border-left: 5px solid #dc3545 !important; }
+        .border-info-custom { border-left: 5px solid #17a2b8 !important; }
     </style>
 </head>
 <body onload="checkTheme()">
@@ -105,226 +91,297 @@
     <header>
         <nav class="navbar navbar-expand-lg fixed-top shadow-sm">
             <div class="container">
-                <a class="navbar-brand d-flex align-items-center" href="/">
-                    <i class="fa-solid fa-sun-plant-wilt me-2 brand-orange"></i> 
-                    <span class="brand-orange">SOLAR</span><span class="brand-text">DRISHTI</span>
+                <a class="navbar-brand d-flex align-items-center no-underline" href="/">
+                    <i class="fa-solid fa-sun-plant-wilt me-2"></i> SOLAR<span class="text-secondary">DRISHTI</span>
                 </a>
-                <button class="navbar-toggler shadow-none" type="button" data-bs-toggle="collapse" data-bs-target="#navMain">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
                 <div class="collapse navbar-collapse" id="navMain">
-                    <ul class="navbar-nav ms-auto text-center py-3 py-lg-0">
-                        <li class="nav-item"><a class="nav-link px-3" href="/"><i class="fa-solid fa-house"></i>Home</a></li>
-                        <li class="nav-item"><a class="nav-link px-3" href="/predict"><i class="fa-solid fa-bolt"></i>Predict</a></li>
-                        <li class="nav-item"><a class="nav-link px-3 active fw-bold" href="/history" style="color: var(--primary-orange) !important;"><i class="fa-solid fa-clock-rotate-left"></i>History</a></li>
+                    <ul class="navbar-nav ms-auto">
+                        <li class="nav-item"><a class="nav-link px-3" href="/">Home</a></li>
+                        <li class="nav-item"><a class="nav-link px-3" href="/predict">Predict</a></li>
+                        <li class="nav-item"><a class="nav-link px-3 active" href="/history">History</a></li>
                     </ul>
                 </div>
             </div>
         </nav>
     </header>
 
-    <main class="container dashboard-container">
-        <div class="row g-3 mb-4">
-            <div class="col-6 col-md-4">
+    {% if messages %}
+    <div class="container mt-5 pt-5" id="message-container" style="position: relative; z-index: 1050;">
+        {% for message in messages %}
+            <div class="alert alert-dismissible fade show rounded-4 border-0 shadow-lg mb-3 d-flex align-items-center 
+                {% if message.tags == 'success' %}border-success-custom
+                {% elif message.tags == 'warning' %}border-warning-custom
+                {% elif message.tags == 'error' or message.tags == 'danger' %}border-danger-custom
+                {% else %}border-info-custom{% endif %}" 
+                 role="alert" 
+                 style="background: var(--glass-card); backdrop-filter: blur(10px);">
+                
+                <div class="d-flex align-items-center w-100">
+                    {% if message.tags == 'success' %}
+                        <i class="fa-solid fa-circle-check text-success me-3 fs-5"></i>
+                    {% elif message.tags == 'warning' %}
+                        <i class="fa-solid fa-triangle-exclamation text-warning me-3 fs-5"></i>
+                    {% elif message.tags == 'error' or message.tags == 'danger' %}
+                        <i class="fa-solid fa-circle-xmark text-danger me-3 fs-5"></i>
+                    {% else %}
+                        <i class="fa-solid fa-circle-info text-info me-3 fs-5"></i>
+                    {% endif %}
+                    <span style="color: var(--text-color); font-weight: 500;">{{ message }}</span>
+                </div>
+                <button type="button" class="btn-close shadow-none" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <main class="container dashboard-container mb-5">
+        <div class="row g-4 mb-5">
+            <div class="col-md-4">
                 <div class="stat-card">
-                    <small class="text-muted d-block">Total Logs</small>
-                    <span class="fw-bold fs-4">{{ history_list|length }}</span>
+                    <small class="text-uppercase block mb-2">Total Logs</small>
+                    <div class="val text-dark">{{ history_list|length }}</div>
                 </div>
             </div>
-            <div class="col-6 col-md-4">
+            <div class="col-md-4">
                 <div class="stat-card">
-                    <small class="text-muted d-block">Avg Accuracy</small>
-                    <span class="fw-bold fs-4 text-success">{{ avg_acc|default:0 }}%</span>
+                    <small class="text-uppercase block mb-2">Avg Accuracy</small>
+                    <div class="val text-success">{{ avg_acc }}%</div>
                 </div>
             </div>
-            <div class="col-12 col-md-4">
+            <div class="col-md-4">
                 <div class="stat-card">
-                    <small class="text-muted d-block">Active Systems</small>
-                    <span class="fw-bold fs-4 text-warning">{{ system_count|default:0 }}</span>
+                    <small class="text-uppercase block mb-2">Active Systems</small>
+                    <div class="val" style="color: var(--primary-orange);">{{ system_count|default:0 }}</div>
                 </div>
             </div>
         </div>
 
-        <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-4 gap-3">
-            <div>
-                <h2 class="fw-bold m-0">Energy History</h2>
-                <p class="text-muted small m-0">Review your past solar forecasting performance.</p>
+        <div class="row align-items-center mb-4 g-3">
+            <div class="col-md-4 text-center text-md-start">
+                <h2 class="fw-bold mb-0">Energy History</h2>
             </div>
-            <div class="d-flex gap-2">
-                <button class="btn btn-outline-warning rounded-pill px-4 py-2 shadow-sm" onclick="exportToPDF()">
-                    <i class="fa-solid fa-file-pdf me-2"></i> Report
-                </button>
-                <button class="btn btn-warning rounded-pill px-4 py-2 shadow-sm" data-bs-toggle="modal" data-bs-target="#analyticsModal">
-                    <i class="fa-solid fa-chart-line me-2"></i> Analytics
-                </button>
+            <div class="col-md-8 d-flex flex-wrap justify-content-center justify-content-md-end gap-3">
+                <div class="input-group" style="max-width: 350px;">
+                    <span class="input-group-text bg-white border-end-0" style="border-radius: 50px 0 0 50px;">
+                        <i class="fa-solid fa-magnifying-glass text-warning"></i>
+                    </span>
+                    <input type="text" id="tableFilter" placeholder="Search date..." class="form-control border-start-0 shadow-none">
+                    <button class="btn btn-orange px-4" type="button" onclick="filterTable()" style="border-radius: 0 50px 50px 0;">Search</button>
+                </div>
+
+                <button class="btn btn-outline-dark rounded-pill px-4 fw-bold" onclick="exportToPDF()">Report</button>
+                <button class="btn btn-orange shadow-sm" data-bs-toggle="modal" data-bs-target="#analyticsModal">Analytics</button>
             </div>
         </div>
 
-        <div class="history-card-fixed overflow-hidden">
-            <h5 class="fw-bold mb-4">Past Records</h5>
+        <div class="history-card-fixed">
             <div class="table-responsive">
-                <table class="table align-middle text-nowrap" id="historyTable">
-                    <thead class="table-light">
+                <table class="table align-middle" id="historyTable">
+                    <thead>
                         <tr>
-                            <th class="ps-3">Commit Date</th>
+                            <th>Commit Date</th>
                             <th>Forecast Date</th>
                             <th>Predicted</th>
-                            <th>Actual</th>
+                            <th>Actual Output</th>
                             <th>Accuracy</th>
-                            <th class="pe-3 text-center no-export">Action</th>
+                            <th class="text-center">Status</th>
                         </tr>
                     </thead>
-                    <tbody>
+                    <tbody id="historyBody">
                         {% for entry in history_list %}
                         <tr>
-                            <td class="small ps-3">{{ entry.created_at|date:"M d, H:i" }}</td>
-                            <td class="fw-medium">{{ entry.target_date|date:"M d, Y" }}</td>
-                            <td class="fw-bold text-primary">{{ entry.pred_value }} kW</td>
+                            <td class="text-muted small">{{ entry.created_at|date:"M d, H:i" }}</td>
+                            <td class="text-dark">{{ entry.target_date|date:"M d, Y" }}</td>
+                            <td style="color: var(--primary-orange);">{{ entry.pred_value }} kW</td>
                             <td>
                                 {% if entry.actual_value is not None %}
-                                    <span class="text-success fw-bold">{{ entry.actual_value }} kW</span>
+                                    <span class="text-success fw-bold me-2">{{ entry.actual_value }} kW</span>
+                                    <button class="btn p-0 border-0 bg-transparent" style="color: var(--primary-orange);" onclick="openEditModal(event, '{{ entry.id }}', '{{ entry.target_date }}', '{{ entry.actual_value }}')">
+                                        <i class="fa-solid fa-pen-to-square"></i>
+                                    </button>
                                 {% else %}
-                                    <span class="text-muted italic">Pending</span>
+                                    <span class="text-muted fst-italic me-2">Pending</span>
+                                    <button class="btn p-0 border-0 bg-transparent text-primary" onclick="openEditModal(event, '{{ entry.id }}', '{{ entry.target_date }}', '')">
+                                        <i class="fa-solid fa-plus-circle"></i>
+                                    </button>
                                 {% endif %}
                             </td>
                             <td>
                                 {% if entry.accuracy %}
-                                    <span class="accuracy-badge {% if entry.accuracy > 90 %}bg-high{% else %}bg-low{% endif %}">
-                                        {{ entry.accuracy }}%
-                                    </span>
+                                    <span class="accuracy-badge {% if entry.accuracy > 90 %}bg-high{% endif %}">{{ entry.accuracy }}%</span>
                                 {% else %}
-                                    <span class="opacity-50 small">--</span>
+                                    <span class="text-muted opacity-50">--</span>
                                 {% endif %}
                             </td>
-                            <td class="pe-3 text-center no-export">
-                                <form action="{% url 'delete_entry' entry.id %}" method="POST" onsubmit="return confirm('Delete record?')">
-                                    {% csrf_token %}
-                                    <button type="submit" class="btn btn-link text-danger p-0 border-0"><i class="fa-solid fa-trash-can"></i></button>
-                                </form>
+                            <td class="text-center">
+                                {% if entry.actual_value is not None %}
+                                    <i class="fa-solid fa-circle-check text-success fs-5"></i>
+                                {% else %}
+                                    <i class="fa-solid fa-clock-rotate-left text-muted opacity-50 fs-5"></i>
+                                {% endif %}
                             </td>
                         </tr>
-                        {% empty %}
-                        <tr><td colspan="6" class="text-center py-5 opacity-50">No historical records found.</td></tr>
                         {% endfor %}
                     </tbody>
                 </table>
             </div>
+            <div id="noMatch" class="d-none text-center py-5 text-muted">
+                <i class="fa-solid fa-calendar-xmark fs-1 mb-3 d-block opacity-25"></i>
+                No matching records found.
+            </div>
         </div>
     </main>
 
-    <div class="modal fade" id="analyticsModal" tabindex="-1">
-        <div class="modal-dialog modal-lg modal-dialog-centered px-3">
-            <div class="modal-content rounded-4 border-0 shadow-lg" style="background: var(--glass-card); backdrop-filter: blur(25px); color: var(--text-color);">
-                <div class="modal-header border-0 pb-0">
-                    <h5 class="fw-bold m-0"><i class="fa-solid fa-chart-area text-warning me-2"></i>Trends</h5>
-                    <button type="button" class="btn-close shadow-none" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <div style="position: relative; height: 50vh; width: 100%;">
-                        <canvas id="historyChart"></canvas>
+    <div class="modal fade" id="editModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 rounded-5 shadow-lg overflow-hidden">
+                <form method="POST" action="{% url 'manual_update_actual' %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="prediction_id" id="modal_prediction_id">
+                    <div class="p-5">
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <h3 class="fw-bold text-dark mb-0">Verify Output</h3>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
+                        <p class="text-muted mb-4">Actual output for <span id="modal_date_display" class="fw-bold" style="color: var(--primary-orange);"></span>.</p>
+                        <div class="mb-4">
+                            <label class="form-label small fw-bold">Energy Generated (kW)</label>
+                            <input type="number" step="0.01" name="actual_val" id="modal_actual_val" class="form-control rounded-4 py-3" required>
+                        </div>
+                        <div class="d-flex gap-2">
+                            <button type="button" class="btn btn-light rounded-pill flex-grow-1 py-3 fw-bold" data-bs-dismiss="modal">Discard</button>
+                            <button type="submit" class="btn btn-orange flex-grow-1 py-3">Verify Now</button>
+                        </div>
                     </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="analyticsModal" tabindex="-1">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content border-0 rounded-5 shadow-lg">
+                <div class="p-5">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h4 class="fw-bold text-dark mb-0">Generation Trends</h4>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div style="height: 400px;"><canvas id="historyChart"></canvas></div>
                 </div>
             </div>
         </div>
     </div>
 
+    <aside id="celestial-anchor" onclick="toggleTheme()">
+        <svg viewBox="0 0 100 100">
+            <circle id="main-circle" cx="50" cy="50" r="40" fill="#FFD700" />
+            <g>
+                <circle cx="35" cy="45" r="7" fill="white" />
+                <circle class="iris" cx="35" cy="45" r="3.5" fill="black" />
+                <circle cx="65" cy="45" r="7" fill="white" />
+                <circle class="iris" cx="65" cy="45" r="3.5" fill="black" />
+            </g>
+            <path d="M 40 65 Q 50 75 60 65" stroke="black" stroke-width="3" fill="none" stroke-linecap="round" />
+        </svg>
+    </aside>
+
     <script id="history-labels" type="application/json">[{% for entry in history_list|slice:":10" %}"{{ entry.target_date|date:'d M' }}"{% if not forloop.last %},{% endif %}{% endfor %}]</script>
     <script id="history-pred" type="application/json">[{% for entry in history_list|slice:":10" %}{{ entry.pred_value|default:0 }}{% if not forloop.last %},{% endif %}{% endfor %}]</script>
     <script id="history-actual" type="application/json">[{% for entry in history_list|slice:":10" %}{{ entry.actual_value|default:0 }}{% if not forloop.last %},{% endif %}{% endfor %}]</script>
 
-    <aside id="celestial-anchor" onclick="toggleTheme()">
-        <svg width="100%" height="100%" viewBox="0 0 100 100">
-            <circle id="main-circle" cx="50" cy="50" r="40" fill="#FFD700" />
-            <g id="eyes">
-                <circle cx="35" cy="45" r="7" fill="white" /><circle class="iris" cx="35" cy="45" r="3.5" fill="black" />
-                <circle cx="65" cy="45" r="7" fill="white" /><circle class="iris" cx="65" cy="45" r="3.5" fill="black" />
-            </g>
-            <path id="mouth" d="M 40 65 Q 50 75 60 65" stroke="black" stroke-width="2" fill="none" stroke-linecap="round" />
-        </svg>
-    </aside>
-
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
     <script>
-        let chartInstance = null;
+        // WORKING SEARCH FILTER
+        function filterTable() {
+            const input = document.getElementById("tableFilter");
+            const filter = input.value.toLowerCase().trim();
+            const rows = document.querySelectorAll("#historyBody tr");
+            let hasMatch = false;
 
-        function checkTheme() {
-            if (localStorage.getItem('theme') === 'dark') applyTheme('dark');
-        }
-
-        function toggleTheme() {
-            const isDark = document.body.getAttribute('data-theme') === 'dark';
-            const newTheme = isDark ? 'light' : 'dark';
-            applyTheme(newTheme);
-            localStorage.setItem('theme', newTheme);
-        }
-
-        function applyTheme(mode) {
-            const sun = document.getElementById('main-circle');
-            if (mode === 'dark') {
-                document.body.setAttribute('data-theme', 'dark');
-                sun.setAttribute('fill', '#bdc3c7');
-            } else {
-                document.body.removeAttribute('data-theme');
-                sun.setAttribute('fill', '#FFD700');
-            }
-        }
-
-        function exportToPDF() {
-            const { jsPDF } = window.jspdf;
-            const doc = new jsPDF();
-            doc.setFontSize(18);
-            doc.setTextColor(255, 145, 0);
-            doc.text("SolarDrishti Generation History", 14, 20);
-            doc.autoTable({
-                html: '#historyTable',
-                startY: 30,
-                theme: 'grid',
-                headStyles: { fillColor: [255, 145, 0] },
-                columns: [0,1,2,3,4]
+            rows.forEach(row => {
+                if (row.innerText.toLowerCase().includes(filter)) {
+                    row.classList.remove('d-none');
+                    hasMatch = true;
+                } else {
+                    row.classList.add('d-none');
+                }
             });
-            doc.save("SolarDrishti_Data.pdf");
+            document.getElementById("noMatch").classList.toggle("d-none", hasMatch);
         }
 
+        // Enter key triggers search
+        document.getElementById("tableFilter").addEventListener("keypress", (e) => {
+            if (e.key === "Enter") filterTable();
+        });
+
+        // EYE TRACKING
+        document.addEventListener('mousemove', (e) => {
+            const irises = document.querySelectorAll('.iris');
+            irises.forEach(iris => {
+                const rect = iris.getBoundingClientRect();
+                const centerX = rect.left + rect.width / 2;
+                const centerY = rect.top + rect.height / 2;
+                const angle = Math.atan2(e.clientY - centerY, e.clientX - centerX);
+                const distance = 2.5;
+                iris.style.transform = `translate(${Math.cos(angle) * distance}px, ${Math.sin(angle) * distance}px)`;
+            });
+        });
+
+        // CHART LOGIC
+        let chartInstance = null;
         document.getElementById('analyticsModal').addEventListener('shown.bs.modal', function () {
             const ctx = document.getElementById('historyChart').getContext('2d');
-            const isDark = document.body.getAttribute('data-theme') === 'dark';
-            const textColor = isDark ? '#f1f1f1' : '#1a1a1a';
-            const gridColor = isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)';
-
             const labels = JSON.parse(document.getElementById('history-labels').textContent).reverse();
-            const predData = JSON.parse(document.getElementById('history-pred').textContent).reverse();
-            const actualData = JSON.parse(document.getElementById('history-actual').textContent).reverse();
-
+            const predData = JSON.parse(document.getElementById('history-pred').textContent).reverse().map(Number);
+            const actualData = JSON.parse(document.getElementById('history-actual').textContent).reverse().map(Number);
+            
             if (chartInstance) chartInstance.destroy();
             chartInstance = new Chart(ctx, {
                 type: 'line',
                 data: {
                     labels: labels,
                     datasets: [
-                        { label: 'Predicted', data: predData, borderColor: '#ff9100', tension: 0.4, fill: false },
-                        { label: 'Actual', data: actualData, borderColor: '#28a745', tension: 0.4, fill: true, backgroundColor: 'rgba(40, 167, 69, 0.1)' }
+                        { label: 'Forecast', data: predData, borderColor: '#ff9100', borderWidth: 4, tension: 0.3, pointRadius: 5 },
+                        { label: 'Actual', data: actualData, borderColor: '#28a745', borderWidth: 4, tension: 0.3, pointRadius: 5, fill: true, backgroundColor: 'rgba(40, 167, 69, 0.05)' }
                     ]
                 },
                 options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: { legend: { labels: { color: textColor } } },
+                    responsive: true, maintainAspectRatio: false,
+                    plugins: { legend: { labels: { color: '#334155', font: { family: 'Poppins', weight: 'bold' } } } },
                     scales: {
-                        y: { beginAtZero: true, grid: { color: gridColor }, ticks: { color: textColor } },
-                        x: { grid: { display: false }, ticks: { color: textColor } }
+                        y: { ticks: { color: '#334155' }, title: { display: true, text: 'Energy Output (kW)', color: '#334155', font: { weight: 'bold' } } },
+                        x: { ticks: { color: '#334155' }, title: { display: true, text: 'Date', color: '#334155', font: { weight: 'bold' } } }
                     }
                 }
             });
         });
 
-        document.addEventListener('mousemove', (e) => {
-            const irises = document.querySelectorAll('.iris');
-            irises.forEach(iris => {
-                const rect = iris.getBoundingClientRect();
-                const angle = Math.atan2(e.clientY - (rect.top + 3.5), e.clientX - (rect.left + 3.5));
-                iris.style.transform = `translate(${Math.cos(angle) * 4}px, ${Math.sin(angle) * 4}px)`;
-            });
-        });
+        function openEditModal(event, id, date, val) {
+            event.preventDefault();
+            document.getElementById('modal_prediction_id').value = id;
+            document.getElementById('modal_date_display').innerText = date;
+            document.getElementById('modal_actual_val').value = val;
+            new bootstrap.Modal(document.getElementById('editModal')).show();
+        }
+
+        function checkTheme() { if (localStorage.getItem('theme') === 'dark') applyTheme('dark'); }
+        function toggleTheme() { const isDark = document.body.getAttribute('data-theme') === 'dark'; applyTheme(isDark ? 'light' : 'dark'); localStorage.setItem('theme', isDark ? 'light' : 'dark'); }
+        function applyTheme(mode) {
+            const sun = document.getElementById('main-circle');
+            if (mode === 'dark') {
+                document.body.setAttribute('data-theme', 'dark');
+                if(sun) sun.setAttribute('fill', '#bdc3c7');
+            } else {
+                document.body.removeAttribute('data-theme');
+                if(sun) sun.setAttribute('fill', '#FFD700');
+            }
+        }
+        function exportToPDF() {
+            const { jsPDF } = window.jspdf; const doc = new jsPDF();
+            doc.autoTable({ html: '#historyTable', startY: 35, theme: 'striped', headStyles: { fillColor: [255, 145, 0] } });
+            doc.save("SolarDrishti_Log.pdf");
+        }
     </script>
 </body>
 </html>
