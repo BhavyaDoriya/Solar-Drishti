@@ -10,6 +10,7 @@ from django.http import JsonResponse, HttpResponse
 from django.core.mail import send_mail
 from django.conf import settings
 from django.views.decorators.csrf import csrf_exempt
+from decouple import config
 
 # Import your models
 from .models import SolarSystem, Prediction
@@ -192,7 +193,7 @@ def add_system(request):
                 return redirect('predict')
             
             # 2. OpenWeather Geocoding logic
-            api_key = "5a82383df52850125b3a28e7c8617e10"
+            api_key = api_key = config("OPENWEATHER_API_KEY")
             geo_url = f"http://api.openweathermap.org/geo/1.0/reverse?lat={lat}&lon={lon}&limit=1&appid={api_key}"
             
             try:
