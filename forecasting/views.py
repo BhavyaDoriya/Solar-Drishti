@@ -10,6 +10,7 @@ from django.http import JsonResponse, HttpResponse
 from django.core.mail import send_mail
 from django.conf import settings
 from django.views.decorators.csrf import csrf_exempt
+from .ml.predict import predict_daily_energy
 from decouple import config
 
 # Import your models
@@ -193,7 +194,7 @@ def add_system(request):
                 return redirect('predict')
             
             # 2. OpenWeather Geocoding logic
-            api_key = api_key = config("OPENWEATHER_API_KEY")
+            api_key = config("OPENWEATHER_API_KEY")
             geo_url = f"http://api.openweathermap.org/geo/1.0/reverse?lat={lat}&lon={lon}&limit=1&appid={api_key}"
             
             try:
@@ -230,9 +231,10 @@ import random
 
 
 @login_required
+@login_required
 def run_prediction(request, system_id):
     system = get_object_or_404(SolarSystem, id=system_id, user=request.user)
-    target = request.GET.get('day', 'tomorrow') # 'tomorrow' or 'day_after'
+    target = request.GET.get('day', 'tomorrow')  # 'tomorrow' or 'day_after'
 
     # 1. Calculate the actual Target Date
     if target == 'day_after':
@@ -243,41 +245,51 @@ def run_prediction(request, system_id):
     # 2. Cycle & Skip-Week Logic
     if system.first_use_timestamp:
         days_passed = (timezone.now() - system.first_use_timestamp).days
-        
-        # If more than 7 days passed and they ARE NOT locked (met requirements)
-        # OR if they skipped a whole extra week (days > 14), give a fresh start
+
         if (days_passed >= 7 and not system.is_locked) or days_passed >= 14:
             system.first_use_timestamp = timezone.now()
             system.predictions_in_cycle = 0
             system.actuals_in_cycle = 0
             system.save()
 
-    # 3. Block if locked (User predicted last week but didn't verify yet)
+    # 3. Block if locked
     if system.is_locked:
         messages.warning(request, "Weekly verification required. Enter actual power to unlock.")
         return redirect('predict')
 
-    # 4. If it's their first time ever predicting (or fresh cycle), start the clock
+    # 4. First-time prediction → start cycle
     if not system.first_use_timestamp:
         system.first_use_timestamp = timezone.now()
 
-    # 5. Generate AI Logic (Using target_date)
-    # This is where your ML model would use the target_date to fetch weather forecasts
-    predicted_kw = random.uniform(system.system_size * 0.2, system.system_size * 0.8)
+    # 5. 🔥 REAL ML PREDICTION (INTEGRATED)
+    try:
+        predicted_kw = predict_daily_energy(system, target_date)
+    except Exception as e:
+        # Optional: log e
+        messages.error(
+            request,
+            "Weather or solar forecast data is unavailable right now. Please try again later."
+        )
+        return redirect('predict')
 
+    # 6. Save prediction
     Prediction.objects.create(
         system=system,
-        target_date=target_date,  # Crucial for your History Graph
+        target_date=target_date,
         day_target=target,
         pred_value=round(predicted_kw, 2)
     )
 
-    # 6. Increment usage count for this cycle
+    # 7. Increment usage count
     system.predictions_in_cycle += 1
     system.save()
 
-    messages.success(request, f"Forecast generated for {target_date.strftime('%b %d')}!")
+    messages.success(
+        request,
+        f"Forecast generated for {target_date.strftime('%b %d')}!"
+    )
     return redirect('predict')
+
 @login_required
 def update_actual_power(request, system_id):
     if request.method == "POST":
