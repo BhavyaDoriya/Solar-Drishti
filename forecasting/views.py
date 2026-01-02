@@ -12,6 +12,19 @@ from django.conf import settings
 from django.views.decorators.csrf import csrf_exempt
 from .ml.predict import predict_daily_energy
 from decouple import config
+import random
+import logging
+
+from django.conf import settings
+from django.core.mail import send_mail
+from django.http import JsonResponse
+from django.shortcuts import render
+from django.views.decorators.csrf import csrf_exempt
+
+from .models import User
+
+logger = logging.getLogger(__name__)
+
 
 # Import your models
 from .models import SolarSystem, Prediction
@@ -53,30 +66,63 @@ def history_view(request):
 
 # --- Authentication & Registration Views ---
 
+@csrf_exempt  # IMPORTANT for AJAX OTP requests on production
 def signup_view(request):
-    if request.method == 'POST':
-        email = request.POST.get('email')
-        username = request.POST.get('username')
-        password = request.POST.get('password')
+    if request.method != "POST":
+        return render(request, 'forecasting/signup.html')
 
-        # Check if email already exists
-        if User.objects.filter(email=email).exists():
-            return JsonResponse({
-                'status': 'error', 
+    email = request.POST.get('email')
+    username = request.POST.get('username')
+    password = request.POST.get('password')
+
+    logger.info(f"Signup attempt for email: {email}")
+
+    if not email or not username or not password:
+        return JsonResponse(
+            {'status': 'error', 'message': 'Missing required fields'},
+            status=400
+        )
+
+    if User.objects.filter(email=email).exists():
+        return JsonResponse(
+            {
+                'status': 'error',
                 'message': 'This email is already registered. Please login instead.'
-            }, status=400)
+            },
+            status=400
+        )
 
-        otp = str(random.randint(100000, 999999))
-        request.session['otp'] = otp
-        request.session['temp_user_data'] = {'username': username, 'email': email, 'password': password}
-        
-        try:
-            send_mail('SolarDrishti OTP', f'Your OTP is {otp}', settings.EMAIL_HOST_USER, [email])
-            return JsonResponse({'status': 'sent'})
-        except Exception as e:
-            return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
+    otp = str(random.randint(100000, 999999))
 
-    return render(request, 'forecasting/signup.html')
+    request.session['otp'] = otp
+    request.session['temp_user_data'] = {
+        'username': username,
+        'email': email,
+        'password': password
+    }
+
+    try:
+        send_mail(
+            subject='SolarDrishti OTP',
+            message=f'Your OTP is {otp}',
+            from_email=settings.EMAIL_HOST_USER,
+            recipient_list=[email],
+            fail_silently=False,   # 👈 VERY IMPORTANT
+        )
+
+        logger.info(f"OTP email sent successfully to {email}")
+        return JsonResponse({'status': 'sent'})
+
+    except Exception as e:
+        logger.error(f"OTP email FAILED for {email}: {repr(e)}")
+
+        return JsonResponse(
+            {
+                'status': 'error',
+                'message': 'OTP could not be sent. Please try again later.'
+            },
+            status=500
+        )
 
 def verify_otp(request):
     if request.method == 'POST':
