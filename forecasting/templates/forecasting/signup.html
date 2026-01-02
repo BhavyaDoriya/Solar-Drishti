@@ -95,7 +95,9 @@
             font-weight: 600;
             padding: 12px;
             border-radius: 12px;
+            transition: all 0.3s ease;
         }
+        .btn-signup:disabled { opacity: 0.7; cursor: not-allowed; }
 
         #otp-section { display: none; }
         .otp-input {
@@ -170,7 +172,7 @@
                     <h3 class="fw-bold mb-1">Create Account</h3>
                     <p class="text-muted mb-4 small">Enter details to receive an OTP</p>
                     
-                    <form id="signupForm" method="POST" autocomplete="off">
+                    <form id="signupForm" autocomplete="off">
                         {% csrf_token %}
                         <div class="mb-3">
                             <label class="form-label small fw-bold">Username</label>
@@ -184,7 +186,9 @@
                             <label class="form-label small fw-bold">Password</label>
                             <input type="password" name="password" class="form-control" placeholder="********" required autocomplete="new-password">
                         </div>
-                        <button type="submit" id="sendOtpBtn" class="btn btn-signup w-100" onclick="handleSendOTP(event)">Send OTP <i class="fa-solid fa-paper-plane ms-2"></i></button>
+                        <button type="button" class="btn btn-signup w-100" id="sendOtpBtn">
+                            Send OTP <i class="fa-solid fa-paper-plane ms-2"></i>
+                        </button>
                     </form>
                     
                     <div class="text-center login-link-text">
@@ -200,14 +204,14 @@
                     <form id="otpVerifyForm" method="POST" autocomplete="off">
                         {% csrf_token %}
                         <div class="d-flex justify-content-center mb-4 mt-4">
-                            <input type="tel" name="otp" class="form-control otp-input" maxlength="1" required>
-                            <input type="tel" name="otp" class="form-control otp-input" maxlength="1" required>
-                            <input type="tel" name="otp" class="form-control otp-input" maxlength="1" required>
-                            <input type="tel" name="otp" class="form-control otp-input" maxlength="1" required>
-                            <input type="tel" name="otp" class="form-control otp-input" maxlength="1" required>
-                            <input type="tel" name="otp" class="form-control otp-input" maxlength="1" required>
+                            <input type="tel" class="form-control otp-input" maxlength="1" required>
+                            <input type="tel" class="form-control otp-input" maxlength="1" required>
+                            <input type="tel" class="form-control otp-input" maxlength="1" required>
+                            <input type="tel" class="form-control otp-input" maxlength="1" required>
+                            <input type="tel" class="form-control otp-input" maxlength="1" required>
+                            <input type="tel" class="form-control otp-input" maxlength="1" required>
                         </div>
-                        <button type="submit" class="btn btn-signup w-100" onclick="handleFinalSignup(event)">Verify & Register</button>
+                        <button type="submit" class="btn btn-signup w-100" id="verifyBtn">Verify & Register</button>
                     </form>
 
                     <div class="text-center login-link-text">
@@ -238,59 +242,58 @@
             if (localStorage.getItem('theme') === 'dark') applyTheme('dark');
         }
 
-        const inputs = document.querySelectorAll('.otp-input');
-        inputs.forEach((input, index) => {
+        // OTP Input Auto-focus Logic
+        const otpInputs = document.querySelectorAll('.otp-input');
+        otpInputs.forEach((input, index) => {
             input.addEventListener('keyup', (e) => {
-                if (input.value.length > 0 && inputs[index + 1]) inputs[index + 1].focus();
-                if (e.key === "Backspace" && inputs[index - 1]) inputs[index - 1].focus();
+                if (input.value.length > 0 && otpInputs[index + 1]) otpInputs[index + 1].focus();
+                if (e.key === "Backspace" && otpInputs[index - 1]) otpInputs[index - 1].focus();
             });
         });
 
-        function handleSendOTP(e) {
-            e.preventDefault();
-            const btn = document.getElementById('sendOtpBtn');
-            const form = document.getElementById('signupForm');
+        // 1. SEND OTP LOGIC
+        document.getElementById("sendOtpBtn").addEventListener("click", function() {
+            const btn = this;
+            const form = document.getElementById("signupForm");
             const formData = new FormData(form);
-            
-            // PRODUCTION FIX: Get CSRF token from form
             const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
 
+            // Visual feedback
             btn.disabled = true;
             btn.innerHTML = 'Sending... <i class="fa-solid fa-spinner fa-spin ms-2"></i>';
 
             fetch("{% url 'signup' %}", {
-                method: 'POST',
+                method: "POST",
                 body: formData,
                 headers: {
-                    'X-Requested-With': 'XMLHttpRequest',
-                    'X-CSRFToken': csrfToken // CRITICAL for Render production
+                    "X-Requested-With": "XMLHttpRequest",
+                    "X-CSRFToken": csrfToken // Required for Render production
                 }
             })
-            .then(response => {
-                if (response.ok) {
-                    document.getElementById('displayEmail').innerText = document.getElementById('userEmail').value;
-                    document.getElementById('registration-section').style.display = 'none';
-                    document.getElementById('otp-section').style.display = 'block';
+            .then(res => res.json())
+            .then(data => {
+                if (data.status === "sent") {
+                    document.getElementById("displayEmail").innerText = document.getElementById("userEmail").value;
+                    document.getElementById("registration-section").style.display = "none";
+                    document.getElementById("otp-section").style.display = "block";
                 } else {
-                    return response.json().then(data => {
-                        // Helpful debugging for Render SMTP blocks
-                        alert(data.message || "Error: Email server unreachable on Render Free Tier.");
-                        btn.disabled = false;
-                        btn.innerHTML = 'Send OTP <i class="fa-solid fa-paper-plane ms-2"></i>';
-                    });
+                    alert(data.message || "OTP failed to send.");
+                    btn.disabled = false;
+                    btn.innerHTML = 'Send OTP <i class="fa-solid fa-paper-plane ms-2"></i>';
                 }
             })
-            .catch(error => {
-                console.error('Error:', error);
-                alert("Network error. If you are on Render Free Tier, SMTP may be blocked.");
+            .catch(err => {
+                console.error(err);
+                alert("Server error. Check your Render logs for SMTP errors.");
                 btn.disabled = false;
                 btn.innerHTML = 'Send OTP <i class="fa-solid fa-paper-plane ms-2"></i>';
             });
-        }
+        });
 
-        function handleFinalSignup(e) {
+        // 2. VERIFY OTP & SIGNUP LOGIC
+        document.getElementById("otpVerifyForm").addEventListener("submit", function(e) {
             e.preventDefault();
-            const otpInputs = document.querySelectorAll('input[name="otp"]');
+            const btn = document.getElementById("verifyBtn");
             let otpCode = "";
             otpInputs.forEach(input => otpCode += input.value);
 
@@ -298,11 +301,15 @@
             formData.append('otp_code', otpCode);
             formData.append('csrfmiddlewaretoken', '{{ csrf_token }}');
 
+            btn.disabled = true;
+            btn.innerHTML = 'Verifying... <i class="fa-solid fa-spinner fa-spin ms-2"></i>';
+
             fetch("/verify-otp/", {
                 method: 'POST',
                 body: formData,
                 headers: {
-                    'X-CSRFToken': '{{ csrf_token }}'
+                    "X-Requested-With": "XMLHttpRequest",
+                    "X-CSRFToken": '{{ csrf_token }}'
                 }
             }).then(response => {
                 if (response.ok) {
@@ -310,9 +317,11 @@
                     window.location.href = "{% url 'home' %}";
                 } else {
                     alert("Invalid OTP. Please try again.");
+                    btn.disabled = false;
+                    btn.innerHTML = 'Verify & Register';
                 }
             });
-        }
+        });
 
         function toggleTheme() {
             const isDark = document.body.getAttribute('data-theme') === 'dark';
@@ -335,7 +344,9 @@
             const irises = document.querySelectorAll('.iris');
             irises.forEach(iris => {
                 const rect = iris.getBoundingClientRect();
-                const angle = Math.atan2(e.clientY - (rect.top + 3.5), e.clientX - (rect.left + 3.5));
+                const centerX = rect.left + rect.width / 2;
+                const centerY = rect.top + rect.height / 2;
+                const angle = Math.atan2(e.clientY - centerY, e.clientX - centerX);
                 iris.style.transform = `translate(${Math.cos(angle) * 4}px, ${Math.sin(angle) * 4}px)`;
             });
         });
