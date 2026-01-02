@@ -265,12 +265,13 @@ def run_prediction(request, system_id):
     try:
         predicted_kw = predict_daily_energy(system, target_date)
     except Exception as e:
-        # Optional: log e
+        print("❌ Prediction error:", e)
         messages.error(
             request,
-            "Weather or solar forecast data is unavailable right now. Please try again later."
+            f"Prediction failed: {str(e)}"
         )
         return redirect('predict')
+
 
     # 6. Save prediction
     Prediction.objects.create(
