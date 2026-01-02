@@ -97,7 +97,6 @@
             border-radius: 12px;
         }
 
-        /* --- OTP Section --- */
         #otp-section { display: none; }
         .otp-input {
             width: 45px;
@@ -171,7 +170,7 @@
                     <h3 class="fw-bold mb-1">Create Account</h3>
                     <p class="text-muted mb-4 small">Enter details to receive an OTP</p>
                     
-                    <form id="signupForm" autocomplete="off">
+                    <form id="signupForm" method="POST" autocomplete="off">
                         {% csrf_token %}
                         <div class="mb-3">
                             <label class="form-label small fw-bold">Username</label>
@@ -185,50 +184,7 @@
                             <label class="form-label small fw-bold">Password</label>
                             <input type="password" name="password" class="form-control" placeholder="********" required autocomplete="new-password">
                         </div>
-                        <button
-                        type="button"
-                        class="btn btn-signup w-100"
-                        id="sendOtpBtn"
-                        >
-                        Send OTP <i class="fa-solid fa-paper-plane ms-2"></i>
-                        </button>
-                        <script>
-document.addEventListener("DOMContentLoaded", function () {
-    const btn = document.getElementById("sendOtpBtn");
-    if (!btn) return;
-
-    btn.addEventListener("click", function () {
-        const form = document.getElementById("signupForm");
-        const formData = new FormData(form);
-
-        fetch("{% url 'signup' %}", {
-            method: "POST",
-            body: formData,
-            headers: {
-                "X-Requested-With": "XMLHttpRequest"
-            }
-        })
-        .then(res => res.json())
-        .then(data => {
-            if (data.status === "sent") {
-                document.getElementById("displayEmail").innerText =
-                    document.getElementById("userEmail").value;
-
-                document.getElementById("registration-section").style.display = "none";
-                document.getElementById("otp-section").style.display = "block";
-            } else {
-                alert(data.message || "OTP failed");
-            }
-        })
-        .catch(err => {
-            console.error(err);
-            alert("Server error");
-        });
-    });
-});
-</script>
-
-
+                        <button type="submit" id="sendOtpBtn" class="btn btn-signup w-100" onclick="handleSendOTP(event)">Send OTP <i class="fa-solid fa-paper-plane ms-2"></i></button>
                     </form>
                     
                     <div class="text-center login-link-text">
@@ -282,7 +238,6 @@ document.addEventListener("DOMContentLoaded", function () {
             if (localStorage.getItem('theme') === 'dark') applyTheme('dark');
         }
 
-        // OTP Input Auto-focus Logic
         const inputs = document.querySelectorAll('.otp-input');
         inputs.forEach((input, index) => {
             input.addEventListener('keyup', (e) => {
@@ -291,60 +246,73 @@ document.addEventListener("DOMContentLoaded", function () {
             });
         });
 
- /*       function handleSendOTP(e) {
-    e.preventDefault();
-    const form = document.getElementById('signupForm');
-    const formData = new FormData(form);
+        function handleSendOTP(e) {
+            e.preventDefault();
+            const btn = document.getElementById('sendOtpBtn');
+            const form = document.getElementById('signupForm');
+            const formData = new FormData(form);
+            
+            // PRODUCTION FIX: Get CSRF token from form
+            const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
 
-    // Send data to Django view
-    fetch("{% url 'signup' %}", {
-        method: 'POST',
-        body: formData,
-        headers: {
-            'X-Requested-With': 'XMLHttpRequest',
-        }
-    })
-    .then(response => {
-        if (response.ok) {
-            // SUCCESS: Only switch to OTP section if the email is new
-            document.getElementById('displayEmail').innerText = document.getElementById('userEmail').value;
-            document.getElementById('registration-section').style.display = 'none';
-            document.getElementById('otp-section').style.display = 'block';
-        } else {
-            // FAILURE: Handle errors like "Email already registered"
-            return response.json().then(data => {
-                alert(data.message || "Something went wrong. Please try again.");
+            btn.disabled = true;
+            btn.innerHTML = 'Sending... <i class="fa-solid fa-spinner fa-spin ms-2"></i>';
+
+            fetch("{% url 'signup' %}", {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRFToken': csrfToken // CRITICAL for Render production
+                }
+            })
+            .then(response => {
+                if (response.ok) {
+                    document.getElementById('displayEmail').innerText = document.getElementById('userEmail').value;
+                    document.getElementById('registration-section').style.display = 'none';
+                    document.getElementById('otp-section').style.display = 'block';
+                } else {
+                    return response.json().then(data => {
+                        // Helpful debugging for Render SMTP blocks
+                        alert(data.message || "Error: Email server unreachable on Render Free Tier.");
+                        btn.disabled = false;
+                        btn.innerHTML = 'Send OTP <i class="fa-solid fa-paper-plane ms-2"></i>';
+                    });
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert("Network error. If you are on Render Free Tier, SMTP may be blocked.");
+                btn.disabled = false;
+                btn.innerHTML = 'Send OTP <i class="fa-solid fa-paper-plane ms-2"></i>';
             });
         }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        alert("Server error. Please try again later.");
-    });
-}*/
 
-    function handleFinalSignup(e) {
-        e.preventDefault();
-        const otpInputs = document.querySelectorAll('input[name="otp"]');
-        let otpCode = "";
-        otpInputs.forEach(input => otpCode += input.value); // Combines 6 digits into 1 string
+        function handleFinalSignup(e) {
+            e.preventDefault();
+            const otpInputs = document.querySelectorAll('input[name="otp"]');
+            let otpCode = "";
+            otpInputs.forEach(input => otpCode += input.value);
 
-        const formData = new FormData();
-        formData.append('otp_code', otpCode); // This name MUST match the views.py name
-        formData.append('csrfmiddlewaretoken', '{{ csrf_token }}');
+            const formData = new FormData();
+            formData.append('otp_code', otpCode);
+            formData.append('csrfmiddlewaretoken', '{{ csrf_token }}');
 
-        fetch("/verify-otp/", {
-            method: 'POST',
-            body: formData
-        }).then(response => {
-            if (response.ok) {
-                localStorage.setItem('isLoggedIn', 'true');
-                window.location.href = "{% url 'home' %}";
-            } else {
-            alert("Invalid OTP. Please try again.");
-            }
-        });
-    }
+            fetch("/verify-otp/", {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}'
+                }
+            }).then(response => {
+                if (response.ok) {
+                    localStorage.setItem('isLoggedIn', 'true');
+                    window.location.href = "{% url 'home' %}";
+                } else {
+                    alert("Invalid OTP. Please try again.");
+                }
+            });
+        }
 
         function toggleTheme() {
             const isDark = document.body.getAttribute('data-theme') === 'dark';
