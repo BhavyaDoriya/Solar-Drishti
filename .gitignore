@@ -27,3 +27,6 @@ db.sqlite3
 .DS_Store
 Thumbs.db
 inputVSScore.xlsx
+
+# Django static files (production)
+staticfiles/
