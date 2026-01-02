@@ -193,35 +193,41 @@
                         Send OTP <i class="fa-solid fa-paper-plane ms-2"></i>
                         </button>
                         <script>
-                            document.getElementById("sendOtpBtn").addEventListener("click", function () {
-                                const form = document.getElementById("signupForm");
-                                const formData = new FormData(form);
+document.addEventListener("DOMContentLoaded", function () {
+    const btn = document.getElementById("sendOtpBtn");
+    if (!btn) return;
 
-                                fetch("{% url 'signup' %}", {
-                                    method: "POST",
-                                    body: formData,
-                                    headers: {
-                                        "X-Requested-With": "XMLHttpRequest"
-                                    }
-                                })
-                                .then(res => res.json())
-                                .then(data => {
-                                    if (data.status === "sent") {
-                                        document.getElementById("displayEmail").innerText =
-                                            document.getElementById("userEmail").value;
+    btn.addEventListener("click", function () {
+        const form = document.getElementById("signupForm");
+        const formData = new FormData(form);
 
-                                        document.getElementById("registration-section").style.display = "none";
-                                        document.getElementById("otp-section").style.display = "block";
-                                    } else {
-                                        alert(data.message || "OTP failed");
-                                    }
-                                })
-                                .catch(err => {
-                                    console.error(err);
-                                    alert("Server error");
-                                });
-                            });
-                            </script>
+        fetch("{% url 'signup' %}", {
+            method: "POST",
+            body: formData,
+            headers: {
+                "X-Requested-With": "XMLHttpRequest"
+            }
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.status === "sent") {
+                document.getElementById("displayEmail").innerText =
+                    document.getElementById("userEmail").value;
+
+                document.getElementById("registration-section").style.display = "none";
+                document.getElementById("otp-section").style.display = "block";
+            } else {
+                alert(data.message || "OTP failed");
+            }
+        })
+        .catch(err => {
+            console.error(err);
+            alert("Server error");
+        });
+    });
+});
+</script>
+
 
                     </form>
                     
