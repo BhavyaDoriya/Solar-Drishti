@@ -342,10 +342,16 @@ def run_prediction(request, system_id):
 
     try:
         predicted_kw = predict_daily_energy(system, target_date)
-    except Exception:
-        messages.error(request, "Forecast data unavailable.")
+    except Exception as e:
+        print("❌ Prediction error:", e)
+        messages.error(
+            request,
+            f"Prediction failed: {str(e)}"
+        )
         return redirect('predict')
 
+
+    # 6. Save prediction
     Prediction.objects.create(
         system=system,
         target_date=target_date,
