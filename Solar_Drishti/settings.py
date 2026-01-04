@@ -44,8 +44,21 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'anymail',  # <--- ADD THIS
     'forecasting',
 ]
+
+# 2. Replace the old Gmail SMTP section with this SendGrid API setup
+# This configuration tells Anymail to use SendGrid's API (Port 443)
+ANYMAIL = {
+    "BREVO_API_KEY": config("BREVO_API_KEY"),
+}
+
+EMAIL_BACKEND = "anymail.backends.brevo.EmailBackend"
+DEFAULT_FROM_EMAIL = config("DEFAULT_FROM_EMAIL") # Your verified SendGrid email
+
+# Note: You can now DELETE the old EMAIL_HOST, EMAIL_PORT, EMAIL_USE_TLS, 
+# and EMAIL_HOST_PASSWORD settings as they are no longer used for API sending.
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -131,16 +144,6 @@ STATIC_ROOT = BASE_DIR / "staticfiles"
 AUTH_USER_MODEL = 'forecasting.User'
 # --- Gmail SMTP Configuration ---
 # This tells Django to send real emails through Gmail's servers
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_PORT = 587
-EMAIL_USE_TLS = True
-
-
-EMAIL_HOST_USER = config("EMAIL_HOST_USER")
-EMAIL_HOST_PASSWORD = config("EMAIL_HOST_PASSWORD")
-
-DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 
 # Fixes the 'stuck' white screen for Google Login
 SECURE_CROSS_ORIGIN_OPENER_POLICY = 'same-origin-allow-popups'
@@ -149,3 +152,4 @@ ACCOUNT_AUTHENTICATION_METHOD = "email"
 ACCOUNT_EMAIL_REQUIRED = True
 # This allows a Google login to match an existing email record
 SOCIALACCOUNT_AUTO_SIGNUP = True
+SESSION_ENGINE = 'django.contrib.sessions.backends.db'

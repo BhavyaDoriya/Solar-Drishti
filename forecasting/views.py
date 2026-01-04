@@ -74,6 +74,12 @@ def signup_view(request):
     email = request.POST.get('email')
     username = request.POST.get('username')
     password = request.POST.get('password')
+    if User.objects.filter(username=username).exists():
+            error_msg = "Username already taken. Please choose another."
+            # We still add it to the django messages module just in case
+            messages.error(request, error_msg) 
+            # But we MUST send it in the JSON for the AJAX to show it now
+            return JsonResponse({'status': 'error', 'message': error_msg}, status=400)
 
     logger.info(f"Signup attempt for email: {email}")
 
@@ -126,26 +132,29 @@ def signup_view(request):
 
 def verify_otp(request):
     if request.method == 'POST':
-        user_otp = request.POST.get('otp_code') 
-        saved_otp = request.session.get('otp')
+        # Clean both inputs to strings and remove any whitespace
+        user_otp = str(request.POST.get('otp_code', '')).strip()
+        saved_otp = str(request.session.get('otp', '')).strip()
         
-        print(f"User entered: {user_otp}, System saved: {saved_otp}")
-        
-        if str(user_otp) == str(saved_otp):
+        if user_otp and saved_otp and user_otp == saved_otp:
             data = request.session.get('temp_user_data')
             
+            if not data:
+                return HttpResponse("Session expired", status=400)
+
             User.objects.create_user(
                 username=data['username'],
                 email=data['email'],
                 password=data['password']
             )
             
+            # Cleanup session
             del request.session['otp']
             del request.session['temp_user_data']
             return HttpResponse(status=200)
         else:
-            return HttpResponse(status=400)
-
+            return HttpResponse("Invalid OTP", status=400)
+    return HttpResponse(status=405)
 def login_view(request):
     if request.method == 'POST':
         u = request.POST.get('username')

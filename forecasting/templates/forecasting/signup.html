@@ -171,6 +171,16 @@
                 <div id="registration-section">
                     <h3 class="fw-bold mb-1">Create Account</h3>
                     <p class="text-muted mb-4 small">Enter details to receive an OTP</p>
+                    <div id="django-messages-container">
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        {% endfor %}
+    {% endif %}
+</div>
                     
                     <form id="signupForm" autocomplete="off">
                         {% csrf_token %}
@@ -350,6 +360,46 @@
                 iris.style.transform = `translate(${Math.cos(angle) * 4}px, ${Math.sin(angle) * 4}px)`;
             });
         });
+        // Inside your <script>
+function handleSendOTP(e) {
+    e.preventDefault();
+    const btn = document.getElementById('sendOtpBtn');
+    const container = document.getElementById('django-messages-container');
+    const formData = new FormData(document.getElementById('signupForm'));
+
+    // Clear old messages before a new attempt
+    container.innerHTML = '';
+    btn.disabled = true;
+
+    fetch("{% url 'signup' %}", {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest',
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+        }
+    })
+    .then(response => response.json().then(data => {
+        if (response.ok) {
+            // Success: Switch to OTP view
+            document.getElementById('registration-section').style.display = 'none';
+            document.getElementById('otp-section').style.display = 'block';
+        } else {
+            // Error: Inject a Bootstrap alert into the Django messages container
+            container.innerHTML = `
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <i class="fa-solid fa-circle-exclamation me-2"></i> ${data.message}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            `;
+            btn.disabled = false;
+        }
+    }))
+    .catch(() => {
+        btn.disabled = false;
+        alert("Server error. Please try again.");
+    });
+}
     </script>
 </body>
 </html>
