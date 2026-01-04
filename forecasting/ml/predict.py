@@ -23,24 +23,24 @@ TARGET_COL = _artifact["target_column"]
 # Public API (used by views.py)
 # --------------------
 def predict_daily_energy(system, target_date):
-    """
-    system      -> SolarSystem model instance
-    target_date -> date object (tomorrow / overmorrow)
-
-    returns: daily predicted energy (float)
-    """
-
     df = build_daily_block_features(system, target_date)
 
     if df.empty:
-        raise ValueError("No forecast data available for selected date")
+        raise ValueError("No forecast data available")
 
     df = df[INPUT_COLS]
 
-    block_predictions = MODEL.predict(df)
+    hourly_norm_preds = MODEL.predict(df)
 
-    return float(block_predictions.sum())
+    HOURS_PER_BLOCK = 3
 
+    daily_energy_kwh = (
+        hourly_norm_preds.sum()
+        * HOURS_PER_BLOCK
+        * system.system_size
+    )
+
+    return round(daily_energy_kwh, 2)
 
 # --------------------
 # Feature builder

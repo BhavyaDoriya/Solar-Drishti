@@ -298,7 +298,6 @@
             document.getElementById('location-status').innerHTML = `Location Locked: ${lat.toFixed(4)}, ${lon.toFixed(4)}`;
         }
 
-        function runPrediction(systemId, targetDay) { window.location.href = `/run-prediction/${systemId}/?day=${targetDay}`; }
         function removeSystem(id, name) { if (confirm(`Remove '${name}'?`)) window.location.href = `/remove-system/${id}/`; }
 
         function toggleTheme() {
@@ -331,6 +330,28 @@
                 iris.style.transform = `translate(${x}px, ${y}px)`;
             });
         });
+        function runPrediction(systemId, targetDay) {
+    fetch(`/run-prediction/${systemId}/?day=${targetDay}`)
+        .then(res => res.json())
+        .then(data => {
+            if (data.status === "success") {
+                alert(
+                    `Prediction for ${data.date}: ${data.predicted_energy} kWh`
+                );
+
+                // reload so "Last Forecast" updates
+                location.reload();
+            } else {
+                alert("Prediction failed: " + data.message);
+            }
+        })
+        .catch(err => {
+            console.error(err);
+            alert("Something went wrong while predicting.");
+        });
+}
+
+
     </script>
 </body>
 </html>

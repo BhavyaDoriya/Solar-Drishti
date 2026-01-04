@@ -287,64 +287,38 @@ import random
 
 @login_required
 @login_required
+@login_required
 def run_prediction(request, system_id):
     system = get_object_or_404(SolarSystem, id=system_id, user=request.user)
-    target = request.GET.get('day', 'tomorrow')  # 'tomorrow' or 'day_after'
+    target = request.GET.get('day', 'tomorrow')
 
-    # 1. Calculate the actual Target Date
     if target == 'day_after':
         target_date = timezone.now().date() + timedelta(days=2)
     else:
         target_date = timezone.now().date() + timedelta(days=1)
 
-    # 2. Cycle & Skip-Week Logic
-    if system.first_use_timestamp:
-        days_passed = (timezone.now() - system.first_use_timestamp).days
-
-        if (days_passed >= 7 and not system.is_locked) or days_passed >= 14:
-            system.first_use_timestamp = timezone.now()
-            system.predictions_in_cycle = 0
-            system.actuals_in_cycle = 0
-            system.save()
-
-    # 3. Block if locked
-    if system.is_locked:
-        messages.warning(request, "Weekly verification required. Enter actual power to unlock.")
-        return redirect('predict')
-
-    # 4. First-time prediction → start cycle
-    if not system.first_use_timestamp:
-        system.first_use_timestamp = timezone.now()
-
-    # 5. 🔥 REAL ML PREDICTION (INTEGRATED)
     try:
-        predicted_kw = predict_daily_energy(system, target_date)
+        predicted_kwh = predict_daily_energy(system, target_date)
     except Exception as e:
-        print("❌ Prediction error:", e)
-        messages.error(
-            request,
-            f"Prediction failed: {str(e)}"
-        )
-        return redirect('predict')
+        return JsonResponse({
+            "status": "error",
+            "message": str(e)
+        }, status=500)
 
-
-    # 6. Save prediction
     Prediction.objects.create(
         system=system,
         target_date=target_date,
         day_target=target,
-        pred_value=round(predicted_kw, 2)
+        pred_value=round(predicted_kwh, 2)
     )
 
-    # 7. Increment usage count
-    system.predictions_in_cycle += 1
-    system.save()
+    return JsonResponse({
+        "status": "success",
+        "date": target_date.isoformat(),
+        "predicted_energy": round(predicted_kwh, 2),
+        "system_size": system.system_size
+    })
 
-    messages.success(
-        request,
-        f"Forecast generated for {target_date.strftime('%b %d')}!"
-    )
-    return redirect('predict')
 
 @login_required
 def update_actual_power(request, system_id):
