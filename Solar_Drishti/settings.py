@@ -55,7 +55,7 @@ ANYMAIL = {
 }
 
 EMAIL_BACKEND = "anymail.backends.brevo.EmailBackend"
-DEFAULT_FROM_EMAIL = config("DEFAULT_FROM_EMAIL") # Your verified SendGrid email
+DEFAULT_FROM_EMAIL = config("EMAIL_HOST_USER") # Your verified SendGrid email
 
 # Note: You can now DELETE the old EMAIL_HOST, EMAIL_PORT, EMAIL_USE_TLS, 
 # and EMAIL_HOST_PASSWORD settings as they are no longer used for API sending.
