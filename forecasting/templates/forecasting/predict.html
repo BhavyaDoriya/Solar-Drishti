@@ -318,18 +318,12 @@
         }
 
         document.addEventListener('mousemove', (e) => {
-            const irises = document.querySelectorAll('.iris');
-            irises.forEach(iris => {
-                const rect = iris.getBoundingClientRect();
-                const centerX = rect.left + rect.width / 2;
-                const centerY = rect.top + rect.height / 2;
-                const angle = Math.atan2(e.clientY - centerY, e.clientX - centerX);
-                const distance = 3;
-                const x = Math.cos(angle) * distance;
-                const y = Math.sin(angle) * distance;
-                iris.style.transform = `translate(${x}px, ${y}px)`;
-            });
-        });
+        const irises = document.querySelectorAll('.iris');
+        irises.forEach(iris => {
+            const rect = iris.getBoundingClientRect();
+            const angle = Math.atan2(e.clientY - (rect.top + 3.5), e.clientX - (rect.left + 3.5));
+            iris.style.transform = `translate(${Math.cos(angle) * 3}px, ${Math.sin(angle) * 3}px)`;
+        });})
         function runPrediction(systemId, targetDay) {
     fetch(`/run-prediction/${systemId}/?day=${targetDay}`)
         .then(res => res.json())
