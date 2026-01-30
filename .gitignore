@@ -30,3 +30,4 @@ inputVSScore.xlsx
 
 # Django static files (production)
 staticfiles/
+media\pv_weather_hourly.csv
