@@ -8,113 +8,102 @@
     <link rel="icon" href="https://img.icons8.com/fluency/48/sun.png" type="image/x-icon">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
     
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <link rel="stylesheet" href="https://unpkg.com/leaflet-geosearch@3.11.0/dist/geosearch.css" />
 
     <style>
-        /* Fix for Hamburger Menu Visibility  */
-        .navbar-toggler { border-color: var(--primary-orange); padding: 4px 8px; }
-        .navbar-toggler-icon { filter: brightness(0) saturate(100%) invert(58%) sepia(91%) rotate(3deg) brightness(103%) contrast(101%); }
-        [data-theme="dark"] .navbar-toggler-icon { filter: invert(1) brightness(200%); }
-        [data-theme="dark"] .navbar-toggler { border-color: rgba(255, 255, 255, 0.2); }
-
         :root {
             --primary-orange: #ff9100;
-            --bg-color: #ffffff;
+            --bg-color: linear-gradient(180deg, #e0f2ff 0%, #ffffff 400px); 
             --text-color: #1a1a1a;
             --glass-bg: rgba(255, 255, 255, 0.8);
             --glass-border: rgba(255, 255, 255, 0.2);
         }
 
         [data-theme="dark"] {
-            --bg-color: #0b0e14;
+            --bg-color: #020617; 
             --text-color: #f1f1f1;
-            --glass-bg: rgba(20, 25, 35, 0.85);
+            --glass-bg: rgba(15, 23, 42, 0.85);
+            --glass-border: rgba(255, 255, 255, 0.15);
         }
 
         body {
             font-family: 'Poppins', sans-serif;
-            background-color: var(--bg-color);
+            background: var(--bg-color);
             color: var(--text-color);
-            transition: background 0.6s ease, color 0.5s ease;
+            transition: background 0.6s ease;
             min-height: 100vh;
+            overflow-x: hidden;
         }
 
-        .navbar { background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(15px); border-bottom: 1px solid rgba(255, 255, 255, 0.1); }
-        .nav-link { color: var(--text-color) !important; position: relative; transition: 0.3s; }
+        /* --- NUCLEAR FIX FOR MAP SUGGESTIONS --- */
+        /* This ensures no transparency or dark-mode colors leak into the search UI */
+        .leaflet-geosearch-results, 
+        .leaflet-geosearch-results .results,
+        .leaflet-geosearch-results .results > div,
+        .leaflet-geosearch-bar form,
+        .leaflet-geosearch-bar form input {
+            background-color: #ffffff !important;
+            color: #000000 !important;
+            backdrop-filter: none !important; /* Removes the "whitish transparent" blur */
+            opacity: 1 !important;
+            filter: none !important;
+        }
+
+        .leaflet-geosearch-results .results > div {
+            padding: 10px !important;
+            border-bottom: 1px solid #eee !important;
+            cursor: pointer !important;
+        }
+
+        .leaflet-geosearch-results .results > div:hover {
+            background-color: #f8f9fa !important;
+            color: var(--primary-orange) !important;
+        }
+
+        /* --- NAVBAR & THEME ELEMENTS --- */
+        .navbar { background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(15px); border-bottom: 1px solid var(--glass-border); }
+        .navbar-brand { font-family: 'Orbitron'; color: var(--primary-orange) !important; font-weight: 900; }
+        [data-theme="dark"] .nav-link { color: #ffffff !important; text-shadow: 0 0 5px rgba(6, 182, 212, 0.5); }
         .nav-link.active-page { color: var(--primary-orange) !important; font-weight: 700; border-bottom: 2px solid var(--primary-orange); }
 
-        .system-card {
-            background: var(--glass-bg); backdrop-filter: blur(15px);
-            border: 1px solid var(--glass-border); border-radius: 25px;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            box-shadow: 0 10px 30px rgba(0,0,0,0.05); position: relative;
-        }
-        .system-card:hover { transform: translateY(-8px); box-shadow: 0 15px 40px rgba(0,0,0,0.1); }
+        /* --- SPACE ENGINE --- */
+        #warpCanvas { position: fixed; inset: 0; z-index: -2; pointer-events: none; opacity: 0; transition: opacity 1s ease; }
+        [data-theme="dark"] #warpCanvas { opacity: 1; }
+        [data-theme="dark"] body::before { content: " "; position: fixed; inset: 0; background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.15) 50%); z-index: 1000; pointer-events: none; }
 
-        .delete-system-btn {
-            position: absolute; top: 15px; right: 15px; color: #dc3545;
-            background: none; border: none; font-size: 1.1rem; opacity: 0.5; transition: 0.3s;
-        }
-        .delete-system-btn:hover { opacity: 1; transform: scale(1.2); }
-
-        .prediction-badge {
-            background: rgba(255, 145, 0, 0.1);
-            color: var(--primary-orange);
-            font-weight: 700; border-radius: 12px; padding: 10px;
-            text-align: center; border: 1px solid rgba(255, 145, 0, 0.2);
-        }
-
-        .add-btn {
-            width: 65px; height: 65px; background: linear-gradient(45deg, var(--primary-orange), #ff6d00);
-            border-radius: 50%; display: flex; align-items: center; justify-content: center;
-            font-size: 2rem; color: white; border: none; box-shadow: 0 10px 20px rgba(255, 145, 0, 0.4);
-            cursor: pointer; animation: floating 3s ease-in-out infinite;
-        }
+        /* --- UI COMPONENTS --- */
+        .system-card { background: var(--glass-bg); backdrop-filter: blur(15px); border: 1px solid var(--glass-border); border-radius: 25px; transition: 0.3s; }
+        .system-card:hover { transform: translateY(-8px); border-color: var(--primary-orange); }
+        .add-btn { width: 65px; height: 65px; background: linear-gradient(45deg, var(--primary-orange), #ff6d00); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 2rem; color: white; border: none; box-shadow: 0 10px 20px rgba(255, 145, 0, 0.4); cursor: pointer; animation: floating 3s infinite; }
         @keyframes floating { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
-
-        #map-picker { height: 350px; width: 100%; border-radius: 20px; margin-bottom: 15px; border: 1px solid var(--glass-border); }
+        
+        #map-picker { height: 350px; width: 100%; border-radius: 20px; border: 1px solid var(--glass-border); z-index: 1; }
         [data-theme="dark"] .leaflet-layer { filter: invert(100%) hue-rotate(180deg) brightness(95%) contrast(90%); }
+        
         #celestial-anchor { position: fixed; bottom: 25px; right: 25px; z-index: 2000; width: 80px; height: 80px; cursor: pointer; }
-        
-        .border-success-custom { border-left: 5px solid #28a745 !important; }
-        .border-warning-custom { border-left: 5px solid #ffc107 !important; }
-        .border-danger-custom { border-left: 5px solid #dc3545 !important; }
-        .border-info-custom { border-left: 5px solid #17a2b8 !important; }
-        [data-theme="dark"] .btn-close { filter: invert(1) grayscale(100%) brightness(200%); }
-
-        /* CRITICAL FIX: Force Map Search UI to remain Black Text on White Background even in Dark Mode */
-        [data-theme="dark"] .leaflet-geosearch-bar form input,
-        [data-theme="dark"] .leaflet-control-geosearch form input,
-        [data-theme="dark"] .leaflet-geosearch-contents,
-        [data-theme="dark"] .leaflet-geosearch-results .results > div,
-        [data-theme="dark"] .leaflet-geosearch-results .results {
-            color: #000000 !important;
-            background-color: #ffffff !important;
+        .cursor-dot, .cursor-outline { position: fixed; pointer-events: none; z-index: 9999; opacity: 0; }
+        @media (pointer: fine) {
+            [data-theme="dark"] { cursor: none !important; }
+            [data-theme="dark"] .cursor-dot { display: block; width: 8px; height: 8px; background: var(--primary-orange); border-radius: 50%; top: 0; left: 0; opacity: 1; }
+            [data-theme="dark"] .cursor-outline { display: block; width: 30px; height: 30px; border: 2px solid var(--primary-orange); border-radius: 50%; top: 0; left: 0; opacity: 1; transition: transform 0.15s ease-out; }
         }
-        
-        [data-theme="dark"] .leaflet-geosearch-bar form,
-        [data-theme="dark"] .leaflet-control-geosearch form {
-            color:#000000 !important;
-            background-color: #ffffff !important;
-        }
-
-        .iris { transition: transform 0.1s ease-out; }
     </style>
 </head>
 <body onload="initApp()">
 
+    <div class="cursor-dot"></div>
+    <div class="cursor-outline"></div>
+    <canvas id="warpCanvas"></canvas>
+
     <header>
         <nav class="navbar navbar-expand-lg fixed-top shadow-sm">
             <div class="container">
-                <a class="navbar-brand fw-bold d-flex align-items-center" href="/">
-                    <i class="fa-solid fa-sun-plant-wilt me-2" style="color: var(--primary-orange);"></i> <span style="color:var(--primary-orange)">SOLAR</span><span class="text-secondary">DRISHTI</span>
+                <a class="navbar-brand d-flex align-items-center" href="/">
+                    <i class="fa-solid fa-sun-plant-wilt me-2"></i> SOLAR<span class="text-secondary">DRISHTI</span>
                 </a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navMain">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
                 <div class="collapse navbar-collapse" id="navMain">
                     <ul class="navbar-nav ms-auto align-items-center">
                         <li class="nav-item"><a class="nav-link px-3" href="/">Home</a></li>
@@ -126,116 +115,47 @@
         </nav>
     </header>
 
-    {% if messages %}
-    <div class="container mt-5 pt-5" id="message-container" style="position: relative; z-index: 1050;">
-        {% for message in messages %}
-            <div class="alert alert-dismissible fade show rounded-4 border-0 shadow-lg mb-3 d-flex align-items-center 
-                {% if message.tags == 'success' %}border-success-custom
-                {% elif message.tags == 'warning' %}border-warning-custom
-                {% elif message.tags == 'error' or message.tags == 'danger' %}border-danger-custom
-                {% else %}border-info-custom{% endif %}" 
-                 role="alert" 
-                 style="background: var(--glass-bg); backdrop-filter: blur(10px);">
-                
-                <div class="d-flex align-items-center w-100">
-                    {% if message.tags == 'success' %}
-                        <i class="fa-solid fa-circle-check text-success me-3 fs-5"></i>
-                    {% elif message.tags == 'warning' %}
-                        <i class="fa-solid fa-triangle-exclamation text-warning me-3 fs-5"></i>
-                    {% elif message.tags == 'error' or message.tags == 'danger' %}
-                        <i class="fa-solid fa-circle-xmark text-danger me-3 fs-5"></i>
-                    {% else %}
-                        <i class="fa-solid fa-circle-info text-info me-3 fs-5"></i>
-                    {% endif %}
-                    <span style="color: var(--text-color); font-weight: 500;">{{ message }}</span>
-                </div>
-                <button type="button" class="btn-close shadow-none" data-bs-dismiss="alert" aria-label="Close"></button>
-            </div>
-        {% endfor %}
-    </div>
-    {% endif %}
-
-    <main class="container mt-5 pt-3">
-        <div class="d-flex justify-content-between align-items-center mb-5 mt-4">
+    <main class="container mt-5 pt-5">
+        <div class="d-flex justify-content-between align-items-center mb-5">
             <div>
-                <h1 class="fw-bold m-0">Solar Insights</h1>
-                <p class="text-muted">Manage your hardware and generate energy forecasts.</p>
+                <h1 class="fw-bold m-0" style="font-family: 'Orbitron';">Solar Insights</h1>
+                <p class="text-muted">US Region: Pin your system and start forecasting.</p>
             </div>
             <button class="add-btn shadow" data-bs-toggle="modal" data-bs-target="#addSystemModal">
                 <i class="fa-solid fa-plus"></i>
             </button>
         </div>
 
-        {% if not systems %}
-        <div class="text-center py-5">
-            <i class="fa-solid fa-solar-panel fa-5x mb-4 opacity-25"></i>
-            <h3 class="fw-bold text-muted">No systems stored yet.</h3>
-        </div>
-        {% else %}
         <div class="row g-4">
             {% for system in systems %}
             <div class="col-md-6 col-lg-4">
                 <div class="system-card p-4 h-100 d-flex flex-column">
-                    <button class="delete-system-btn" onclick="removeSystem('{{ system.id }}', '{{ system.name }}')">
-                        <i class="fa-solid fa-trash-can"></i>
-                    </button>
-                    <h4 class="fw-bold m-0 text-orange">{{ system.name }}</h4>
-                    <small class="text-muted mb-3 d-block"><i class="fa-solid fa-location-dot me-1"></i> {{ system.location_name }}</small>
-
-                    {% if system.is_locked %}
-                        <div class="alert alert-warning small rounded-4 border-0">
-                            <i class="fa-solid fa-lock me-2"></i> Weekly verification required. Enter actual output to unlock.
-                        </div>
-                        <form method="POST" action="{% url 'update_actual_power' system.id %}">
-                            {% csrf_token %}
-                            <input type="number" step="0.01" name="actual_val" class="form-control mb-2 rounded-3 shadow-none" placeholder="Actual Power (kW)" required>
-                            <button type="submit" class="btn btn-warning w-100 rounded-pill fw-bold py-2 shadow-sm">Unlock System</button>
-                        </form>
-                    {% else %}
-                        <div class="row g-2 mt-2">
-                            <div class="col-6">
-                                <button class="btn btn-outline-warning w-100 rounded-pill fw-bold py-2 small" onclick="runPrediction('{{ system.id }}', 'tomorrow')">Tomorrow</button>
-                            </div>
-                            <div class="col-6">
-                                <button class="btn btn-outline-warning w-100 rounded-pill fw-bold py-2 small" onclick="runPrediction('{{ system.id }}', 'day_after')">Next Day</button>
-                            </div>
-                        </div>
-                        {% with last=system.predictions.last %}
-                        {% if last %}
-                        <div class="prediction-badge mt-3">
-                            <small class="d-block opacity-75">Last Forecast ({{ last.day_target }}):</small>
-                            <span class="fs-4">{{ last.pred_value }} kW</span>
-                        </div>
-                        {% endif %}
-                        {% endwith %}
-                    {% endif %}
+                    <h4 class="fw-bold m-0" style="color: var(--primary-orange);">{{ system.name }}</h4>
+                    <small class="text-muted mb-3"><i class="fa-solid fa-location-dot me-1"></i> {{ system.location_name }}</small>
+                    <div class="row g-2 mt-auto">
+                        <div class="col-6"><button class="btn btn-outline-warning w-100 rounded-pill fw-bold" onclick="runPrediction('{{ system.id }}', 'tomorrow')">Tomorrow</button></div>
+                        <div class="col-6"><button class="btn btn-outline-warning w-100 rounded-pill fw-bold" onclick="runPrediction('{{ system.id }}', 'day_after')">Next Day</button></div>
+                    </div>
                 </div>
-            </div>
             {% endfor %}
         </div>
-        {% endif %}
     </main>
 
     <div class="modal fade" id="addSystemModal" tabindex="-1">
         <div class="modal-dialog modal-dialog-centered modal-lg">
-            <div class="modal-content rounded-4 border-0 shadow-lg" style="background: var(--glass-bg); backdrop-filter: blur(20px);">
+            <div class="modal-content rounded-4 border-0" style="background: var(--glass-bg); backdrop-filter: blur(20px);">
                 <form id="addSystemForm" method="POST" action="{% url 'add_system' %}">
                     {% csrf_token %}
-                    <div class="modal-header border-0">
-                        <h5 class="fw-bold">Pin Your System</h5>
-                        <button type="button" class="btn-close shadow-none" data-bs-dismiss="modal"></button>
-                    </div>
+                    <div class="modal-header border-0"><h5 class="fw-bold">Pin US System</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
                     <div class="modal-body">
                         <div class="row mb-3">
-                            <div class="col-md-8"><input type="text" name="name" class="form-control mb-2 rounded-3 shadow-none" placeholder="System Name" required></div>
-                            <div class="col-md-4"><input type="number" step="0.1" name="size" class="form-control rounded-3 shadow-none" placeholder="Size (kW)" required></div>
+                            <div class="col-md-8"><input type="text" name="name" class="form-control" placeholder="System Name" required></div>
+                            <div class="col-md-4"><input type="number" step="0.1" name="size" class="form-control" placeholder="Size (kW)" required></div>
                         </div>
                         <div id="map-picker"></div>
-                        <div id="location-status" class="alert alert-info py-2 small border-0 rounded-3">Drag the pin or use search to find your location</div>
+                        <div id="location-status" class="alert alert-info py-2 small border-0" style="color:#000 !important; background:#fff !important; border:1px solid #ff9100 !important;">Search is restricted to the United States only.</div>
                     </div>
-                    <div class="modal-footer border-0">
-                        <button type="submit" class="btn btn-warning w-100 rounded-pill fw-bold py-3 shadow-sm" id="save-sys-btn" disabled>Add System</button>
-                    </div>
+                    <div class="modal-footer border-0"><button type="submit" class="btn btn-warning w-100 rounded-pill fw-bold py-3" id="save-sys-btn" disabled>Add System</button></div>
                     <input type="hidden" name="lat" id="sys-lat"><input type="hidden" name="lon" id="sys-lon">
                 </form>
             </div>
@@ -259,35 +179,45 @@
 
     <script>
         let map, marker;
+        const US_BOUNDS = L.latLngBounds([24.39, -125.0], [49.38, -66.93]);
+
         function initApp() { 
             if (localStorage.getItem('theme') === 'dark') applyTheme('dark'); 
-            autoHideAlerts(); 
-        }
-
-        function autoHideAlerts() {
-            const container = document.getElementById('message-container');
-            if (container) {
-                setTimeout(() => {
-                    container.style.transition = '0.6s opacity';
-                    container.style.opacity = '0';
-                    setTimeout(() => container.remove(), 600);
-                }, 4000);
-            }
+            animateWarp();
         }
 
         document.getElementById('addSystemModal').addEventListener('shown.bs.modal', function () {
-            const defaultCoords = [23.0225, 72.5714];
+            const centerUS = [37.09, -95.71];
             if (!map) {
-                map = L.map('map-picker').setView(defaultCoords, 13);
+                map = L.map('map-picker', { maxBounds: US_BOUNDS, maxBoundsViscosity: 1.0 }).setView(centerUS, 4);
                 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
-                const provider = new window.GeoSearch.OpenStreetMapProvider();
-                const search = new window.GeoSearch.GeoSearchControl({ provider: provider, style: 'bar', showMarker: false });
+
+                const provider = new window.GeoSearch.OpenStreetMapProvider({
+                    params: { countrycodes: 'us', viewbox: "-125.0,24.39,-66.93,49.38", bounded: 1 }
+                });
+
+                const search = new window.GeoSearch.GeoSearchControl({ 
+                    provider: provider, 
+                    style: 'bar', 
+                    showMarker: false, 
+                    autoClose: true,
+                    keepResult: true 
+                });
+                
                 map.addControl(search);
-                marker = L.marker(defaultCoords, { draggable: true }).addTo(map);
-                map.on('geosearch/showlocation', (e) => { marker.setLatLng([e.location.y, e.location.x]); updateCoords(e.location.y, e.location.x); });
-                marker.on('dragend', () => updateCoords(marker.getLatLng().lat, marker.getLatLng().lng));
-                map.on('click', (e) => { marker.setLatLng(e.latlng); updateCoords(e.latlng.lat, e.latlng.lng); });
-                updateCoords(defaultCoords[0], defaultCoords[1]);
+                marker = L.marker(centerUS, { draggable: true }).addTo(map);
+                
+                map.on('geosearch/showlocation', (e) => { 
+                    marker.setLatLng([e.location.y, e.location.x]); 
+                    updateCoords(e.location.y, e.location.x); 
+                });
+                
+                marker.on('dragend', () => {
+                    const pos = marker.getLatLng();
+                    if (!US_BOUNDS.contains(pos)) { marker.setLatLng(centerUS); alert("Select a location within the US."); }
+                    else { updateCoords(pos.lat, pos.lng); }
+                });
+                map.on('click', (e) => { if (US_BOUNDS.contains(e.latlng)) { marker.setLatLng(e.latlng); updateCoords(e.latlng.lat, e.latlng.lng); } });
             } else { map.invalidateSize(); }
         });
 
@@ -298,7 +228,29 @@
             document.getElementById('location-status').innerHTML = `Location Locked: ${lat.toFixed(4)}, ${lon.toFixed(4)}`;
         }
 
-        function removeSystem(id, name) { if (confirm(`Remove '${name}'?`)) window.location.href = `/remove-system/${id}/`; }
+        const canvas = document.getElementById('warpCanvas'), ctx = canvas.getContext('2d');
+        let stars = Array(350).fill().map(() => ({ x: Math.random()*innerWidth-innerWidth/2, y: Math.random()*innerHeight-innerHeight/2, z: Math.random()*innerWidth }));
+
+        function animateWarp() {
+            canvas.width = window.innerWidth; canvas.height = window.innerHeight;
+            const isDark = document.body.getAttribute('data-theme') === 'dark';
+            ctx.fillStyle = isDark ? "rgba(2, 6, 23, 0.4)" : "rgba(255, 255, 255, 0)";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            if(isDark) {
+                stars.forEach(s => {
+                    s.z -= 1.5; if (s.z <= 0) s.z = canvas.width;
+                    const x = (s.x / s.z) * canvas.width + canvas.width/2, y = (s.y / s.z) * canvas.height + canvas.height/2, size = (1 - s.z/canvas.width) * 2;
+                    ctx.beginPath(); ctx.fillStyle = "white"; ctx.arc(x, y, size, 0, Math.PI*2); ctx.fill();
+                });
+            }
+            requestAnimationFrame(animateWarp);
+        }
+
+        const dot = document.querySelector('.cursor-dot'), outline = document.querySelector('.cursor-outline');
+        window.addEventListener('mousemove', (e) => {
+            dot.style.transform = `translate(${e.clientX}px, ${e.clientY}px)`;
+            outline.animate({ transform: `translate(${e.clientX - 15}px, ${e.clientY - 15}px)` }, { duration: 400, fill: "forwards" });
+        });
 
         function toggleTheme() {
             const isDark = document.body.getAttribute('data-theme') === 'dark';
@@ -308,44 +260,9 @@
 
         function applyTheme(mode) {
             const sun = document.getElementById('main-circle');
-            if (mode === 'dark') {
-                document.body.setAttribute('data-theme', 'dark');
-                if(sun) sun.setAttribute('fill', '#bdc3c7');
-            } else {
-                document.body.removeAttribute('data-theme');
-                if(sun) sun.setAttribute('fill', '#FFD700');
-            }
+            document.body.setAttribute('data-theme', mode);
+            if(sun) sun.setAttribute('fill', mode === 'dark' ? '#bdc3c7' : '#FFD700');
         }
-
-        document.addEventListener('mousemove', (e) => {
-        const irises = document.querySelectorAll('.iris');
-        irises.forEach(iris => {
-            const rect = iris.getBoundingClientRect();
-            const angle = Math.atan2(e.clientY - (rect.top + 3.5), e.clientX - (rect.left + 3.5));
-            iris.style.transform = `translate(${Math.cos(angle) * 3}px, ${Math.sin(angle) * 3}px)`;
-        });})
-        function runPrediction(systemId, targetDay) {
-    fetch(`/run-prediction/${systemId}/?day=${targetDay}`)
-        .then(res => res.json())
-        .then(data => {
-            if (data.status === "success") {
-                alert(
-                    `Prediction for ${data.date}: ${data.predicted_energy} kWh`
-                );
-
-                // reload so "Last Forecast" updates
-                location.reload();
-            } else {
-                alert("Prediction failed: " + data.message);
-            }
-        })
-        .catch(err => {
-            console.error(err);
-            alert("Something went wrong while predicting.");
-        });
-}
-
-
     </script>
 </body>
 </html>

@@ -3,141 +3,149 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="keywords" content="SolarDrishti, Solar Energy, AI Prediction, Renewable Energy, Solar Forecasting, Energy Insights">
-    <meta 
-            name="description"
-            content="SolarDrishti provides accurate solar energy forecasting using machine learning to optimize renewable energy production.">
-    <meta 
-            name="author"
-            content="SolarDrishti Team(Mr. Shubhra Jyoti,Mr. Bhavya Doriya,shreemati Pratham devi)"/>
-
-    <title>SolarDrishti | Insight into Energy</title>
+    <title>SolarDrishti | AI Energy Insights</title>
     
     <link rel="icon" href="https://img.icons8.com/fluency/48/sun.png" type="image/x-icon">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
     
     <style>
         :root {
             --primary-orange: #ff9100;
             --bg-color: linear-gradient(180deg, #e0f2ff 0%, #ffffff 400px); 
             --text-color: #1a1a1a;
-            --card-bg: #ffffff;
+            --card-bg: rgba(255, 255, 255, 0.95);
+            --border: rgba(0, 0, 0, 0.08);
+            --neon-glow: 0 0 15px rgba(255, 145, 0, 0.5);
         }
 
         [data-theme="dark"] {
-            --bg-color: #0b0e14;
+            --bg-color: #020617; /* Deep Space Base */
             --text-color: #f1f1f1;
-            --card-bg: rgba(28, 33, 40, 0.9);
+            --card-bg: rgba(15, 23, 42, 0.85);
+            --border: rgba(255, 255, 255, 0.15);
         }
 
         body {
             font-family: 'Poppins', sans-serif;
             background: var(--bg-color);
             color: var(--text-color);
-            transition: background 0.6s cubic-bezier(0.4, 0, 0.2, 1), color 0.5s ease;
+            transition: background 0.6s ease;
             min-height: 100vh;
             overflow-x: hidden;
+            width: 100%;
         }
 
-        /* --- DARK MODE EXCLUSIVE BACKGROUND & CURSOR --- */
-        #warpCanvas {
-            position: fixed; inset: 0; z-index: -2; pointer-events: none;
-            opacity: 0; transition: opacity 1s ease;
+        /* --- RESTORED SPACE ATMOSPHERE --- */
+        [data-theme="dark"] body::before {
+            content: " "; position: fixed; inset: 0;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.15) 50%), 
+                        linear-gradient(90deg, rgba(255, 0, 0, 0.03), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.03));
+            z-index: 1000; background-size: 100% 4px, 3px 100%; pointer-events: none;
         }
+
+        /* --- GLOBAL DARK MODE TEXT FIX --- */
+        [data-theme="dark"] p, [data-theme="dark"] .text-muted, [data-theme="dark"] .modal-body p {
+            color: #e2e8f0 !important;
+        }
+        [data-theme="dark"] .modal-content h5 { color: #ffffff !important; }
+
+        /* --- SCROLL PROGRESS & CANVAS --- */
+        #scroll-progress { position: fixed; top: 0; left: 0; width: 0%; height: 3px; background: var(--primary-orange); z-index: 9999; box-shadow: 0 0 10px var(--primary-orange); }
+        #warpCanvas { position: fixed; inset: 0; z-index: -2; pointer-events: none; opacity: 0; transition: opacity 1s ease; }
         [data-theme="dark"] #warpCanvas { opacity: 1; }
+        .vignette { position: fixed; inset: 0; z-index: -1; pointer-events: none; background: radial-gradient(circle at center, transparent 0%, rgba(0,0,0,0.4) 100%); }
 
-        .cursor-dot, .cursor-outline { opacity: 0; pointer-events: none; }
-        
+        /* --- CYBER HUD BUTTON --- */
+        .terminal-btn {
+            position: relative; overflow: hidden;
+            border: 1px solid var(--primary-orange);
+            box-shadow: 0 0 5px var(--primary-orange);
+            transition: 0.3s;
+        }
+        .terminal-btn:hover { box-shadow: 0 0 20px var(--primary-orange); transform: translateY(-2px); }
+
+        /* --- GLITCH TITLE --- */
+        .glitch-hover { position: relative; display: inline-block; }
+        .glitch-hover:hover { animation: glitch-skew 0.3s infinite; }
+        .glitch-hover::before, .glitch-hover::after { content: attr(data-text); position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0.8; display: none; }
+        .glitch-hover:hover::before { display: block; color: #0ff; z-index: -1; animation: glitch-anim 0.3s infinite; }
+        .glitch-hover:hover::after { display: block; color: #f0f; z-index: -2; animation: glitch-anim2 0.3s reverse infinite; }
+
+        @keyframes glitch-anim { 0% { transform: translate(0); } 20% { transform: translate(-3px, 3px); } 100% { transform: translate(0); } }
+        @keyframes glitch-anim2 { 0% { transform: translate(0); } 20% { transform: translate(3px, -3px); } 100% { transform: translate(0); } }
+        @keyframes glitch-skew { 0% { transform: skew(0deg); } 10% { transform: skew(-2deg); } 20% { transform: skew(3deg); } 100% { transform: skew(0deg); } }
+
+        /* --- CUSTOM CURSOR --- */
+        .cursor-dot, .cursor-outline { position: fixed; pointer-events: none; z-index: 9999; opacity: 0; }
         @media (pointer: fine) {
             [data-theme="dark"] { cursor: none !important; }
             [data-theme="dark"] a, [data-theme="dark"] button, [data-theme="dark"] .flip-card { cursor: none !important; }
-            [data-theme="dark"] .cursor-dot {
-                opacity: 1; width: 8px; height: 8px; background: var(--primary-orange);
-                position: fixed; border-radius: 50%; z-index: 9999; top: 0; left: 0;
-            }
-            [data-theme="dark"] .cursor-outline {
-                opacity: 1; width: 35px; height: 35px; border: 2px solid var(--primary-orange);
-                position: fixed; border-radius: 50%; z-index: 9998; top: 0; left: 0; 
-                transition: transform 0.1s ease-out;
-            }
+            [data-theme="dark"] .cursor-dot { display: block; width: 8px; height: 8px; background: var(--primary-orange); border-radius: 50%; top: 0; left: 0; opacity: 1; box-shadow: 0 0 10px var(--primary-orange); }
+            [data-theme="dark"] .cursor-outline { display: block; width: 30px; height: 30px; border: 2px solid var(--primary-orange); border-radius: 50%; top: 0; left: 0; opacity: 1; transition: transform 0.15s ease-out; }
         }
 
-        /* --- Global Elements --- */
-        .navbar { background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(15px); border-bottom: 1px solid rgba(255, 255, 255, 0.1); }
-        .navbar-brand { color: var(--primary-orange) !important; font-weight: 700; }
+        /* --- NAVBAR & BRANDING --- */
+        .navbar { background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(15px); border-bottom: 1px solid var(--border); }
+        .navbar-brand { font-family: 'Orbitron'; color: var(--primary-orange) !important; font-weight: 900; letter-spacing: 2px; }
         .text-secondary { color: #6c757d !important; }
         [data-theme="dark"] .text-secondary { color: #adb5bd !important; }
-        .nav-link { color: var(--text-color) !important; }
+        .nav-link { font-family: 'Orbitron'; font-size: 13px; color: var(--text-color) !important; transition: 0.3s; }
+        .nav-link:hover { color: var(--primary-orange) !important; text-shadow: 0 0 8px var(--primary-orange); }
         .nav-link.active-page { color: var(--primary-orange) !important; font-weight: 700; border-bottom: 2px solid var(--primary-orange); }
 
-        /* --- Carousel --- */
+        /* --- CAROUSEL --- */
         .carousel-item { height: 75vh; background-position: center; background-size: cover; }
-        .carousel-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); }
-        .carousel-caption { bottom: 20%; z-index: 10; }
-        .carousel-caption h2, .carousel-caption p { color: white !important; }
+        .carousel-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); }
+        .carousel-caption { bottom: 20%; z-index: 10; backdrop-filter: blur(5px); background: rgba(0,0,0,0.25); border-radius: 20px; padding: 30px; }
+        .carousel-caption h2 { font-family: 'Orbitron'; color: white !important; font-weight: 900; }
 
-        /* --- 3D Flip Cards --- */
+        /* --- CARDS & GRID --- */
         .flip-card { background-color: transparent; width: 100%; height: 350px; perspective: 1000px; }
-        .flip-card-inner {
-            position: relative; width: 100%; height: 100%;
-            text-align: center; transition: transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            transform-style: preserve-3d;
-        }
+        .flip-card-inner { position: relative; width: 100%; height: 100%; text-align: center; transition: transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275); transform-style: preserve-3d; }
         .flip-card:hover .flip-card-inner { transform: rotateY(180deg); }
-        .flip-card-front, .flip-card-back {
-            position: absolute; width: 100%; height: 100%;
-            backface-visibility: hidden; border-radius: 30px;
-            display: flex; flex-direction: column; justify-content: center;
-            align-items: center; padding: 30px; box-shadow: 0 10px 30px rgba(0,0,0,0.08);
-        }
-        .flip-card-front { background-color: var(--card-bg); backdrop-filter: blur(5px); }
-        .flip-card-back { background-color: var(--primary-orange); color: white !important; transform: rotateY(180deg); }
+        .flip-card-front, .flip-card-back { position: absolute; width: 100%; height: 100%; backface-visibility: hidden; border-radius: 30px; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 30px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); border: 1px solid var(--border); }
+        .flip-card-front { background-color: var(--card-bg); backdrop-filter: blur(10px); transition: 0.3s; }
+        .flip-card:hover .flip-card-front { border-color: var(--primary-orange); box-shadow: var(--neon-glow); }
+        .flip-card-back { background: linear-gradient(45deg, var(--primary-orange), #ff6d00); color: white !important; transform: rotateY(180deg); }
         .feature-icon { font-size: 3.5rem; color: var(--primary-orange); margin-bottom: 1rem; }
 
-        /* --- Mobile Logic --- */
+        /* --- MOBILE --- */
         .mobile-actions { display: none; }
         @media (max-width: 767px) {
             .flip-card { display: none; }
-            .mobile-actions { display: block; }
-            .action-btn-mobile {
-                background: var(--card-bg); border-radius: 20px; padding: 22px; margin-bottom: 15px;
-                display: flex; align-items: center; justify-content: space-between;
-                box-shadow: 0 4px 15px rgba(0,0,0,0.05); text-decoration: none; 
-                color: var(--text-color) !important; border: 1px solid rgba(0,0,0,0.05);
-            }
+            .mobile-actions { display: block; padding-bottom: 30px; }
+            .action-btn-mobile { background: var(--card-bg); border-radius: 20px; padding: 22px; margin-bottom: 15px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 4px 15px rgba(0,0,0,0.05); text-decoration: none; color: var(--text-color) !important; border: 1px solid var(--border); backdrop-filter: blur(10px); }
         }
 
-        #celestial-anchor {
-            position: fixed; bottom: 25px; right: 25px; z-index: 2000;
-            cursor: pointer; width: 90px; height: 90px; transform: translateY(150px); opacity: 0;
-        }
+        #celestial-anchor { position: fixed; bottom: 25px; right: 25px; z-index: 2000; cursor: pointer; width: 85px; height: 85px; transform: translateY(150px); opacity: 0; }
         .sunrise-animation { animation: rise 1.5s cubic-bezier(0.17, 0.67, 0.83, 0.67) forwards; }
-        @keyframes rise { 0% { transform: translateY(150px) scale(0.5); opacity: 0; } 100% { transform: translateY(0) scale(1); opacity: 1; } }
-        
-        .reveal { opacity: 0; transform: translateY(30px); transition: all 0.8s ease-out; }
-        .reveal.active { opacity: 1; transform: translateY(0); }
+        @keyframes rise { 0% { transform: translateY(150px); opacity: 0; } 100% { transform: translateY(0); opacity: 1; } }
+
+        [data-theme="dark"] .navbar-toggler-icon { filter: invert(1); }
+        h1, h2, h3 { font-family: 'Orbitron'; font-weight: 700; }
     </style>
 </head>
 <body onload="initApp()">
 
+    <div id="scroll-progress"></div>
+
     <div class="cursor-dot"></div>
     <div class="cursor-outline"></div>
     <canvas id="warpCanvas"></canvas>
+    <div class="vignette"></div>
 
     <div class="modal fade" id="authModal" tabindex="-1">
         <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content border-0 rounded-4">
-                <div class="modal-header border-0">
-                    <h5 class="fw-bold" style="color:#1a1a1a !important">SolarDrishti Account</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
+            <div class="modal-content">
+                <div class="modal-header border-0"><h5 class="fw-bold">TERMINAL AUTHORIZATION</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
                 <div class="modal-body text-center p-4">
-                    <p style="color:#1a1a1a !important">Access your personalized solar insights. Sign in or join us to get started.</p>
+                    <p style="color:black !important">Access restricted to authorized terminal users. Please verify identity.</p>
                     <div class="d-grid gap-3">
-                        <button class="btn btn-warning py-3 rounded-pill fw-bold" onclick="handleRedirect('login')">Login</button>
-                        <button class="btn btn-outline-dark py-3 rounded-pill fw-bold" onclick="handleRedirect('signup')">Create Account</button>
+                        <button class="btn btn-warning py-3 rounded-pill fw-bold terminal-btn" onclick="handleRedirect('login')">LOGIN TERMINAL</button>
+                        <button class="btn btn-outline-dark py-3 rounded-pill fw-bold" onclick="handleRedirect('signup')">CREATE IDENTITY</button>
                     </div>
                 </div>
             </div>
@@ -145,23 +153,26 @@
     </div>
 
     <header>
-        <nav class="navbar navbar-expand-lg fixed-top shadow-sm">
+        <nav class="navbar navbar-expand-lg fixed-top shadow-sm" data-aos="fade-down">
             <div class="container">
-                <a class="navbar-brand fw-bold d-flex align-items-center" href="/">
-                    <i class="fa-solid fa-sun-plant-wilt me-2"></i> SOLAR<span class="text-secondary">DRISHTI</span>
-                </a>
-                <button class="navbar-toggler border-0 shadow-none" type="button" data-bs-toggle="collapse" data-bs-target="#navMain">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
+                <a class="navbar-brand d-flex align-items-center" href="/"><i class="fa-solid fa-sun-plant-wilt me-2"></i> SOLAR<span class="text-secondary">DRISHTI</span></a>
+                <button class="navbar-toggler border-0 shadow-none" type="button" data-bs-toggle="collapse" data-bs-target="#navMain"><span class="navbar-toggler-icon"></span></button>
                 <div class="collapse navbar-collapse" id="navMain">
                     <ul class="navbar-nav ms-auto align-items-center">
-                        <li class="nav-item"><a class="nav-link px-3 active-page" id="nav-home" href="/">Home</a></li>
-                        <li class="nav-item"><a class="nav-link px-3" id="nav-predict" href="javascript:void(0)" onclick="guard(predictURL)">Predict</a></li>
-                        <li class="nav-item"><a class="nav-link px-3" id="nav-history" href="javascript:void(0)" onclick="guard(historyURL)">History</a></li>
+                        <li class="nav-item"><a class="nav-link px-3 active-page" href="/">DASHBOARD</a></li>
+                        <li class="nav-item"><a class="nav-link px-3" href="javascript:void(0)" onclick="guard(predictURL)">AI_PREDICT</a></li>
+                        <li class="nav-item"><a class="nav-link px-3" href="javascript:void(0)" onclick="guard(historyURL)">ENERGY_LOGS</a></li>
                         {% if user.is_authenticated %}
-                        <li class="nav-item ms-lg-3"><a class="btn btn-warning rounded-pill px-4 fw-bold shadow" href="{% url 'logout' %}">Logout</a></li>
+                        <li class="nav-item dropdown"><a class="nav-link dropdown-toggle px-3" href="#" id="profileDrop" data-bs-toggle="dropdown"><i class="fa-solid fa-circle-user"></i> {{ user.username|upper }}</a>
+                            <ul class="dropdown-menu dropdown-menu-end shadow border-0" style="background: var(--card-bg); backdrop-filter: blur(10px);">
+                                <li><a class="dropdown-item" href="{% url 'profile_view' user_id=request.user.id %}">VIEW PROFILE</a></li>
+                                <li><a class="dropdown-item" href="{% url 'update_profile' %}">CALIBRATE SETUP</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item text-danger fw-bold" href="{% url 'logout' %}">TERMINATE_SESSION</a></li>
+                            </ul>
+                        </li>
                         {% else %}
-                        <li class="nav-item ms-lg-3"><button class="btn btn-warning rounded-pill px-4 fw-bold shadow" data-bs-toggle="modal" data-bs-target="#authModal">Login / Signup</button></li>
+                        <li class="nav-item ms-lg-3"><button class="btn btn-warning rounded-pill px-4 fw-bold shadow terminal-btn" data-bs-toggle="modal" data-bs-target="#authModal">ACCESS TERMINAL</button></li>
                         {% endif %}
                     </ul>
                 </div>
@@ -170,7 +181,7 @@
     </header>
 
     <main style="margin-top: 70px;">
-        <section id="hero-carousel">
+        <section id="hero-carousel" data-aos="zoom-in">
             <div id="solarHero" class="carousel slide carousel-fade" data-bs-ride="carousel">
                 <div class="carousel-indicators">
                     <button type="button" data-bs-target="#solarHero" data-bs-slide-to="0" class="active"></button>
@@ -181,173 +192,120 @@
                     <div class="carousel-item active" style="background-image: url('https://images.unsplash.com/photo-1509391366360-fe5bb584850a?q=80&w=2070');">
                         <div class="carousel-overlay"></div>
                         <div class="carousel-caption">
-                            <h2 class="display-3 fw-bold">Clean Energy Vision</h2>
+                            <h2 class="glitch-hover" data-text="Clean Energy Vision">Clean Energy Vision</h2>
                             <p class="lead">Harnessing AI to predict a sustainable tomorrow.</p>
                         </div>
                     </div>
                     <div class="carousel-item" style="background-image: url('https://images.unsplash.com/photo-1508514177221-188b1cf16e9d?q=80&w=2070');">
                         <div class="carousel-overlay"></div>
                         <div class="carousel-caption">
-                            <h2 class="display-3 fw-bold">Smart Analysis</h2>
+                            <h2 class="glitch-hover" data-text="Smart Analysis">Smart Analysis</h2>
                             <p class="lead">Real-time data processing for solar efficiency.</p>
                         </div>
                     </div>
                     <div class="carousel-item" style="background-image: url('https://images.unsplash.com/photo-1497435334941-8c899ee9e8e9?q=80&w=2070');">
                         <div class="carousel-overlay"></div>
                         <div class="carousel-caption">
-                            <h2 class="display-3 fw-bold">Future Proof</h2>
+                            <h2 class="glitch-hover" data-text="Future Proof">Future Proof</h2>
                             <p class="lead">Advanced algorithms for precision energy insights.</p>
                         </div>
                     </div>
                 </div>
-                <button class="carousel-control-prev" type="button" data-bs-target="#solarHero" data-bs-slide="prev">
-                    <span class="carousel-control-prev-icon"></span>
-                </button>
-                <button class="carousel-control-next" type="button" data-bs-target="#solarHero" data-bs-slide="next">
-                    <span class="carousel-control-next-icon"></span>
-                </button>
+                <button class="carousel-control-prev" type="button" data-bs-target="#solarHero" data-bs-slide="prev"><span class="carousel-control-prev-icon"></span></button>
+                <button class="carousel-control-next" type="button" data-bs-target="#solarHero" data-bs-slide="next"><span class="carousel-control-next-icon"></span></button>
             </div>
         </section>
 
         <section class="container py-5 mt-lg-5">
-            <h2 class="mb-5 fw-bold text-center reveal">How SolarDrishti Works</h2>
+            <h2 class="mb-5 text-center" data-aos="fade-up">System Core</h2>
             <div class="row g-4 d-none d-md-flex">
-                <div class="col-md-4 reveal">
-                    <div class="flip-card">
-                        <div class="flip-card-inner">
-                            <div class="flip-card-front">
-                                <div class="feature-icon"><i class="fa-solid fa-magnifying-glass-chart"></i></div>
-                                <h3 class="fw-bold">Prediction</h3>
-                            </div>
-                            <div class="flip-card-back">
-                                <h3 class="fw-bold">AI Predictor</h3>
-                                <p>Neural energy forecasting.</p>
-                                <button class="btn btn-light rounded-pill px-4 fw-bold" onclick="guard(predictURL)">Launch</button>
-                            </div>
-                        </div>
-                    </div>
+                <div class="col-md-4" data-aos="flip-left" data-aos-delay="100">
+                    <div class="flip-card" onclick="guard(predictURL)"><div class="flip-card-inner"><div class="flip-card-front"><div class="feature-icon"><i class="fa-solid fa-magnifying-glass-chart"></i></div><h3>Prediction</h3></div><div class="flip-card-back"><h3>AI Predictor</h3><p>Neural energy forecasting.</p></div></div></div>
                 </div>
-                <div class="col-md-4 reveal">
-                    <div class="flip-card">
-                        <div class="flip-card-inner">
-                            <div class="flip-card-front">
-                                <div class="feature-icon"><i class="fa-solid fa-database"></i></div>
-                                <h3 class="fw-bold">Vault</h3>
-                            </div>
-                            <div class="flip-card-back">
-                                <h3 class="fw-bold">History Logs</h3>
-                                <p>Access secure energy scans.</p>
-                                <button class="btn btn-light rounded-pill px-4 fw-bold" onclick="guard(historyURL)">View</button>
-                            </div>
-                        </div>
-                    </div>
+                <div class="col-md-4" data-aos="flip-left" data-aos-delay="300">
+                    <div class="flip-card" onclick="guard(historyURL)"><div class="flip-card-inner"><div class="flip-card-front"><div class="feature-icon"><i class="fa-solid fa-database"></i></div><h3>History</h3></div><div class="flip-card-back"><h3>Secure Logs</h3><p>Access energy scans.</p></div></div></div>
                 </div>
-                <div class="col-md-4 reveal">
-                    <div class="flip-card">
-                        <div class="flip-card-inner">
-                            <div class="flip-card-front">
-                                <div class="feature-icon"><i class="fa-solid fa-user-gear"></i></div>
-                                <h3 class="fw-bold">Account</h3>
-                            </div>
-                            <div class="flip-card-back">
-                                <h3 class="fw-bold">Settings</h3>
-                                <p>Manage hardware configs.</p>
-                                <button class="btn btn-light rounded-pill px-4 fw-bold" onclick="guard(profileURL)">Manage</button>
-                            </div>
-                        </div>
-                    </div>
+                <div class="col-md-4" data-aos="flip-left" data-aos-delay="500">
+                    <div class="flip-card" onclick="guard(profileURL)"><div class="flip-card-inner"><div class="flip-card-front"><div class="feature-icon"><i class="fa-solid fa-user-gear"></i></div><h3>Account</h3></div><div class="flip-card-back"><h3>Manage</h3><p>Update telemetry.</p></div></div></div>
                 </div>
             </div>
 
             <div class="mobile-actions px-2">
-                <a href="javascript:void(0)" onclick="guard(predictURL)" class="action-btn-mobile reveal">
-                    <span><i class="fa-solid fa-bolt-lightning me-3 text-warning"></i> AI Predictor</span>
-                    <i class="fa-solid fa-chevron-right opacity-50"></i>
-                </a>
-                <a href="javascript:void(0)" onclick="guard(historyURL)" class="action-btn-mobile reveal">
-                    <span><i class="fa-solid fa-clock-rotate-left me-3 text-primary"></i> View History</span>
-                    <i class="fa-solid fa-chevron-right opacity-50"></i>
-                </a>
-                <a href="javascript:void(0)" onclick="guard(profileURL)" class="action-btn-mobile reveal">
-                    <span><i class="fa-solid fa-user-gear me-3 text-success"></i> Settings</span>
-                    <i class="fa-solid fa-chevron-right opacity-50"></i>
-                </a>
+                <a href="javascript:void(0)" onclick="guard(predictURL)" class="action-btn-mobile" data-aos="fade-right"><span><i class="fa-solid fa-bolt me-3 text-warning"></i> Predictor</span><i class="fa-solid fa-chevron-right opacity-50"></i></a>
+                <a href="javascript:void(0)" onclick="guard(historyURL)" class="action-btn-mobile" data-aos="fade-right" data-aos-delay="100"><span><i class="fa-solid fa-clock me-3 text-primary"></i> History</span><i class="fa-solid fa-chevron-right opacity-50"></i></a>
+                <a href="javascript:void(0)" onclick="guard(profileURL)" class="action-btn-mobile" data-aos="fade-right" data-aos-delay="200"><span><i class="fa-solid fa-user me-3 text-success"></i> Settings</span><i class="fa-solid fa-chevron-right opacity-50"></i></a>
             </div>
         </section>
     </main>
 
+    <footer class="text-center py-5 mt-5 border-top border-secondary">
+        <p class="text-muted small">&copy; 2026 SolarDrishti AI Systems | Deep Space Operations</p>
+    </footer>
+
     <aside id="celestial-anchor" onclick="toggleTheme()">
         <svg width="100%" height="100%" viewBox="0 0 100 100">
             <circle id="main-circle" cx="50" cy="50" r="40" fill="#FFD700" />
-            <g id="eyes">
-                <circle cx="35" cy="45" r="7" fill="white" /><circle class="iris" cx="35" cy="45" r="3.5" fill="black" />
-                <circle cx="65" cy="45" r="7" fill="white" /><circle class="iris" cx="65" cy="45" r="3.5" fill="black" />
-            </g>
+            <g id="eyes"><circle cx="35" cy="45" r="7" fill="white" /><circle class="iris" cx="35" cy="45" r="3.5" fill="black" /><circle cx="65" cy="45" r="7" fill="white" /><circle class="iris" cx="65" cy="45" r="3.5" fill="black" /></g>
             <path id="mouth" d="M 40 70 Q 50 70 60 70" stroke="black" stroke-width="2" fill="none" stroke-linecap="round" />
         </svg>
     </aside>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
     <script>
-    const predictURL = "{% url 'predict' %}";
-    const historyURL = "{% url 'history_view' %}";
-    const profileURL = "{% if user.is_authenticated %}{% url 'profile_view' user_id=request.user.id %}{% else %}#{% endif %}";
+    AOS.init({ duration: 800, once: true });
+    const predictURL = "{% url 'predict' %}", historyURL = "{% url 'history_view' %}", profileURL = "{% if user.is_authenticated %}{% url 'profile_view' user_id=request.user.id %}{% else %}#{% endif %}";
 
-    // Warp Canvas Logic
-    const canvas = document.getElementById('warpCanvas');
-    const ctx = canvas.getContext('2d');
-    let stars = Array(450).fill().map(() => ({
-        x: Math.random() * innerWidth - innerWidth / 2,
-        y: Math.random() * innerHeight - innerHeight / 2,
-        z: Math.random() * innerWidth
+    // SCROLL PROGRESS
+    window.onscroll = function() {
+        let winScroll = document.body.scrollTop || document.documentElement.scrollTop;
+        let height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+        let scrolled = (winScroll / height) * 100;
+        document.getElementById("scroll-progress").style.width = scrolled + "%";
+    };
+
+    // WARP ENGINE
+    const canvas = document.getElementById('warpCanvas'), ctx = canvas.getContext('2d');
+    let stars = Array(window.innerWidth < 768 ? 150 : 450).fill().map(() => ({
+        x: Math.random() * innerWidth - innerWidth / 2, y: Math.random() * innerHeight - innerHeight / 2, z: Math.random() * innerWidth
     }));
 
     function draw() {
         canvas.width = window.innerWidth; canvas.height = window.innerHeight;
         const isDark = document.body.getAttribute('data-theme') === 'dark';
-        ctx.fillStyle = isDark ? "rgba(11, 14, 20, 0.4)" : "rgba(224, 242, 255, 0.0)";
+        ctx.fillStyle = isDark ? "rgba(2, 6, 23, 0.4)" : "rgba(224, 242, 255, 0.0)";
         ctx.fillRect(0, 0, canvas.width, canvas.height);
         if(!isDark) { requestAnimationFrame(draw); return; }
         stars.forEach(s => {
             s.z -= 1.5; if (s.z <= 0) s.z = canvas.width;
-            const x = (s.x / s.z) * canvas.width + canvas.width/2;
-            const y = (s.y / s.z) * canvas.height + canvas.height/2;
-            const size = (1 - s.z/canvas.width) * 2.5;
-            ctx.beginPath(); ctx.fillStyle = "white";
-            ctx.arc(x, y, size > 0 ? size : 0, 0, Math.PI*2); ctx.fill();
+            const x = (s.x / s.z) * canvas.width + canvas.width/2, y = (s.y / s.z) * canvas.height + canvas.height/2, size = (1 - s.z/canvas.width) * 2;
+            ctx.beginPath(); ctx.fillStyle = "white"; ctx.arc(x, y, size, 0, Math.PI*2); ctx.fill();
         });
         requestAnimationFrame(draw);
     }
     draw();
 
-    // Cursor Logic
-    const dot = document.querySelector('.cursor-dot');
-    const outline = document.querySelector('.cursor-outline');
-    window.addEventListener('mousemove', (e) => {
-        dot.style.transform = `translate(${e.clientX}px, ${e.clientY}px)`;
-        outline.animate({ transform: `translate(${e.clientX - 17.5}px, ${e.clientY - 17.5}px)` }, { duration: 500, fill: "forwards" });
-    });
+    // CURSOR
+    const dot = document.querySelector('.cursor-dot'), outline = document.querySelector('.cursor-outline');
+    if (window.matchMedia("(pointer: fine)").matches) {
+        window.addEventListener('mousemove', (e) => {
+            dot.style.transform = `translate(${e.clientX}px, ${e.clientY}px)`;
+            outline.animate({ transform: `translate(${e.clientX - 15}px, ${e.clientY - 15}px)` }, { duration: 400, fill: "forwards" });
+        });
+    }
 
     function initApp() {
         if (localStorage.getItem('theme') === 'dark') applyTheme('dark');
         document.getElementById('celestial-anchor').classList.add('sunrise-animation');
-        setTimeout(() => document.getElementById('mouth').setAttribute('d', 'M 40 65 Q 50 75 60 65'), 1700);
+        setTimeout(() => document.getElementById('mouth').setAttribute('d', 'M 40 65 Q 50 75 60 65'), 1500);
     }
 
     function guard(route) {
-        const auth = "{{ user.is_authenticated|yesno:'true,false' }}";
-        if (auth === "false") { new bootstrap.Modal(document.getElementById('authModal')).show(); }
-        else { window.location.href = route; }
+        if ("{{ user.is_authenticated|yesno:'true,false' }}" === "false") new bootstrap.Modal(document.getElementById('authModal')).show();
+        else window.location.href = route;
     }
-
     function handleRedirect(type) { window.location.href = (type === 'login') ? '/login/' : '/signup/'; }
-
-    function toggleTheme() {
-        const isDark = document.body.getAttribute('data-theme') === 'dark';
-        applyTheme(isDark ? 'light' : 'dark');
-        localStorage.setItem('theme', isDark ? 'light' : 'dark');
-    }
-
+    function toggleTheme() { const isDark = document.body.getAttribute('data-theme') === 'dark'; applyTheme(isDark ? 'light' : 'dark'); localStorage.setItem('theme', isDark ? 'light' : 'dark'); }
     function applyTheme(mode) {
         const sun = document.getElementById('main-circle');
         document.body.setAttribute('data-theme', mode);
@@ -357,16 +315,10 @@
     // Iris tracking
     document.addEventListener('mousemove', (e) => {
         document.querySelectorAll('.iris').forEach(iris => {
-            const rect = iris.getBoundingClientRect();
-            const angle = Math.atan2(e.clientY - (rect.top + 3.5), e.clientX - (rect.left + 3.5));
+            const rect = iris.getBoundingClientRect(), angle = Math.atan2(e.clientY - (rect.top + 3.5), e.clientX - (rect.left + 3.5));
             iris.style.transform = `translate(${Math.cos(angle) * 3}px, ${Math.sin(angle) * 3}px)`;
         });
     });
-
-    const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => { if (entry.isIntersecting) entry.target.classList.add('active'); });
-    }, { threshold: 0.1 });
-    document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
     </script>
 </body>
 </html>
