@@ -263,6 +263,27 @@
             document.body.setAttribute('data-theme', mode);
             if(sun) sun.setAttribute('fill', mode === 'dark' ? '#bdc3c7' : '#FFD700');
         }
+        function runPrediction(systemId, targetDay) {
+    fetch(`/run-prediction/${systemId}/?day=${targetDay}`)
+        .then(res => res.json())
+        .then(data => {
+            if (data.status === "success") {
+                alert(
+                    `Prediction for ${data.date}: ${data.predicted_energy} kWh`
+                );
+
+                // reload so "Last Forecast" updates
+                location.reload();
+            } else {
+                alert("Prediction failed: " + data.message);
+            }
+        })
+        .catch(err => {
+            console.error(err);
+            alert("Something went wrong while predicting.");
+        });
+}
+
     </script>
 </body>
 </html>

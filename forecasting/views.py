@@ -287,9 +287,6 @@ import random
 
 
 @login_required
-@login_required
-@login_required
-@login_required
 def run_prediction(request, system_id):
     system = get_object_or_404(SolarSystem, id=system_id, user=request.user)
     target = request.GET.get('day', 'tomorrow')
