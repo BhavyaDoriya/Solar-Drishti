@@ -1,68 +1,73 @@
 import json
-import logging
 import random
 import requests
-from datetime import timedelta
-
-from django.conf import settings
-from django.contrib import messages
-from django.contrib.auth import authenticate, login, logout, get_user_model
-from django.contrib.auth.decorators import login_required
-from django.contrib.auth.models import update_last_login
-from django.core.mail import send_mail
-from django.http import JsonResponse, HttpResponse
 from django.shortcuts import render, redirect, get_object_or_404
-from django.utils import timezone
+from django.contrib.auth import authenticate, login, logout, get_user_model
+from django.contrib.auth.models import update_last_login
+from django.contrib.auth.decorators import login_required
+from django.contrib import messages
+from django.http import JsonResponse, HttpResponse
+from django.core.mail import send_mail
+from django.conf import settings
 from django.views.decorators.csrf import csrf_exempt
-
-from decouple import config
-
 from .models import SolarSystem, Prediction
 from .ml.predict import predict_next_48h
+from decouple import config
+import random
+import logging
+
+from django.conf import settings
+from django.core.mail import send_mail
+from django.http import JsonResponse
+from django.shortcuts import render
+from django.views.decorators.csrf import csrf_exempt
+
+from .models import User
 
 logger = logging.getLogger(__name__)
 
+
+# Import your models
+from .models import SolarSystem, Prediction
+
+# Correctly define the User model for the entire file
 User = get_user_model()
 
-# -------------------------
-# Navigation
-# -------------------------
+# --- Navigation Views ---
 
 def indexview(request):
     return render(request, 'forecasting/index.html')
 
-
-# -------------------------
-# History
-# -------------------------
+from django.db.models import Avg
 
 @login_required
 def history_view(request):
-    history_list = Prediction.objects.filter(
-        system__user=request.user
-    ).order_by('-target_date')
-
+    history_list = Prediction.objects.filter(system__user=request.user).order_by('-target_date')
+    
+    # FILTER only records that have actual values
     verified_logs = history_list.filter(actual_value__isnull=False)
-
+    
     if verified_logs.exists():
-        total_actual = sum(p.actual_value for p in verified_logs)
+        # Better Precision Logic
         total_error = sum(abs(p.pred_value - p.actual_value) for p in verified_logs)
-        avg_acc = max(0, 100 - (total_error / total_actual * 100)) if total_actual > 0 else 0
+        total_actual = sum(p.actual_value for p in verified_logs)
+        
+        if total_actual > 0:
+            avg_acc = max(0, 100 - (total_error / total_actual * 100))
+        else:
+            avg_acc = 0
     else:
         avg_acc = 0
-
+    
     return render(request, 'forecasting/history.html', {
         'history_list': history_list,
-        'avg_acc': round(avg_acc, 2),
+        'avg_acc': round(avg_acc, 2), # Keep 2 decimal places for accuracy
         'system_count': SolarSystem.objects.filter(user=request.user).count()
     })
 
+# --- Authentication & Registration Views ---
 
-# -------------------------
-# Authentication
-# -------------------------
-
-@csrf_exempt
+@csrf_exempt  # IMPORTANT for AJAX OTP requests on production
 def signup_view(request):
     if request.method != "POST":
         return render(request, 'forecasting/signup.html')
@@ -70,14 +75,32 @@ def signup_view(request):
     email = request.POST.get('email')
     username = request.POST.get('username')
     password = request.POST.get('password')
-
     if User.objects.filter(username=username).exists():
-        return JsonResponse({'status': 'error', 'message': 'Username already taken'}, status=400)
+            error_msg = "Username already taken. Please choose another."
+            # We still add it to the django messages module just in case
+            messages.error(request, error_msg) 
+            # But we MUST send it in the JSON for the AJAX to show it now
+            return JsonResponse({'status': 'error', 'message': error_msg}, status=400)
+
+    logger.info(f"Signup attempt for email: {email}")
+
+    if not email or not username or not password:
+        return JsonResponse(
+            {'status': 'error', 'message': 'Missing required fields'},
+            status=400
+        )
 
     if User.objects.filter(email=email).exists():
-        return JsonResponse({'status': 'error', 'message': 'Email already registered'}, status=400)
+        return JsonResponse(
+            {
+                'status': 'error',
+                'message': 'This email is already registered. Please login instead.'
+            },
+            status=400
+        )
 
     otp = str(random.randint(100000, 999999))
+
     request.session['otp'] = otp
     request.session['temp_user_data'] = {
         'username': username,
@@ -91,228 +114,62 @@ def signup_view(request):
             message=f'Your OTP is {otp}',
             from_email=settings.EMAIL_HOST_USER,
             recipient_list=[email],
-            fail_silently=False,
+            fail_silently=False,   # 👈 VERY IMPORTANT
         )
-        return JsonResponse({'status': 'sent'})
-    except Exception as e:
-        logger.error(f"OTP send failed: {e}")
-        return JsonResponse({'status': 'error'}, status=500)
 
+        logger.info(f"OTP email sent successfully to {email}")
+        return JsonResponse({'status': 'sent'})
+
+    except Exception as e:
+        logger.error(f"OTP email FAILED for {email}: {repr(e)}")
+
+        return JsonResponse(
+            {
+                'status': 'error',
+                'message': 'OTP could not be sent. Please try again later.'
+            },
+            status=500
+        )
 
 def verify_otp(request):
-    if request.method != 'POST':
-        return HttpResponse(status=405)
+    if request.method == 'POST':
+        # Clean both inputs to strings and remove any whitespace
+        user_otp = str(request.POST.get('otp_code', '')).strip()
+        saved_otp = str(request.session.get('otp', '')).strip()
+        
+        if user_otp and saved_otp and user_otp == saved_otp:
+            data = request.session.get('temp_user_data')
+            
+            if not data:
+                return HttpResponse("Session expired", status=400)
 
-    if request.POST.get('otp_code') == request.session.get('otp'):
-        data = request.session.get('temp_user_data')
-        if not data:
-            return HttpResponse("Session expired", status=400)
-
-        User.objects.create_user(
-            username=data['username'],
-            email=data['email'],
-            password=data['password']
-        )
-
-        request.session.flush()
-        return HttpResponse(status=200)
-
-    return HttpResponse("Invalid OTP", status=400)
-
-
+            User.objects.create_user(
+                username=data['username'],
+                email=data['email'],
+                password=data['password']
+            )
+            
+            # Cleanup session
+            del request.session['otp']
+            del request.session['temp_user_data']
+            return HttpResponse(status=200)
+        else:
+            return HttpResponse("Invalid OTP", status=400)
+    return HttpResponse(status=405)
 def login_view(request):
     if request.method == 'POST':
-        user = authenticate(
-            request,
-            username=request.POST.get('username'),
-            password=request.POST.get('password')
-        )
+        u = request.POST.get('username')
+        p = request.POST.get('password')
+        user = authenticate(request, username=u, password=p)
+
         if user:
             login(request, user)
             update_last_login(None, user)
             return render(request, 'forecasting/login.html', {'login_success': True})
-
-        return render(request, 'forecasting/login.html', {'auth_failed': True})
-
-    return render(request, 'forecasting/login.html')
-
-
-@login_required
-def logout_view(request):
-    logout(request)
-    return redirect('home')
-
-
-# -------------------------
-# Profile
-# -------------------------
-
-@login_required
-def profile_view(request, user_id):
-    profile_user = get_object_or_404(User, pk=user_id)
-    total_insights = Prediction.objects.filter(system__user=profile_user).count()
-
-    return render(request, 'forecasting/profile.html', {
-        'profile_user': profile_user,
-        'total_insights': total_insights
-    })
-
-
-@login_required
-def profile_update_view(request):
-    if request.method == 'POST':
-        new_username = request.POST.get('username')
-        new_password = request.POST.get('password')
-
-        if User.objects.filter(username=new_username).exclude(id=request.user.id).exists():
-            messages.error(request, "Username already taken.")
         else:
-            request.user.username = new_username
-            if new_password:
-                request.user.set_password(new_password)
-                login(request, request.user)
-            request.user.save()
-            messages.success(request, "Profile updated.")
-            return redirect('profile_view', user_id=request.user.id)
-
-    return render(request, 'forecasting/update_profile.html')
-
-
-# -------------------------
-# Solar Systems
-# -------------------------
-
-@login_required
-def predictview(request):
-    systems = SolarSystem.objects.filter(user=request.user)
-    return render(request, 'forecasting/predict.html', {'systems': systems})
-
-
-@login_required
-def add_system(request):
-    if request.method == "POST":
-        try:
-            size = float(request.POST.get('size'))
-            if size <= 0:
-                raise ValueError
-        except ValueError:
-            messages.error(request, "Invalid system size.")
-            return redirect('predict')
-
-        lat = request.POST.get('lat')
-        lon = request.POST.get('lon')
-        name = request.POST.get('name')
-
-        api_key = config("OPENWEATHER_API_KEY")
-        geo_url = f"http://api.openweathermap.org/geo/1.0/reverse?lat={lat}&lon={lon}&limit=1&appid={api_key}"
-
-        try:
-            response = requests.get(geo_url).json()
-            location_name = f"{response[0]['name']}, {response[0]['country']}"
-        except Exception:
-            location_name = "Unknown Location"
-
-        SolarSystem.objects.create(
-            user=request.user,
-            name=name,
-            system_size=size,
-            latitude=lat,
-            longitude=lon,
-            location_name=location_name
-        )
-
-        messages.success(request, "System added successfully.")
-    return redirect('predict')
-
-
-@login_required
-def remove_system(request, system_id):
-    system = get_object_or_404(SolarSystem, id=system_id, user=request.user)
-    system.delete()
-    messages.success(request, "System removed.")
-    return redirect('predict')
-
-
-# -------------------------
-# Prediction
-# -------------------------
-
-@login_required
-def run_prediction(request, system_id):
-    system = get_object_or_404(SolarSystem, id=system_id, user=request.user)
-    target = request.GET.get('day', 'tomorrow')
-
-    target_date = timezone.now().date() + (timedelta(days=2) if target == 'day_after' else timedelta(days=1))
-
-    try:
-        _, daily_df = predict_next_48h(system.latitude, system.longitude)
-
-        row = daily_df[daily_df["date"] == target_date]
-        if row.empty:
-            raise ValueError("Prediction not available")
-
-        predicted_energy = float(row["daily_energy"].iloc[0])
-        predicted_kwh = predicted_energy * system.system_size
-
-    except Exception as e:
-        return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
-
-    Prediction.objects.create(
-        system=system,
-        target_date=target_date,
-        day_target=target,
-        pred_value=round(predicted_kwh, 2)
-    )
-
-    return JsonResponse({
-        "status": "success",
-        "date": target_date.isoformat(),
-        "predicted_energy": round(predicted_kwh, 2)
-    })
-
-
-# -------------------------
-# Actuals Update
-# -------------------------
-
-@login_required
-def update_actual_power(request, system_id):
-    if request.method == "POST":
-        system = get_object_or_404(SolarSystem, id=system_id, user=request.user)
-        val = float(request.POST.get('actual_val'))
-
-        latest_pred = system.predictions.filter(
-            actual_value__isnull=True
-        ).latest('target_date')
-
-        latest_pred.actual_value = val
-        latest_pred.save()
-
-        system.actuals_in_cycle += 1
-        system.save()
-
-        messages.success(request, "Actual power updated.")
-
-    return redirect('predict')
-
-
-@login_required
-def delete_entry(request, entry_id):
-    entry = get_object_or_404(Prediction, id=entry_id, system__user=request.user)
-    entry.delete()
-    messages.success(request, "Entry deleted.")
-    return redirect('history_view')
-
-
-
-
-
-
-
-
-
-
-
+            return render(request, 'forecasting/login.html', {'auth_failed': True})
+            
+    return render(request, 'forecasting/login.html')
 
 @csrf_exempt
 def google_verify_view(request):
@@ -373,7 +230,9 @@ def delete_account_view(request):
 # --- Solar Prediction Logic ---
 
 @login_required
-
+def predictview(request):
+    systems = SolarSystem.objects.filter(user=request.user)
+    return render(request, 'forecasting/predict.html', {'systems': systems})
 
 @login_required
 def add_system(request):
@@ -426,6 +285,42 @@ from datetime import timedelta
 from django.utils import timezone
 import random
 
+
+@login_required
+@login_required
+@login_required
+@login_required
+def run_prediction(request, system_id):
+    system = get_object_or_404(SolarSystem, id=system_id, user=request.user)
+    target = request.GET.get('day', 'tomorrow')
+
+    target_date = timezone.now().date() + (timedelta(days=2) if target == 'day_after' else timedelta(days=1))
+
+    try:
+        _, daily_df = predict_next_48h(system.latitude, system.longitude)
+
+        row = daily_df[daily_df["date"] == target_date]
+        if row.empty:
+            raise ValueError("Prediction not available")
+
+        predicted_energy = float(row["daily_energy"].iloc[0])
+        predicted_kwh = predicted_energy * system.system_size
+
+    except Exception as e:
+        return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
+
+    Prediction.objects.create(
+        system=system,
+        target_date=target_date,
+        day_target=target,
+        pred_value=round(predicted_kwh, 2)
+    )
+
+    return JsonResponse({
+        "status": "success",
+        "date": target_date.isoformat(),
+        "predicted_energy": round(predicted_kwh, 2)
+    })
 
 
 @login_required
