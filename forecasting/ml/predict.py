@@ -1,92 +1,57 @@
+# ml/predict.py
+
 import joblib
 import pandas as pd
-from pathlib import Path
-from datetime import datetime
 
-from .weather import fetch_weather, dew_point,build_preciptype
-from .solar import fetch_pvgis
-
-# --------------------
-# Model loading
-# --------------------
-BASE_PATH = Path(__file__).resolve().parent
-MODEL_PATH = BASE_PATH / "models" / "RF_artifact.joblib"
-
-_artifact = joblib.load(MODEL_PATH)
-
-MODEL = _artifact["model"]
-INPUT_COLS = _artifact["input_columns"]
-TARGET_COL = _artifact["target_column"]
+from .weather import get_hourly_forecast
+from .solar import compute_solar_features
+from .py_files.features import add_features
+from .py_files.config import INPUT_COLS, MODEL_PATH
 
 
-# --------------------
-# Public API (used by views.py)
-# --------------------
-def predict_daily_energy(system, target_date):
-    df = build_daily_block_features(system, target_date)
+def predict_next_48h(
+    lat: float,
+    lon: float
+) -> pd.DataFrame:
+    """
+    Predict hourly and daily solar energy for next 48 hours.
+    """
 
-    if df.empty:
-        raise ValueError("No forecast data available")
+    # 1️⃣ Fetch weather
+    weather_df = get_hourly_forecast(lat, lon, hours=48)
 
-    df = df[INPUT_COLS]
+    # 2️⃣ Compute solar features
+    solar_df = compute_solar_features(weather_df, lat, lon)
+    # 3️⃣ Merge (timezone-safe)
+    weather_df["timestamp"] = pd.to_datetime(weather_df["timestamp"]).dt.floor("H")
+    solar_df["timestamp"] = pd.to_datetime(solar_df["timestamp"]).dt.floor("H")
 
-    hourly_norm_preds = MODEL.predict(df)
+    df = weather_df.merge(solar_df, on="timestamp", how="inner")
 
-    HOURS_PER_BLOCK = 3
 
-    daily_energy_kwh = (
-        hourly_norm_preds.sum()
-        * HOURS_PER_BLOCK
-        * system.system_size
+    # 3️⃣ Merge
+    # df = weather_df.merge(solar_df, on="timestamp")
+    print("weather_df:", weather_df.shape)
+    print("solar_df:", solar_df.shape)
+    print("merged df:", df.shape)
+    print("columns:", df.columns.tolist())
+
+    # 4️⃣ Feature engineering (sin/cos etc.)
+    df = add_features(df)
+
+    # 5️⃣ Load trained model
+    model = joblib.load(MODEL_PATH)
+
+    # 6️⃣ Predict hourly specific energy
+    df["predicted_specific_energy"] = model.predict(df[INPUT_COLS])
+
+    # 7️⃣ Daily aggregation (for UI)
+    df["date"] = df["timestamp"].dt.date
+
+    daily_df = (
+        df.groupby("date")["predicted_specific_energy"]
+        .sum()
+        .reset_index(name="daily_energy")
     )
 
-    return round(daily_energy_kwh, 2)
-
-# --------------------
-# Feature builder
-# --------------------
-def build_daily_block_features(system, target_date):
-    weather = fetch_weather(system.latitude, system.longitude)
-    solar = fetch_pvgis(system.latitude, system.longitude)
-
-    rows = []
-
-    # ---- filter weather blocks (3-hour blocks) ----
-    for w in weather["list"]:
-        w_date = datetime.utcfromtimestamp(w["dt"]).date()
-
-        if w_date != target_date:
-            continue
-
-        base = {
-            "temp": w["main"]["temp"],
-            "humidity": w["main"]["humidity"],
-            "windspeed": w["wind"]["speed"],
-            "winddir": w["wind"].get("deg", 0),
-            "cloudcover": w["clouds"]["all"],
-            "visibility": w.get("visibility", 10000) / 1000,
-            "sealevelpressure": w["main"]["pressure"],
-            "precip": w.get("rain", {}).get("3h", 0),
-            "snowdepth": w.get("snow", {}).get("3h", 0),
-            "uvindex": 0,
-        }
-
-        # --- solar aggregation (average over 3 hours) ---
-        solar_blocks = [
-            s for s in solar["outputs"]["hourly"]
-            if datetime.fromisoformat(s["time"]).date() == target_date
-        ]
-
-        if solar_blocks:
-            base["solarradiation"] = sum(s["G(i)"] for s in solar_blocks) / len(solar_blocks)
-            base["solarenergy"] = sum(s["E_pv"] for s in solar_blocks)
-        else:
-            base["solarradiation"] = 0
-            base["solarenergy"] = 0
-
-        base["dew"] = dew_point(base["temp"], base["humidity"])
-        base.update(build_preciptype(base))
-
-        rows.append(base)
-
-    return pd.DataFrame(rows)
+    return df, daily_df
