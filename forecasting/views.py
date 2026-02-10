@@ -283,6 +283,7 @@ from datetime import timedelta
 from django.utils import timezone
 import random
 
+
 @login_required
 def run_prediction(request, system_id):
     system = get_object_or_404(SolarSystem, id=system_id, user=request.user)

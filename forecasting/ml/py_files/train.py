@@ -2,6 +2,7 @@ import lightgbm as lgb
 import joblib
 from load_data import load_and_split_data
 from config import INPUT_COLS, TARGET_COL, MODEL_PATH
+from metrics import regression_metrics
 
 
 def train_and_save_model():
@@ -27,5 +28,11 @@ def train_and_save_model():
         lgb.log_evaluation(50)
     ]
     )
+    y_test = test_df[TARGET_COL]
+    y_pred = model.predict(test_df[INPUT_COLS])
+    metrics = regression_metrics(y_test, y_pred)
+    print("Test Metrics:")
+    for k, v in metrics.items():
+        print(f"{k.upper()}: {v:.4f}")
 
     joblib.dump(model, MODEL_PATH)
