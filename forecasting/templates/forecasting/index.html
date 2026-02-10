@@ -161,18 +161,18 @@
                     <ul class="navbar-nav ms-auto align-items-center">
                         <li class="nav-item"><a class="nav-link px-3 active-page" href="/">DASHBOARD</a></li>
                         <li class="nav-item"><a class="nav-link px-3" href="javascript:void(0)" onclick="guard(predictURL)">AI_PREDICT</a></li>
-                        <li class="nav-item"><a class="nav-link px-3" href="javascript:void(0)" onclick="guard(historyURL)">ENERGY_LOGS</a></li>
+                        <li class="nav-item"><a class="nav-link px-3" href="javascript:void(0)" onclick="guard(historyURL)">History</a></li>
                         {% if user.is_authenticated %}
                         <li class="nav-item dropdown"><a class="nav-link dropdown-toggle px-3" href="#" id="profileDrop" data-bs-toggle="dropdown"><i class="fa-solid fa-circle-user"></i> {{ user.username|upper }}</a>
                             <ul class="dropdown-menu dropdown-menu-end shadow border-0" style="background: var(--card-bg); backdrop-filter: blur(10px);">
                                 <li><a class="dropdown-item" href="{% url 'profile_view' user_id=request.user.id %}">VIEW PROFILE</a></li>
-                                <li><a class="dropdown-item" href="{% url 'update_profile' %}">CALIBRATE SETUP</a></li>
+                                <li><a class="dropdown-item" href="{% url 'update_profile' %}">Update_Profile</a></li>
                                 <li><hr class="dropdown-divider"></li>
-                                <li><a class="dropdown-item text-danger fw-bold" href="{% url 'logout' %}">TERMINATE_SESSION</a></li>
+                                <li><a class="dropdown-item text-danger fw-bold" href="{% url 'logout' %}">Logout</a></li>
                             </ul>
                         </li>
                         {% else %}
-                        <li class="nav-item ms-lg-3"><button class="btn btn-warning rounded-pill px-4 fw-bold shadow terminal-btn" data-bs-toggle="modal" data-bs-target="#authModal">ACCESS TERMINAL</button></li>
+                        <li class="nav-item ms-lg-3"><button class="btn btn-warning rounded-pill px-4 fw-bold shadow terminal-btn" data-bs-toggle="modal" data-bs-target="#authModal">Login or Sign-up</button></li>
                         {% endif %}
                     </ul>
                 </div>

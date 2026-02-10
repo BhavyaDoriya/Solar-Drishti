@@ -171,16 +171,17 @@
                 <div id="registration-section">
                     <h3 class="fw-bold mb-1">Create Account</h3>
                     <p class="text-muted mb-4 small">Enter details to receive an OTP</p>
+                    
                     <div id="django-messages-container">
-    {% if messages %}
-        {% for message in messages %}
-            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
-                {{ message }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            </div>
-        {% endfor %}
-    {% endif %}
-</div>
+                        {% if messages %}
+                            {% for message in messages %}
+                                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                                    {{ message }}
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                                </div>
+                            {% endfor %}
+                        {% endif %}
+                    </div>
                     
                     <form id="signupForm" autocomplete="off">
                         {% csrf_token %}
@@ -196,7 +197,7 @@
                             <label class="form-label small fw-bold">Password</label>
                             <input type="password" name="password" class="form-control" placeholder="********" required autocomplete="new-password">
                         </div>
-                        <button type="button" class="btn btn-signup w-100" id="sendOtpBtn">
+                        <button type="button" class="btn btn-signup w-100" id="sendOtpBtn" onclick="handleSendOTP(event)">
                             Send OTP <i class="fa-solid fa-paper-plane ms-2"></i>
                         </button>
                     </form>
@@ -252,7 +253,6 @@
             if (localStorage.getItem('theme') === 'dark') applyTheme('dark');
         }
 
-        // OTP Input Auto-focus Logic
         const otpInputs = document.querySelectorAll('.otp-input');
         otpInputs.forEach((input, index) => {
             input.addEventListener('keyup', (e) => {
@@ -261,46 +261,49 @@
             });
         });
 
-        // 1. SEND OTP LOGIC
-        document.getElementById("sendOtpBtn").addEventListener("click", function() {
-            const btn = this;
-            const form = document.getElementById("signupForm");
+        function handleSendOTP(e) {
+            e.preventDefault();
+            const btn = document.getElementById('sendOtpBtn');
+            const container = document.getElementById('django-messages-container');
+            const form = document.getElementById('signupForm');
             const formData = new FormData(form);
-            const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
 
-            // Visual feedback
+            container.innerHTML = '';
             btn.disabled = true;
             btn.innerHTML = 'Sending... <i class="fa-solid fa-spinner fa-spin ms-2"></i>';
 
             fetch("{% url 'signup' %}", {
-                method: "POST",
+                method: 'POST',
                 body: formData,
                 headers: {
-                    "X-Requested-With": "XMLHttpRequest",
-                    "X-CSRFToken": csrfToken // Required for Render production
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
                 }
             })
-            .then(res => res.json())
-            .then(data => {
-                if (data.status === "sent") {
+            .then(response => response.json().then(data => {
+                if (response.ok && data.status === "sent") {
                     document.getElementById("displayEmail").innerText = document.getElementById("userEmail").value;
-                    document.getElementById("registration-section").style.display = "none";
-                    document.getElementById("otp-section").style.display = "block";
+                    document.getElementById('registration-section').style.display = 'none';
+                    document.getElementById('otp-section').style.display = 'block';
                 } else {
-                    alert(data.message || "OTP failed to send.");
+                    container.innerHTML = `
+                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            <i class="fa-solid fa-circle-exclamation me-2"></i> ${data.message || "An error occurred."}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    `;
                     btn.disabled = false;
                     btn.innerHTML = 'Send OTP <i class="fa-solid fa-paper-plane ms-2"></i>';
                 }
-            })
-            .catch(err => {
-                console.error(err);
-                alert("Server error. Check your Render logs for SMTP errors.");
+            }))
+            .catch(() => {
                 btn.disabled = false;
                 btn.innerHTML = 'Send OTP <i class="fa-solid fa-paper-plane ms-2"></i>';
+                alert("Server error. Please try again.");
             });
-        });
+        }
 
-        // 2. VERIFY OTP & SIGNUP LOGIC
+        // VERIFY OTP Logic
         document.getElementById("otpVerifyForm").addEventListener("submit", function(e) {
             e.preventDefault();
             const btn = document.getElementById("verifyBtn");
@@ -318,8 +321,8 @@
                 method: 'POST',
                 body: formData,
                 headers: {
-                    "X-Requested-With": "XMLHttpRequest",
-                    "X-CSRFToken": '{{ csrf_token }}'
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRFToken': '{{ csrf_token }}'
                 }
             }).then(response => {
                 if (response.ok) {
@@ -360,46 +363,6 @@
                 iris.style.transform = `translate(${Math.cos(angle) * 4}px, ${Math.sin(angle) * 4}px)`;
             });
         });
-        // Inside your <script>
-function handleSendOTP(e) {
-    e.preventDefault();
-    const btn = document.getElementById('sendOtpBtn');
-    const container = document.getElementById('django-messages-container');
-    const formData = new FormData(document.getElementById('signupForm'));
-
-    // Clear old messages before a new attempt
-    container.innerHTML = '';
-    btn.disabled = true;
-
-    fetch("{% url 'signup' %}", {
-        method: 'POST',
-        body: formData,
-        headers: {
-            'X-Requested-With': 'XMLHttpRequest',
-            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
-        }
-    })
-    .then(response => response.json().then(data => {
-        if (response.ok) {
-            // Success: Switch to OTP view
-            document.getElementById('registration-section').style.display = 'none';
-            document.getElementById('otp-section').style.display = 'block';
-        } else {
-            // Error: Inject a Bootstrap alert into the Django messages container
-            container.innerHTML = `
-                <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                    <i class="fa-solid fa-circle-exclamation me-2"></i> ${data.message}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                </div>
-            `;
-            btn.disabled = false;
-        }
-    }))
-    .catch(() => {
-        btn.disabled = false;
-        alert("Server error. Please try again.");
-    });
-}
     </script>
 </body>
 </html>

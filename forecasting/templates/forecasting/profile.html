@@ -113,6 +113,7 @@
     </style>
 </head>
 <body onload="checkTheme()">
+    
 
     <header>
         <nav class="navbar navbar-expand-lg fixed-top shadow-sm">
@@ -141,8 +142,32 @@
             </div>
         </nav>
     </header>
+    <br>
+    <br>
+    <br>
+    <div id="status-notif" class="mb-4">
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-dismissible fade show rounded-3 shadow-sm border-0 
+                {% if message.tags == 'success' %}bg-success text-white{% else %}bg-warning text-dark{% endif %}" 
+                role="alert" style="backdrop-filter: blur(10px); opacity: 0.9;">
+                <div class="d-flex align-items-center">
+                    {% if message.tags == 'success' %}
+                        <i class="fa-solid fa-circle-check me-2"></i>
+                    {% else %}
+                        <i class="fa-solid fa-circle-exclamation me-2"></i>
+                    {% endif %}
+                    <span>{{ message }}</span>
+                </div>
+                <button type="button" class="btn-close {% if message.tags == 'success' %}btn-close-white{% endif %}" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        {% endfor %}
+    {% endif %}
+</div>
+    
 
     <main class="profile-main">
+        
         <article class="profile-glass-card">
             <div class="row align-items-center text-center text-md-start">
                 <div class="col-md-4 d-flex justify-content-center mb-4 mb-md-0">

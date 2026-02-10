@@ -10,12 +10,10 @@ from django.http import JsonResponse, HttpResponse
 from django.core.mail import send_mail
 from django.conf import settings
 from django.views.decorators.csrf import csrf_exempt
-from .models import SolarSystem, Prediction
 from .ml.predict import predict_next_48h
 from decouple import config
 import random
 import logging
-
 from django.conf import settings
 from django.core.mail import send_mail
 from django.http import JsonResponse
@@ -40,30 +38,30 @@ def indexview(request):
 
 from django.db.models import Avg
 
-@login_required
-def history_view(request):
-    history_list = Prediction.objects.filter(system__user=request.user).order_by('-target_date')
+# @login_required
+# def history_view(request):
+#     history_list = Prediction.objects.filter(system__user=request.user).order_by('-target_date')
     
-    # FILTER only records that have actual values
-    verified_logs = history_list.filter(actual_value__isnull=False)
+#     # FILTER only records that have actual values
+#     verified_logs = history_list.filter(actual_value__isnull=False)
     
-    if verified_logs.exists():
-        # Better Precision Logic
-        total_error = sum(abs(p.pred_value - p.actual_value) for p in verified_logs)
-        total_actual = sum(p.actual_value for p in verified_logs)
+#     if verified_logs.exists():
+#         # Better Precision Logic
+#         total_error = sum(abs(p.pred_value - p.actual_value) for p in verified_logs)
+#         total_actual = sum(p.actual_value for p in verified_logs)
         
-        if total_actual > 0:
-            avg_acc = max(0, 100 - (total_error / total_actual * 100))
-        else:
-            avg_acc = 0
-    else:
-        avg_acc = 0
+#         if total_actual > 0:
+#             avg_acc = max(0, 100 - (total_error / total_actual * 100))
+#         else:
+#             avg_acc = 0
+#     else:
+#         avg_acc = 0
     
-    return render(request, 'forecasting/history.html', {
-        'history_list': history_list,
-        'avg_acc': round(avg_acc, 2), # Keep 2 decimal places for accuracy
-        'system_count': SolarSystem.objects.filter(user=request.user).count()
-    })
+#     return render(request, 'forecasting/history.html', {
+#         'history_list': history_list,
+#         'avg_acc': round(avg_acc, 2), # Keep 2 decimal places for accuracy
+#         'system_count': SolarSystem.objects.filter(user=request.user).count()
+#     })
 
 # --- Authentication & Registration Views ---
 
@@ -285,10 +283,6 @@ from datetime import timedelta
 from django.utils import timezone
 import random
 
-
-@login_required
-@login_required
-@login_required
 @login_required
 def run_prediction(request, system_id):
     system = get_object_or_404(SolarSystem, id=system_id, user=request.user)

@@ -18,14 +18,14 @@
             --primary-orange: #ff9100;
             --bg-color: linear-gradient(180deg, #e0f2ff 0%, #ffffff 400px); 
             --text-color: #1a1a1a;
-            --glass-bg: rgba(255, 255, 255, 0.8);
-            --glass-border: rgba(255, 255, 255, 0.2);
+            --glass-bg: rgba(255, 255, 255, 0.9);
+            --glass-border: rgba(0, 0, 0, 0.1);
         }
 
         [data-theme="dark"] {
             --bg-color: #020617; 
             --text-color: #f1f1f1;
-            --glass-bg: rgba(15, 23, 42, 0.85);
+            --glass-bg: rgba(15, 23, 42, 0.8);
             --glass-border: rgba(255, 255, 255, 0.15);
         }
 
@@ -38,57 +38,53 @@
             overflow-x: hidden;
         }
 
-        /* --- NUCLEAR FIX FOR MAP SUGGESTIONS --- */
-        /* This ensures no transparency or dark-mode colors leak into the search UI */
-        .leaflet-geosearch-results, 
-        .leaflet-geosearch-results .results,
-        .leaflet-geosearch-results .results > div,
-        .leaflet-geosearch-bar form,
-        .leaflet-geosearch-bar form input {
-            background-color: #ffffff !important;
-            color: #000000 !important;
-            backdrop-filter: none !important; /* Removes the "whitish transparent" blur */
-            opacity: 1 !important;
-            filter: none !important;
-        }
-
-        .leaflet-geosearch-results .results > div {
-            padding: 10px !important;
-            border-bottom: 1px solid #eee !important;
-            cursor: pointer !important;
-        }
-
-        .leaflet-geosearch-results .results > div:hover {
-            background-color: #f8f9fa !important;
-            color: var(--primary-orange) !important;
-        }
-
-        /* --- NAVBAR & THEME ELEMENTS --- */
-        .navbar { background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(15px); border-bottom: 1px solid var(--glass-border); }
-        .navbar-brand { font-family: 'Orbitron'; color: var(--primary-orange) !important; font-weight: 900; }
-        [data-theme="dark"] .nav-link { color: #ffffff !important; text-shadow: 0 0 5px rgba(6, 182, 212, 0.5); }
-        .nav-link.active-page { color: var(--primary-orange) !important; font-weight: 700; border-bottom: 2px solid var(--primary-orange); }
-
-        /* --- SPACE ENGINE --- */
+        /* --- STABLE SPACE THEME --- */
         #warpCanvas { position: fixed; inset: 0; z-index: -2; pointer-events: none; opacity: 0; transition: opacity 1s ease; }
         [data-theme="dark"] #warpCanvas { opacity: 1; }
-        [data-theme="dark"] body::before { content: " "; position: fixed; inset: 0; background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.15) 50%); z-index: 1000; pointer-events: none; }
+        [data-theme="dark"] body::before {
+            content: " "; position: fixed; inset: 0;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.15) 50%);
+            z-index: 1000; pointer-events: none;
+        }
 
-        /* --- UI COMPONENTS --- */
-        .system-card { background: var(--glass-bg); backdrop-filter: blur(15px); border: 1px solid var(--glass-border); border-radius: 25px; transition: 0.3s; }
-        .system-card:hover { transform: translateY(-8px); border-color: var(--primary-orange); }
-        .add-btn { width: 65px; height: 65px; background: linear-gradient(45deg, var(--primary-orange), #ff6d00); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 2rem; color: white; border: none; box-shadow: 0 10px 20px rgba(255, 145, 0, 0.4); cursor: pointer; animation: floating 3s infinite; }
-        @keyframes floating { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
-        
-        #map-picker { height: 350px; width: 100%; border-radius: 20px; border: 1px solid var(--glass-border); z-index: 1; }
-        [data-theme="dark"] .leaflet-layer { filter: invert(100%) hue-rotate(180deg) brightness(95%) contrast(90%); }
-        
-        #celestial-anchor { position: fixed; bottom: 25px; right: 25px; z-index: 2000; width: 80px; height: 80px; cursor: pointer; }
+        /* --- NAVBAR --- */
+        .navbar { background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(15px); border-bottom: 1px solid var(--glass-border); height: 60px; }
+        .navbar-brand { font-family: 'Orbitron'; color: var(--primary-orange) !important; font-weight: 900; }
+        [data-theme="dark"] .nav-link { color: #ffffff !important; }
+
+        /* --- CARD UI --- */
+        .system-card {
+            background: var(--glass-bg); backdrop-filter: blur(12px);
+            border: 1px solid var(--glass-border); border-radius: 20px;
+            padding: 20px; height: 100%; transition: 0.3s ease;
+            display: flex; flex-direction: column;
+        }
+        .system-card:hover { transform: translateY(-5px); border-color: var(--primary-orange); }
+
+        /* --- SPINNER --- */
+        .spinner-border-sm { width: 1rem; height: 1rem; display: none; margin-right: 5px; }
+        .predicting .spinner-border-sm { display: inline-block; }
+        .predicting .btn-text { display: none; }
+        .predicting::after { content: "Calculating..."; }
+
+        .add-btn {
+            width: 55px; height: 55px; background: linear-gradient(45deg, var(--primary-orange), #ff6d00);
+            border-radius: 50%; border: none; color: white; font-size: 1.4rem;
+            box-shadow: 0 8px 20px rgba(255, 145, 0, 0.3); cursor: pointer;
+        }
+
+        #map-picker { height: 280px; width: 100%; border-radius: 12px; border: 1px solid var(--glass-border); }
+
+        /* --- MAP SEARCH FIX --- */
+        .leaflet-geosearch-results, .leaflet-geosearch-bar form input { 
+            background-color: #ffffff !important; color: #000000 !important; backdrop-filter: none !important; opacity: 1 !important; 
+        }
+
+        #celestial-anchor { position: fixed; bottom: 20px; right: 20px; z-index: 2000; width: 60px; height: 60px; cursor: pointer; }
         .cursor-dot, .cursor-outline { position: fixed; pointer-events: none; z-index: 9999; opacity: 0; }
         @media (pointer: fine) {
-            [data-theme="dark"] { cursor: none !important; }
             [data-theme="dark"] .cursor-dot { display: block; width: 8px; height: 8px; background: var(--primary-orange); border-radius: 50%; top: 0; left: 0; opacity: 1; }
-            [data-theme="dark"] .cursor-outline { display: block; width: 30px; height: 30px; border: 2px solid var(--primary-orange); border-radius: 50%; top: 0; left: 0; opacity: 1; transition: transform 0.15s ease-out; }
+            [data-theme="dark"] .cursor-outline { display: block; width: 30px; height: 30px; border: 2px solid var(--primary-orange); border-radius: 50%; top: 0; left: 0; opacity: 1; transition: transform 0.1s ease-out; }
         }
     </style>
 </head>
@@ -101,9 +97,7 @@
     <header>
         <nav class="navbar navbar-expand-lg fixed-top shadow-sm">
             <div class="container">
-                <a class="navbar-brand d-flex align-items-center" href="/">
-                    <i class="fa-solid fa-sun-plant-wilt me-2"></i> SOLAR<span class="text-secondary">DRISHTI</span>
-                </a>
+                <a class="navbar-brand d-flex align-items-center" href="/"><i class="fa-solid fa-sun-plant-wilt me-2"></i> SOLAR<span class="text-secondary">DRISHTI</span></a>
                 <div class="collapse navbar-collapse" id="navMain">
                     <ul class="navbar-nav ms-auto align-items-center">
                         <li class="nav-item"><a class="nav-link px-3" href="/">Home</a></li>
@@ -115,47 +109,73 @@
         </nav>
     </header>
 
-    <main class="container mt-5 pt-5">
-        <div class="d-flex justify-content-between align-items-center mb-5">
-            <div>
-                <h1 class="fw-bold m-0" style="font-family: 'Orbitron';">Solar Insights</h1>
-                <p class="text-muted">US Region: Pin your system and start forecasting.</p>
-            </div>
-            <button class="add-btn shadow" data-bs-toggle="modal" data-bs-target="#addSystemModal">
-                <i class="fa-solid fa-plus"></i>
-            </button>
+    <main class="container mt-5 pt-4">
+        <div id="status-notif">
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert alert-dismissible fade show rounded-3 shadow-sm border-0 {% if message.tags == 'success' %}bg-success text-white{% else %}bg-warning text-dark{% endif %}" role="alert">
+                        <i class="fa-solid {% if message.tags == 'success' %}fa-circle-check{% else %}fa-circle-exclamation{% endif %} me-2"></i> {{ message }}
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
         </div>
 
-        <div class="row g-4">
+        <div class="row align-items-center mb-4">
+            <div class="col-9">
+                <h2 class="fw-bold m-0" style="font-family: 'Orbitron';">Solar Insights</h2>
+                <p class="text-muted small">Manage hardware and generate accurate US forecasts.</p>
+            </div>
+            <div class="col-3 text-end">
+                <button class="add-btn shadow" data-bs-toggle="modal" data-bs-target="#addSystemModal"><i class="fa-solid fa-plus"></i></button>
+            </div>
+        </div>
+
+        <div class="row g-3">
             {% for system in systems %}
-            <div class="col-md-6 col-lg-4">
-                <div class="system-card p-4 h-100 d-flex flex-column">
-                    <h4 class="fw-bold m-0" style="color: var(--primary-orange);">{{ system.name }}</h4>
-                    <small class="text-muted mb-3"><i class="fa-solid fa-location-dot me-1"></i> {{ system.location_name }}</small>
+            <div class="col-12 col-md-6 col-lg-4">
+                <div class="system-card shadow-sm">
+                    <h5 class="fw-bold m-0" style="color: var(--primary-orange);">{{ system.name }}</h5>
+                    <small class="text-muted mb-3 d-block"><i class="fa-solid fa-location-dot me-1"></i> {{ system.location_name }}</small>
                     <div class="row g-2 mt-auto">
-                        <div class="col-6"><button class="btn btn-outline-warning w-100 rounded-pill fw-bold" onclick="runPrediction('{{ system.id }}', 'tomorrow')">Tomorrow</button></div>
-                        <div class="col-6"><button class="btn btn-outline-warning w-100 rounded-pill fw-bold" onclick="runPrediction('{{ system.id }}', 'day_after')">Next Day</button></div>
+                        <div class="col-6"><button class="btn btn-outline-warning w-100 rounded-pill fw-bold btn-sm" onclick="runPrediction(this, '{{ system.id }}', 'tomorrow')"><span class="spinner-border spinner-border-sm"></span><span class="btn-text">Tomorrow</span></button></div>
+                        <div class="col-6"><button class="btn btn-outline-warning w-100 rounded-pill fw-bold btn-sm" onclick="runPrediction(this, '{{ system.id }}', 'day_after')"><span class="spinner-border spinner-border-sm"></span><span class="btn-text">Next Day</span></button></div>
                     </div>
                 </div>
+            </div>
             {% endfor %}
         </div>
     </main>
 
+    <div class="modal fade" id="resultModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content rounded-4 border-0" style="background: var(--glass-bg); backdrop-filter: blur(20px);">
+                <div class="modal-header border-0"><h6 class="fw-bold">AI FORECAST ANALYSIS</h6><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+                <div class="modal-body text-center p-4">
+                    <i class="fa-solid fa-bolt text-warning fa-2x mb-3"></i>
+                    <h2 id="result-value" class="fw-bold" style="color: var(--primary-orange);">-- kW</h2>
+                    <p id="result-date" class="text-muted small">Target Date: --</p>
+                </div>
+                <div class="modal-footer border-0"><button class="btn btn-warning w-100 rounded-pill fw-bold py-2" data-bs-dismiss="modal">DISMISS</button></div>
+            </div>
+        </div>
+    </div>
+
     <div class="modal fade" id="addSystemModal" tabindex="-1">
-        <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content rounded-4 border-0" style="background: var(--glass-bg); backdrop-filter: blur(20px);">
                 <form id="addSystemForm" method="POST" action="{% url 'add_system' %}">
                     {% csrf_token %}
-                    <div class="modal-header border-0"><h5 class="fw-bold">Pin US System</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
-                    <div class="modal-body">
-                        <div class="row mb-3">
-                            <div class="col-md-8"><input type="text" name="name" class="form-control" placeholder="System Name" required></div>
-                            <div class="col-md-4"><input type="number" step="0.1" name="size" class="form-control" placeholder="Size (kW)" required></div>
+                    <div class="modal-header border-0"><h6 class="fw-bold m-0">REGISTER US HARDWARE</h6><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+                    <div class="modal-body pt-0">
+                        <div class="row g-2 mb-3">
+                            <div class="col-8"><input type="text" name="name" class="form-control form-control-sm" placeholder="System Name" required></div>
+                            <div class="col-4"><input type="number" step="0.1" name="size" class="form-control form-control-sm" placeholder="kW Size" required></div>
                         </div>
                         <div id="map-picker"></div>
-                        <div id="location-status" class="alert alert-info py-2 small border-0" style="color:#000 !important; background:#fff !important; border:1px solid #ff9100 !important;">Search is restricted to the United States only.</div>
+                        <div id="location-status" class="alert alert-info py-2 small border-0 mt-2" style="background:#fff !important; color:#000 !important; border:1px solid var(--primary-orange) !important;">Search US address; coordinates update auto.</div>
                     </div>
-                    <div class="modal-footer border-0"><button type="submit" class="btn btn-warning w-100 rounded-pill fw-bold py-3" id="save-sys-btn" disabled>Add System</button></div>
+                    <div class="modal-footer border-0 pt-0"><button type="submit" class="btn btn-warning w-100 rounded-pill fw-bold py-2 shadow-sm" id="save-sys-btn" disabled>VERIFY & ADD</button></div>
                     <input type="hidden" name="lat" id="sys-lat"><input type="hidden" name="lon" id="sys-lon">
                 </form>
             </div>
@@ -165,10 +185,7 @@
     <aside id="celestial-anchor" onclick="toggleTheme()">
         <svg width="100%" height="100%" viewBox="0 0 100 100">
             <circle id="main-circle" cx="50" cy="50" r="40" fill="#FFD700" />
-            <g id="eyes">
-                <circle cx="35" cy="45" r="7" fill="white" /><circle class="iris" cx="35" cy="45" r="3.5" fill="black" />
-                <circle cx="65" cy="45" r="7" fill="white" /><circle class="iris" cx="65" cy="45" r="3.5" fill="black" />
-            </g>
+            <g id="eyes"><circle cx="35" cy="45" r="7" fill="white" /><circle class="iris" cx="35" cy="45" r="3.5" fill="black" /><circle cx="65" cy="45" r="7" fill="white" /><circle class="iris" cx="65" cy="45" r="3.5" fill="black" /></g>
             <path id="mouth" d="M 40 65 Q 50 75 60 65" stroke="black" stroke-width="2" fill="none" stroke-linecap="round" />
         </svg>
     </aside>
@@ -186,51 +203,50 @@
             animateWarp();
         }
 
+        // --- PREDICTION FETCH LOGIC ---
+        function runPrediction(btn, systemId, targetDay) {
+            btn.classList.add('predicting');
+            btn.disabled = true;
+            fetch(`/run-prediction/${systemId}/?day=${targetDay}`)
+                .then(res => res.json())
+                .then(data => {
+                    if (data.status === "success") {
+                        document.getElementById('result-value').innerText = data.predicted_energy + " kW";
+                        document.getElementById('result-date').innerText = "Target: " + data.date;
+                        new bootstrap.Modal(document.getElementById('resultModal')).show();
+                    } else { alert("Error: " + data.message); }
+                })
+                .catch(() => alert("Network communication error."))
+                .finally(() => { btn.classList.remove('predicting'); btn.disabled = false; });
+        }
+
         document.getElementById('addSystemModal').addEventListener('shown.bs.modal', function () {
-            const centerUS = [37.09, -95.71];
             if (!map) {
-                map = L.map('map-picker', { maxBounds: US_BOUNDS, maxBoundsViscosity: 1.0 }).setView(centerUS, 4);
+                map = L.map('map-picker', { maxBounds: US_BOUNDS, maxBoundsViscosity: 1.0 }).setView([37.09, -95.71], 4);
                 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
-
-                const provider = new window.GeoSearch.OpenStreetMapProvider({
-                    params: { countrycodes: 'us', viewbox: "-125.0,24.39,-66.93,49.38", bounded: 1 }
-                });
-
-                const search = new window.GeoSearch.GeoSearchControl({ 
-                    provider: provider, 
-                    style: 'bar', 
-                    showMarker: false, 
-                    autoClose: true,
-                    keepResult: true 
-                });
-                
+                const provider = new window.GeoSearch.OpenStreetMapProvider({ params: { countrycodes: 'us', viewbox: "-125,24,-66,49", bounded: 1 } });
+                const search = new window.GeoSearch.GeoSearchControl({ provider: provider, style: 'bar', showMarker: false, autoClose: true, keepResult: true });
                 map.addControl(search);
-                marker = L.marker(centerUS, { draggable: true }).addTo(map);
-                
+                marker = L.marker([37.09, -95.71], { draggable: true }).addTo(map);
+
                 map.on('geosearch/showlocation', (e) => { 
                     marker.setLatLng([e.location.y, e.location.x]); 
                     updateCoords(e.location.y, e.location.x); 
                 });
-                
-                marker.on('dragend', () => {
-                    const pos = marker.getLatLng();
-                    if (!US_BOUNDS.contains(pos)) { marker.setLatLng(centerUS); alert("Select a location within the US."); }
-                    else { updateCoords(pos.lat, pos.lng); }
-                });
+
+                marker.on('dragend', () => { const pos = marker.getLatLng(); if (!US_BOUNDS.contains(pos)) { marker.setLatLng([37.09, -95.71]); alert("US only."); } else updateCoords(pos.lat, pos.lng); });
                 map.on('click', (e) => { if (US_BOUNDS.contains(e.latlng)) { marker.setLatLng(e.latlng); updateCoords(e.latlng.lat, e.latlng.lng); } });
-            } else { map.invalidateSize(); }
+            } else { setTimeout(() => map.invalidateSize(), 200); }
         });
 
         function updateCoords(lat, lon) {
-            document.getElementById('sys-lat').value = lat;
-            document.getElementById('sys-lon').value = lon;
+            document.getElementById('sys-lat').value = lat; document.getElementById('sys-lon').value = lon;
             document.getElementById('save-sys-btn').disabled = false;
-            document.getElementById('location-status').innerHTML = `Location Locked: ${lat.toFixed(4)}, ${lon.toFixed(4)}`;
+            document.getElementById('location-status').innerHTML = `Telemetry Locked: ${lat.toFixed(3)}, ${lon.toFixed(3)}`;
         }
 
         const canvas = document.getElementById('warpCanvas'), ctx = canvas.getContext('2d');
         let stars = Array(350).fill().map(() => ({ x: Math.random()*innerWidth-innerWidth/2, y: Math.random()*innerHeight-innerHeight/2, z: Math.random()*innerWidth }));
-
         function animateWarp() {
             canvas.width = window.innerWidth; canvas.height = window.innerHeight;
             const isDark = document.body.getAttribute('data-theme') === 'dark';
@@ -250,6 +266,10 @@
         window.addEventListener('mousemove', (e) => {
             dot.style.transform = `translate(${e.clientX}px, ${e.clientY}px)`;
             outline.animate({ transform: `translate(${e.clientX - 15}px, ${e.clientY - 15}px)` }, { duration: 400, fill: "forwards" });
+            document.querySelectorAll('.iris').forEach(iris => {
+                const rect = iris.getBoundingClientRect(), angle = Math.atan2(e.clientY - (rect.top + 3.5), e.clientX - (rect.left + 3.5));
+                iris.style.transform = `translate(${Math.cos(angle) * 3}px, ${Math.sin(angle) * 3}px)`;
+            });
         });
 
         function toggleTheme() {
