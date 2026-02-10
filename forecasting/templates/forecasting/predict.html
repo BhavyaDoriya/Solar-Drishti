@@ -77,7 +77,7 @@
 
         /* --- MAP SEARCH FIX --- */
         .leaflet-geosearch-results, .leaflet-geosearch-bar form input { 
-            background-color: #ffffff !important; color: #000000 !important; backdrop-filter: none !important; opacity: 1 !important; 
+            background-color: var(--bg-color) !important; color: var(--text-color) !important;filter:invert(1); backdrop-filter: none !important; opacity: 1 !important; 
         }
 
         #celestial-anchor { position: fixed; bottom: 20px; right: 20px; z-index: 2000; width: 60px; height: 60px; cursor: pointer; }
@@ -86,6 +86,30 @@
             [data-theme="dark"] .cursor-dot { display: block; width: 8px; height: 8px; background: var(--primary-orange); border-radius: 50%; top: 0; left: 0; opacity: 1; }
             [data-theme="dark"] .cursor-outline { display: block; width: 30px; height: 30px; border: 2px solid var(--primary-orange); border-radius: 50%; top: 0; left: 0; opacity: 1; transition: transform 0.1s ease-out; }
         }
+        .leaflet-geosearch-results, 
+.leaflet-geosearch-results .results,
+.leaflet-geosearch-results .results > div,
+.leaflet-geosearch-bar form,
+.leaflet-geosearch-bar form input {
+    background-color: #ffffff !important; /* Force solid white */
+    color: #000000 !important;            /* Force solid black text */
+    filter: none !important;               /* Remove any inversions */
+    backdrop-filter: none !important;      /* Remove glass blur */
+    opacity: 1 !important;                 /* Ensure no transparency */
+    border: none !important;
+}
+
+/* Hover effect for the suggestions */
+.leaflet-geosearch-results .results > div:hover {
+    background-color: #f0f0f0 !important;
+    color: var(--primary-orange) !important;
+}
+
+/* Fix for the magnifying glass/reset icons */
+.leaflet-geosearch-bar a.reset {
+    color: #000 !important;
+    background: none !important;
+}
     </style>
 </head>
 <body onload="initApp()">
@@ -124,7 +148,7 @@
         <div class="row align-items-center mb-4">
             <div class="col-9">
                 <h2 class="fw-bold m-0" style="font-family: 'Orbitron';">Solar Insights</h2>
-                <p class="text-muted small">Manage hardware and generate accurate US forecasts.</p>
+                <p class="text-muted small" style="color:var(--text-color) !important; ">Manage hardware and generate accurate US forecasts.</p>
             </div>
             <div class="col-3 text-end">
                 <button class="add-btn shadow" data-bs-toggle="modal" data-bs-target="#addSystemModal"><i class="fa-solid fa-plus"></i></button>
@@ -136,7 +160,7 @@
             <div class="col-12 col-md-6 col-lg-4">
                 <div class="system-card shadow-sm">
                     <h5 class="fw-bold m-0" style="color: var(--primary-orange);">{{ system.name }}</h5>
-                    <small class="text-muted mb-3 d-block"><i class="fa-solid fa-location-dot me-1"></i> {{ system.location_name }}</small>
+                    <small class="text-muted mb-3 d-block" style="color:var(--text-color) !important;"><i class="fa-solid fa-location-dot me-1"></i> {{ system.location_name }}</small>
                     <div class="row g-2 mt-auto">
                         <div class="col-6"><button class="btn btn-outline-warning w-100 rounded-pill fw-bold btn-sm" onclick="runPrediction(this, '{{ system.id }}', 'tomorrow')"><span class="spinner-border spinner-border-sm"></span><span class="btn-text">Tomorrow</span></button></div>
                         <div class="col-6"><button class="btn btn-outline-warning w-100 rounded-pill fw-bold btn-sm" onclick="runPrediction(this, '{{ system.id }}', 'day_after')"><span class="spinner-border spinner-border-sm"></span><span class="btn-text">Next Day</span></button></div>
@@ -153,8 +177,8 @@
                 <div class="modal-header border-0"><h6 class="fw-bold">AI FORECAST ANALYSIS</h6><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
                 <div class="modal-body text-center p-4">
                     <i class="fa-solid fa-bolt text-warning fa-2x mb-3"></i>
-                    <h2 id="result-value" class="fw-bold" style="color: var(--primary-orange);">-- kW</h2>
-                    <p id="result-date" class="text-muted small">Target Date: --</p>
+                    <h2 id="result-value" class="fw-bold" style="color: var(--primary-orange);">-- kWh</h2>
+                    <p id="result-date" class="text-muted small" style="color:var(--text-color) !important;">Target Date: --</p>
                 </div>
                 <div class="modal-footer border-0"><button class="btn btn-warning w-100 rounded-pill fw-bold py-2" data-bs-dismiss="modal">DISMISS</button></div>
             </div>
@@ -166,7 +190,7 @@
             <div class="modal-content rounded-4 border-0" style="background: var(--glass-bg); backdrop-filter: blur(20px);">
                 <form id="addSystemForm" method="POST" action="{% url 'add_system' %}">
                     {% csrf_token %}
-                    <div class="modal-header border-0"><h6 class="fw-bold m-0">REGISTER US HARDWARE</h6><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+                    <div class="modal-header border-0"><h6 class="fw-bold m-0">REGISTER SYSTEM</h6><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
                     <div class="modal-body pt-0">
                         <div class="row g-2 mb-3">
                             <div class="col-8"><input type="text" name="name" class="form-control form-control-sm" placeholder="System Name" required></div>
@@ -195,115 +219,133 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
     <script>
-        let map, marker;
-        const US_BOUNDS = L.latLngBounds([24.39, -125.0], [49.38, -66.93]);
+    let map, marker;
+    const US_BOUNDS = L.latLngBounds([24.39, -125.0], [49.38, -66.93]);
 
-        function initApp() { 
-            if (localStorage.getItem('theme') === 'dark') applyTheme('dark'); 
-            animateWarp();
-        }
+    function initApp() { 
+        if (localStorage.getItem('theme') === 'dark') applyTheme('dark'); 
+        animateWarp();
+    }
 
-        // --- PREDICTION FETCH LOGIC ---
-        function runPrediction(btn, systemId, targetDay) {
-            btn.classList.add('predicting');
-            btn.disabled = true;
-            fetch(`/run-prediction/${systemId}/?day=${targetDay}`)
-                .then(res => res.json())
-                .then(data => {
-                    if (data.status === "success") {
-                        document.getElementById('result-value').innerText = data.predicted_energy + " kW";
-                        document.getElementById('result-date').innerText = "Target: " + data.date;
-                        new bootstrap.Modal(document.getElementById('resultModal')).show();
-                    } else { alert("Error: " + data.message); }
-                })
-                .catch(() => alert("Network communication error."))
-                .finally(() => { btn.classList.remove('predicting'); btn.disabled = false; });
-        }
+    // --- FIXED PREDICTION FETCH LOGIC ---
+    // Added 'btn' as the first argument to match the HTML call
+    function runPrediction(btn, systemId, targetDay) {
+        btn.classList.add('predicting');
+        btn.disabled = true;
 
-        document.getElementById('addSystemModal').addEventListener('shown.bs.modal', function () {
-            if (!map) {
-                map = L.map('map-picker', { maxBounds: US_BOUNDS, maxBoundsViscosity: 1.0 }).setView([37.09, -95.71], 4);
-                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
-                const provider = new window.GeoSearch.OpenStreetMapProvider({ params: { countrycodes: 'us', viewbox: "-125,24,-66,49", bounded: 1 } });
-                const search = new window.GeoSearch.GeoSearchControl({ provider: provider, style: 'bar', showMarker: false, autoClose: true, keepResult: true });
-                map.addControl(search);
-                marker = L.marker([37.09, -95.71], { draggable: true }).addTo(map);
+        fetch(`/run-prediction/${systemId}/?day=${targetDay}`)
+            .then(res => res.json())
+            .then(data => {
+                if (data.status === "success") {
+                    // Update the Modal elements
+                    document.getElementById('result-value').innerText = data.predicted_energy + " kWh";
+                    document.getElementById('result-date').innerText = "Target Date: " + data.date;
+                    
+                    // Show the Bootstrap Modal
+                    const myModal = new bootstrap.Modal(document.getElementById('resultModal'));
+                    myModal.show();
 
-                map.on('geosearch/showlocation', (e) => { 
-                    marker.setLatLng([e.location.y, e.location.x]); 
-                    updateCoords(e.location.y, e.location.x); 
-                });
+                    // Optional: Setup a listener to reload page when modal closes to update 'Last Forecast'
+                    document.getElementById('resultModal').addEventListener('hidden.bs.modal', function () {
+                        location.reload();
+                    }, {once: true});
 
-                marker.on('dragend', () => { const pos = marker.getLatLng(); if (!US_BOUNDS.contains(pos)) { marker.setLatLng([37.09, -95.71]); alert("US only."); } else updateCoords(pos.lat, pos.lng); });
-                map.on('click', (e) => { if (US_BOUNDS.contains(e.latlng)) { marker.setLatLng(e.latlng); updateCoords(e.latlng.lat, e.latlng.lng); } });
-            } else { setTimeout(() => map.invalidateSize(), 200); }
-        });
-
-        function updateCoords(lat, lon) {
-            document.getElementById('sys-lat').value = lat; document.getElementById('sys-lon').value = lon;
-            document.getElementById('save-sys-btn').disabled = false;
-            document.getElementById('location-status').innerHTML = `Telemetry Locked: ${lat.toFixed(3)}, ${lon.toFixed(3)}`;
-        }
-
-        const canvas = document.getElementById('warpCanvas'), ctx = canvas.getContext('2d');
-        let stars = Array(350).fill().map(() => ({ x: Math.random()*innerWidth-innerWidth/2, y: Math.random()*innerHeight-innerHeight/2, z: Math.random()*innerWidth }));
-        function animateWarp() {
-            canvas.width = window.innerWidth; canvas.height = window.innerHeight;
-            const isDark = document.body.getAttribute('data-theme') === 'dark';
-            ctx.fillStyle = isDark ? "rgba(2, 6, 23, 0.4)" : "rgba(255, 255, 255, 0)";
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-            if(isDark) {
-                stars.forEach(s => {
-                    s.z -= 1.5; if (s.z <= 0) s.z = canvas.width;
-                    const x = (s.x / s.z) * canvas.width + canvas.width/2, y = (s.y / s.z) * canvas.height + canvas.height/2, size = (1 - s.z/canvas.width) * 2;
-                    ctx.beginPath(); ctx.fillStyle = "white"; ctx.arc(x, y, size, 0, Math.PI*2); ctx.fill();
-                });
-            }
-            requestAnimationFrame(animateWarp);
-        }
-
-        const dot = document.querySelector('.cursor-dot'), outline = document.querySelector('.cursor-outline');
-        window.addEventListener('mousemove', (e) => {
-            dot.style.transform = `translate(${e.clientX}px, ${e.clientY}px)`;
-            outline.animate({ transform: `translate(${e.clientX - 15}px, ${e.clientY - 15}px)` }, { duration: 400, fill: "forwards" });
-            document.querySelectorAll('.iris').forEach(iris => {
-                const rect = iris.getBoundingClientRect(), angle = Math.atan2(e.clientY - (rect.top + 3.5), e.clientX - (rect.left + 3.5));
-                iris.style.transform = `translate(${Math.cos(angle) * 3}px, ${Math.sin(angle) * 3}px)`;
+                } else { 
+                    alert("Error: " + data.message); 
+                }
+            })
+            .catch(err => {
+                console.error(err);
+                alert("Network communication error.");
+            })
+            .finally(() => { 
+                btn.classList.remove('predicting'); 
+                btn.disabled = false; 
             });
-        });
+    }
 
-        function toggleTheme() {
-            const isDark = document.body.getAttribute('data-theme') === 'dark';
-            applyTheme(isDark ? 'light' : 'dark');
-            localStorage.setItem('theme', isDark ? 'light' : 'dark');
+    // --- MAP LOGIC ---
+    document.getElementById('addSystemModal').addEventListener('shown.bs.modal', function () {
+        if (!map) {
+            map = L.map('map-picker', { maxBounds: US_BOUNDS, maxBoundsViscosity: 1.0 }).setView([37.09, -95.71], 4);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+            const provider = new window.GeoSearch.OpenStreetMapProvider({ params: { countrycodes: 'us', viewbox: "-125,24,-66,49", bounded: 1 } });
+            const search = new window.GeoSearch.GeoSearchControl({ provider: provider, style: 'bar', showMarker: false, autoClose: true, keepResult: true });
+            map.addControl(search);
+            marker = L.marker([37.09, -95.71], { draggable: true }).addTo(map);
+
+            map.on('geosearch/showlocation', (e) => { 
+                marker.setLatLng([e.location.y, e.location.x]); 
+                updateCoords(e.location.y, e.location.x); 
+            });
+
+            marker.on('dragend', () => { 
+                const pos = marker.getLatLng(); 
+                if (!US_BOUNDS.contains(pos)) { 
+                    marker.setLatLng([37.09, -95.71]); 
+                    alert("US only."); 
+                } else {
+                    updateCoords(pos.lat, pos.lng); 
+                }
+            });
+            map.on('click', (e) => { 
+                if (US_BOUNDS.contains(e.latlng)) { 
+                    marker.setLatLng(e.latlng); 
+                    updateCoords(e.latlng.lat, e.latlng.lng); 
+                } 
+            });
+        } else { 
+            setTimeout(() => map.invalidateSize(), 200); 
         }
+    });
 
-        function applyTheme(mode) {
-            const sun = document.getElementById('main-circle');
-            document.body.setAttribute('data-theme', mode);
-            if(sun) sun.setAttribute('fill', mode === 'dark' ? '#bdc3c7' : '#FFD700');
+    function updateCoords(lat, lon) {
+        document.getElementById('sys-lat').value = lat; 
+        document.getElementById('sys-lon').value = lon;
+        document.getElementById('save-sys-btn').disabled = false;
+        document.getElementById('location-status').innerHTML = `Telemetry Locked: ${lat.toFixed(3)}, ${lon.toFixed(3)}`;
+    }
+
+    // --- ANIMATION & THEME LOGIC ---
+    const canvas = document.getElementById('warpCanvas'), ctx = canvas.getContext('2d');
+    let stars = Array(350).fill().map(() => ({ x: Math.random()*innerWidth-innerWidth/2, y: Math.random()*innerHeight-innerHeight/2, z: Math.random()*innerWidth }));
+    
+    function animateWarp() {
+        canvas.width = window.innerWidth; canvas.height = window.innerHeight;
+        const isDark = document.body.getAttribute('data-theme') === 'dark';
+        ctx.fillStyle = isDark ? "rgba(2, 6, 23, 0.4)" : "rgba(255, 255, 255, 0)";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        if(isDark) {
+            stars.forEach(s => {
+                s.z -= 1.5; if (s.z <= 0) s.z = canvas.width;
+                const x = (s.x / s.z) * canvas.width + canvas.width/2, y = (s.y / s.z) * canvas.height + canvas.height/2, size = (1 - s.z/canvas.width) * 2;
+                ctx.beginPath(); ctx.fillStyle = "white"; ctx.arc(x, y, size, 0, Math.PI*2); ctx.fill();
+            });
         }
-        function runPrediction(systemId, targetDay) {
-    fetch(`/run-prediction/${systemId}/?day=${targetDay}`)
-        .then(res => res.json())
-        .then(data => {
-            if (data.status === "success") {
-                alert(
-                    `Prediction for ${data.date}: ${data.predicted_energy} kWh`
-                );
+        requestAnimationFrame(animateWarp);
+    }
 
-                // reload so "Last Forecast" updates
-                location.reload();
-            } else {
-                alert("Prediction failed: " + data.message);
-            }
-        })
-        .catch(err => {
-            console.error(err);
-            alert("Something went wrong while predicting.");
+    const dot = document.querySelector('.cursor-dot'), outline = document.querySelector('.cursor-outline');
+    window.addEventListener('mousemove', (e) => {
+        dot.style.transform = `translate(${e.clientX}px, ${e.clientY}px)`;
+        outline.animate({ transform: `translate(${e.clientX - 15}px, ${e.clientY - 15}px)` }, { duration: 400, fill: "forwards" });
+        document.querySelectorAll('.iris').forEach(iris => {
+            const rect = iris.getBoundingClientRect(), angle = Math.atan2(e.clientY - (rect.top + 3.5), e.clientX - (rect.left + 3.5));
+            iris.style.transform = `translate(${Math.cos(angle) * 3}px, ${Math.sin(angle) * 3}px)`;
         });
-}
+    });
 
-    </script>
+    function toggleTheme() {
+        const isDark = document.body.getAttribute('data-theme') === 'dark';
+        applyTheme(isDark ? 'light' : 'dark');
+        localStorage.setItem('theme', isDark ? 'light' : 'dark');
+    }
+
+    function applyTheme(mode) {
+        const sun = document.getElementById('main-circle');
+        document.body.setAttribute('data-theme', mode);
+        if(sun) sun.setAttribute('fill', mode === 'dark' ? '#bdc3c7' : '#FFD700');
+    }
+</script>
 </body>
 </html>

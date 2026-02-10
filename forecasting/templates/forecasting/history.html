@@ -192,10 +192,10 @@
                         <tr>
                             <td class="text-muted small">{{ entry.created_at|date:"M d, H:i" }}</td>
                             <td class="text-dark">{{ entry.target_date|date:"M d, Y" }}</td>
-                            <td style="color: var(--primary-orange);">{{ entry.pred_value }} kW</td>
+                            <td style="color: var(--primary-orange);">{{ entry.pred_value }} kWh</td>
                             <td>
                                 {% if entry.actual_value is not None %}
-                                    <span class="text-success fw-bold me-2">{{ entry.actual_value }} kW</span>
+                                    <span class="text-success fw-bold me-2">{{ entry.actual_value }} kWh</span>
                                     <button class="btn p-0 border-0 bg-transparent" style="color: var(--primary-orange);" onclick="openEditModal(event, '{{ entry.id }}', '{{ entry.target_date }}', '{{ entry.actual_value }}')">
                                         <i class="fa-solid fa-pen-to-square"></i>
                                     </button>
@@ -245,7 +245,7 @@
                         </div>
                         <p class="text-muted mb-4">Actual output for <span id="modal_date_display" class="fw-bold" style="color: var(--primary-orange);"></span>.</p>
                         <div class="mb-4">
-                            <label class="form-label small fw-bold">Energy Generated (kW)</label>
+                            <label class="form-label small fw-bold">Energy Generated (kWh)</label>
                             <input type="number" step="0.01" name="actual_val" id="modal_actual_val" class="form-control rounded-4 py-3" required>
                         </div>
                         <div class="d-flex gap-2">
@@ -352,7 +352,7 @@
                     responsive: true, maintainAspectRatio: false,
                     plugins: { legend: { labels: { color: '#334155', font: { family: 'Poppins', weight: 'bold' } } } },
                     scales: {
-                        y: { ticks: { color: '#334155' }, title: { display: true, text: 'Energy Output (kW)', color: '#334155', font: { weight: 'bold' } } },
+                        y: { ticks: { color: '#334155' }, title: { display: true, text: 'Energy Output (kWh)', color: '#334155', font: { weight: 'bold' } } },
                         x: { ticks: { color: '#334155' }, title: { display: true, text: 'Date', color: '#334155', font: { weight: 'bold' } } }
                     }
                 }

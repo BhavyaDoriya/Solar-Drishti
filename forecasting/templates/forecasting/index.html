@@ -144,8 +144,8 @@
                 <div class="modal-body text-center p-4">
                     <p style="color:black !important">Access restricted to authorized terminal users. Please verify identity.</p>
                     <div class="d-grid gap-3">
-                        <button class="btn btn-warning py-3 rounded-pill fw-bold terminal-btn" onclick="handleRedirect('login')">LOGIN TERMINAL</button>
-                        <button class="btn btn-outline-dark py-3 rounded-pill fw-bold" onclick="handleRedirect('signup')">CREATE IDENTITY</button>
+                        <button class="btn btn-warning py-3 rounded-pill fw-bold terminal-btn" onclick="handleRedirect('login')">Sign-in</button>
+                        <button class="btn btn-outline-dark py-3 rounded-pill fw-bold" onclick="handleRedirect('signup')">Sign-Up</button>
                     </div>
                 </div>
             </div>
@@ -159,20 +159,20 @@
                 <button class="navbar-toggler border-0 shadow-none" type="button" data-bs-toggle="collapse" data-bs-target="#navMain"><span class="navbar-toggler-icon"></span></button>
                 <div class="collapse navbar-collapse" id="navMain">
                     <ul class="navbar-nav ms-auto align-items-center">
-                        <li class="nav-item"><a class="nav-link px-3 active-page" href="/">HOME</a></li>
-                        <li class="nav-item"><a class="nav-link px-3" href="javascript:void(0)" onclick="guard(predictURL)">AI_PREDICT</a></li>
-                        <li class="nav-item"><a class="nav-link px-3" href="javascript:void(0)" onclick="guard(historyURL)">HISTORY</a></li>
+                        <li class="nav-item"><a class="nav-link px-3 active-page" href="/">Home</a></li>
+                        <li class="nav-item"><a class="nav-link px-3" href="javascript:void(0)" onclick="guard(predictURL)">Predict</a></li>
+                        <li class="nav-item"><a class="nav-link px-3" href="javascript:void(0)" onclick="guard(historyURL)">History</a></li>
                         {% if user.is_authenticated %}
                         <li class="nav-item dropdown"><a class="nav-link dropdown-toggle px-3" href="#" id="profileDrop" data-bs-toggle="dropdown"><i class="fa-solid fa-circle-user"></i> {{ user.username|upper }}</a>
                             <ul class="dropdown-menu dropdown-menu-end shadow border-0" style="background: var(--card-bg); backdrop-filter: blur(10px);">
-                                <li><a class="dropdown-item" href="{% url 'profile_view' user_id=request.user.id %}">VIEW PROFILE</a></li>
-                                <li><a class="dropdown-item" href="{% url 'update_profile' %}">Update_Profile</a></li>
+                                <li><a class="dropdown-item" href="{% url 'profile_view' user_id=request.user.id %}">View Profile</a></li>
+                                <li><a class="dropdown-item" href="{% url 'update_profile' %}">Update Profile</a></li>
                                 <li><hr class="dropdown-divider"></li>
                                 <li><a class="dropdown-item text-danger fw-bold" href="{% url 'logout' %}">Logout</a></li>
                             </ul>
                         </li>
                         {% else %}
-                        <li class="nav-item ms-lg-3"><button class="btn btn-warning rounded-pill px-4 fw-bold shadow terminal-btn" data-bs-toggle="modal" data-bs-target="#authModal">Login or Sign-up</button></li>
+                        <li class="nav-item ms-lg-3"><button class="btn btn-warning rounded-pill px-4 fw-bold shadow terminal-btn" data-bs-toggle="modal" data-bs-target="#authModal"> Sign-up /Sign-in </button></li>
                         {% endif %}
                     </ul>
                 </div>
@@ -220,13 +220,13 @@
             <h2 class="mb-5 text-center" data-aos="fade-up">System Core</h2>
             <div class="row g-4 d-none d-md-flex">
                 <div class="col-md-4" data-aos="flip-left" data-aos-delay="100">
-                    <div class="flip-card" onclick="guard(predictURL)"><div class="flip-card-inner"><div class="flip-card-front"><div class="feature-icon"><i class="fa-solid fa-magnifying-glass-chart"></i></div><h3>Prediction</h3></div><div class="flip-card-back"><h3>AI Predictor</h3><p>Neural energy forecasting.</p></div></div></div>
+                    <div class="flip-card" onclick="guard(predictURL)"><div class="flip-card-inner"><div class="flip-card-front"><div class="feature-icon"><i class="fa-solid fa-magnifying-glass-chart"></i></div><h3>Prediction</h3></div><div class="flip-card-back"><h3>AI Predictor</h3><p>Solar Energy Forecasting.</p></div></div></div>
                 </div>
                 <div class="col-md-4" data-aos="flip-left" data-aos-delay="300">
-                    <div class="flip-card" onclick="guard(historyURL)"><div class="flip-card-inner"><div class="flip-card-front"><div class="feature-icon"><i class="fa-solid fa-database"></i></div><h3>History</h3></div><div class="flip-card-back"><h3>Secure Logs</h3><p>Access energy scans.</p></div></div></div>
+                    <div class="flip-card" onclick="guard(historyURL)"><div class="flip-card-inner"><div class="flip-card-front"><div class="feature-icon"><i class="fa-solid fa-database"></i></div><h3>History</h3></div><div class="flip-card-back"><h3>Secure Logs</h3><p>Access Energy Scans.</p></div></div></div>
                 </div>
                 <div class="col-md-4" data-aos="flip-left" data-aos-delay="500">
-                    <div class="flip-card" onclick="guard(profileURL)"><div class="flip-card-inner"><div class="flip-card-front"><div class="feature-icon"><i class="fa-solid fa-user-gear"></i></div><h3>Account</h3></div><div class="flip-card-back"><h3>Manage</h3><p>Update telemetry.</p></div></div></div>
+                    <div class="flip-card" onclick="guard(profileURL)"><div class="flip-card-inner"><div class="flip-card-front"><div class="feature-icon"><i class="fa-solid fa-user-gear"></i></div><h3>Account</h3></div><div class="flip-card-back"><h3>Manage</h3><p>Update Telemetry.</p></div></div></div>
                 </div>
             </div>
 
@@ -239,7 +239,7 @@
     </main>
 
     <footer class="text-center py-5 mt-5 border-top border-secondary">
-        <p class="text-muted small">&copy; 2026 SolarDrishti AI Systems | Deep Space Operations</p>
+        <p class="text-muted small">&copy; 2026 SolarDrishti AI Prediction System</p>
     </footer>
 
     <aside id="celestial-anchor" onclick="toggleTheme()">
