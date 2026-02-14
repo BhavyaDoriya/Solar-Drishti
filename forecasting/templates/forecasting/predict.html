@@ -163,7 +163,7 @@
                     <small class="text-muted mb-3 d-block" style="color:var(--text-color) !important;"><i class="fa-solid fa-location-dot me-1"></i> {{ system.location_name }}</small>
                     <div class="row g-2 mt-auto">
                         <div class="col-6"><button class="btn btn-outline-warning w-100 rounded-pill fw-bold btn-sm" onclick="runPrediction(this, '{{ system.id }}', 'tomorrow')"><span class="spinner-border spinner-border-sm"></span><span class="btn-text">Tomorrow</span></button></div>
-                        <div class="col-6"><button class="btn btn-outline-warning w-100 rounded-pill fw-bold btn-sm" onclick="runPrediction(this, '{{ system.id }}', 'day_after')"><span class="spinner-border spinner-border-sm"></span><span class="btn-text">Next Day</span></button></div>
+                        <div class="col-6"><button class="btn btn-outline-warning w-100 rounded-pill fw-bold btn-sm" onclick="runPrediction(this, '{{ system.id }}', 'day_after')"><span class="spinner-border spinner-border-sm"></span><span class="btn-text">Overmorrow</span></button></div>
                     </div>
                 </div>
             </div>
@@ -174,13 +174,56 @@
     <div class="modal fade" id="resultModal" tabindex="-1">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content rounded-4 border-0" style="background: var(--glass-bg); backdrop-filter: blur(20px);">
-                <div class="modal-header border-0"><h6 class="fw-bold">AI FORECAST ANALYSIS</h6><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+                <div class="modal-header border-0"><h6 class="fw-bold">FORECAST ANALYSIS</h6><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
                 <div class="modal-body text-center p-4">
                     <i class="fa-solid fa-bolt text-warning fa-2x mb-3"></i>
                     <h2 id="result-value" class="fw-bold" style="color: var(--primary-orange);">-- kWh</h2>
                     <p id="result-date" class="text-muted small" style="color:var(--text-color) !important;">Target Date: --</p>
                 </div>
-                <div class="modal-footer border-0"><button class="btn btn-warning w-100 rounded-pill fw-bold py-2" data-bs-dismiss="modal">DISMISS</button></div>
+               <div class="modal-footer border-0">
+                    <div class="container-fluid p-0">
+                        <div class="row g-2"> <div class="col-12 col-md-6">
+                                <button class="btn btn-warning w-100 rounded-pill fw-bold py-2" onclick="showAnalytics()">
+                                    View Analytics
+                                </button>
+                            </div>
+                            <div class="col-12 col-md-6">
+                                <button class="btn btn-warning w-100 rounded-pill fw-bold py-2" data-bs-dismiss="modal">
+                                    Dismiss
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="analyticsModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content rounded-4 border-0" style="background: var(--glass-bg); backdrop-filter: blur(20px);">
+                <div class="modal-header border-0"><h6 class="fw-bold">ANALYTICS</h6><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+                <div class="modal-body text-center p-4">
+                    <h2 class="fww-bold" style="color:var(--primary-orange)">Average Values</h2>
+                    <h2 id="ghi-value" class="fw-bold" style="color: var(--primary-orange);">-- W/m<sup>2</sup></h2>
+                    <h2 id="airtemp-value" class="fw-bold" style="color: var(--primary-orange);">-- W/m<sup>2</sup></h2>
+                    <h2 id="windspeed-value" class="fw-bold" style="color: var(--primary-orange);">-- W/m<sup>2</sup></h2>
+
+                </div>
+               <div class="modal-footer border-0">
+                    <div class="container-fluid p-0">
+                        <div class="row g-2"> <div class="col-12 col-md-6">
+                                <button class="btn btn-warning w-100 rounded-pill fw-bold py-2" onclick="showAnalytics()">
+                                    View Analytics
+                                </button>
+                            </div>
+                            <div class="col-12 col-md-6">
+                                <button class="btn btn-warning w-100 rounded-pill fw-bold py-2" data-bs-dismiss="modal">
+                                    Dismiss
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -345,6 +388,10 @@
         const sun = document.getElementById('main-circle');
         document.body.setAttribute('data-theme', mode);
         if(sun) sun.setAttribute('fill', mode === 'dark' ? '#bdc3c7' : '#FFD700');
+    }
+    function showAnalytics() {
+        const myModal = new bootstrap.Modal(document.getElementById('analyticsModal'));
+        myModal.show();
     }
 </script>
 </body>
