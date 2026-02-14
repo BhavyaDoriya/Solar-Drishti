@@ -168,10 +168,10 @@
                         <li class="nav-item"><a class="nav-link px-3" href="javascript:void(0)" onclick="guard(historyURL)">History</a></li>
                         {% if user.is_authenticated %}
                         <li class="nav-item dropdown"><a class="nav-link dropdown-toggle px-3" href="#" id="profileDrop" data-bs-toggle="dropdown"><i class="fa-solid fa-circle-user"></i> {{ user.username|upper }}</a>
-                            <ul class="dropdown-menu dropdown-menu-end shadow border-0" style="background: var(--card-bg); backdrop-filter: blur(10px);">
-                                <li><a class="dropdown-item" href="{% url 'profile_view' user_id=request.user.id %}">View Profile</a></li>
-                                <li><a class="dropdown-item" href="{% url 'update_profile' %}">Update Profile</a></li>
-                                <li><hr class="dropdown-divider" style="color:var(--text-color) !important"></li>
+                            <ul class="dropdown-menu dropdown-menu-end shadow border-0" style="background: var(--card-bg); backdrop-filter: blur(10px);--bs-dropdown-divider-bg: var(--text-color);">
+                                <li><a class="dropdown-item" href="{% url 'profile_view' user_id=request.user.id %}" style="color:var(--text-color) !important">View Profile</a></li>
+                                <li><a class="dropdown-item" href="{% url 'update_profile' %}" style="color:var(--text-color) !important">Update Profile</a></li>
+                                <li><hr class="dropdown-divider" ></li>
                                 <li><a class="dropdown-item text-danger fw-bold" href="{% url 'logout' %}">Logout</a></li>
                             </ul>
                         </li>
