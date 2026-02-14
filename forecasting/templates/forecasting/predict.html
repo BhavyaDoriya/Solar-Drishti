@@ -173,12 +173,42 @@
 
     <div class="modal fade" id="resultModal" tabindex="-1">
         <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content rounded-4 border-0" style="background: var(--glass-bg); backdrop-filter: blur(20px);">
+            <div class="modal-content rounded-4 border-0" style="background: var(--glass-bg); backdrop-filter: blur(20px); color: var(--text-color);">
                 <div class="modal-header border-0"><h6 class="fw-bold">AI FORECAST ANALYSIS</h6><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
                 <div class="modal-body text-center p-4">
                     <i class="fa-solid fa-bolt text-warning fa-2x mb-3"></i>
                     <h2 id="result-value" class="fw-bold" style="color: var(--primary-orange);">-- kWh</h2>
-                    <p id="result-date" class="text-muted small" style="color:var(--text-color) !important;">Target Date: --</p>
+                    <p id="result-date" class="text-muted small" style="color:var(--text-color) !important">Target Date: --</p>
+                    
+                    <button class="btn btn-sm btn-outline-warning rounded-pill mb-3 fw-bold" type="button" data-bs-toggle="collapse" data-bs-target="#factorCollapse">
+                        <i class="fa-solid fa-chart-line me-1"></i> View Impact Factors
+                    </button>
+
+                    <div class="collapse" id="factorCollapse">
+                        <div class="p-3 rounded-3 border mb-3 text-start bg-light bg-opacity-10">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span>Solar Radiation (GHI) 
+                                    <i class="fa-solid fa-circle-info ms-1 text-primary small" style="cursor:help;" 
+                                       title="Global Horizontal Irradiance: The total amount of shortwave radiation received from above by a surface horizontal to the ground. Higher GHI = More power."></i>
+                                </span>
+                                <span id="factor-ghi" class="fw-bold text-orange">--</span>
+                            </div>
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span>Air Temperature 
+                                    <i class="fa-solid fa-circle-info ms-1 text-primary small" style="cursor:help;" 
+                                       title="Ambient temperature. Excessive heat can actually reduce solar panel efficiency."></i>
+                                </span>
+                                <span id="factor-temp" class="fw-bold text-orange">--</span>
+                            </div>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span>Wind Speed 
+                                    <i class="fa-solid fa-circle-info ms-1 text-primary small" style="cursor:help;" 
+                                       title="Wind helps cool panels down, potentially improving performance in hot conditions."></i>
+                                </span>
+                                <span id="factor-wind" class="fw-bold text-orange">--</span>
+                            </div>
+                        </div>
+                    </div>
                 </div>
                 <div class="modal-footer border-0"><button class="btn btn-warning w-100 rounded-pill fw-bold py-2" data-bs-dismiss="modal">DISMISS</button></div>
             </div>
@@ -237,15 +267,25 @@
             .then(res => res.json())
             .then(data => {
                 if (data.status === "success") {
-                    // Update the Modal elements
+                    // 1. Update Energy Display
                     document.getElementById('result-value').innerText = data.predicted_energy + " kWh";
                     document.getElementById('result-date').innerText = "Target Date: " + data.date;
                     
-                    // Show the Bootstrap Modal
+                    // 2. Populate Environmental Factors
+                    document.getElementById('factor-ghi').innerText = data.factors.ghi + " W/m²";
+                    document.getElementById('factor-temp').innerText = data.factors.temp + " °C";
+                    document.getElementById('factor-wind').innerText = data.factors.wind + " m/s";
+
+                    // 3. Reset the collapse (hide factors for new result)
+                    const collapseContent = document.getElementById('factorCollapse');
+                    const bsCollapse = bootstrap.Collapse.getInstance(collapseContent);
+                    if (bsCollapse) bsCollapse.hide();
+                    
+                    // 4. Show the Bootstrap Modal
                     const myModal = new bootstrap.Modal(document.getElementById('resultModal'));
                     myModal.show();
 
-                    // Optional: Setup a listener to reload page when modal closes to update 'Last Forecast'
+                    // Reload on close to update history
                     document.getElementById('resultModal').addEventListener('hidden.bs.modal', function () {
                         location.reload();
                     }, {once: true});
@@ -263,7 +303,6 @@
                 btn.disabled = false; 
             });
     }
-
     // --- MAP LOGIC ---
     document.getElementById('addSystemModal').addEventListener('shown.bs.modal', function () {
         if (!map) {

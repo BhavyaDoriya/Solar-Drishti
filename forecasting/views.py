@@ -288,35 +288,45 @@ import random
 def run_prediction(request, system_id):
     system = get_object_or_404(SolarSystem, id=system_id, user=request.user)
     target = request.GET.get('day', 'tomorrow')
-
     target_date = timezone.now().date() + (timedelta(days=2) if target == 'day_after' else timedelta(days=1))
 
     try:
         _, daily_df = predict_next_48h(system.latitude, system.longitude)
-
         row = daily_df[daily_df["date"] == target_date]
+        
         if row.empty:
-            raise ValueError("Prediction not available")
+            row = daily_df.iloc[[0]] if not daily_df.empty else None
+            if not row: return JsonResponse({'status': 'error', 'message': 'No data'}, status=400)
 
         predicted_energy = float(row["daily_energy"].iloc[0])
         predicted_kwh = predicted_energy * system.system_size
 
+        # helper to safely grab values from the row
+        def get_val(df_row, col_name):
+            return float(df_row[col_name].iloc[0]) if col_name in df_row.columns else 0.0
+
+        # MATCHING TERMINAL LOG NAMES: ghi, air_temp, wind_speed
+        factors = {
+            "ghi": round(get_val(row, "ghi"), 2),
+            "temp": round(get_val(row, "air_temp"), 1),
+            "wind": round(get_val(row, "wind_speed"), 1),
+        }
+
     except Exception as e:
+        logger.error(f"Prediction Error: {str(e)}")
         return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
 
     Prediction.objects.create(
-        system=system,
-        target_date=target_date,
-        day_target=target,
+        system=system, target_date=target_date, day_target=target,
         pred_value=round(predicted_kwh, 2)
     )
 
     return JsonResponse({
         "status": "success",
         "date": target_date.isoformat(),
-        "predicted_energy": round(predicted_kwh, 2)
+        "predicted_energy": round(predicted_kwh, 2),
+        "factors": factors
     })
-
 
 @login_required
 def update_actual_power(request, system_id):

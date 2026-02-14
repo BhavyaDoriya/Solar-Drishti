@@ -111,6 +111,10 @@
         .flip-card:hover .flip-card-front { border-color: var(--primary-orange); box-shadow: var(--neon-glow); }
         .flip-card-back { background: linear-gradient(45deg, var(--primary-orange), #ff6d00); color: white !important; transform: rotateY(180deg); }
         .feature-icon { font-size: 3.5rem; color: var(--primary-orange); margin-bottom: 1rem; }
+        [data-theme="dark"] .dropdown-divider {
+    border-top: 1px solid rgba(255, 255, 255, 0.5) !important;
+    opacity: 1;
+}
 
         /* --- MOBILE --- */
         .mobile-actions { display: none; }
@@ -167,7 +171,7 @@
                             <ul class="dropdown-menu dropdown-menu-end shadow border-0" style="background: var(--card-bg); backdrop-filter: blur(10px);">
                                 <li><a class="dropdown-item" href="{% url 'profile_view' user_id=request.user.id %}">View Profile</a></li>
                                 <li><a class="dropdown-item" href="{% url 'update_profile' %}">Update Profile</a></li>
-                                <li><hr class="dropdown-divider"></li>
+                                <li><hr class="dropdown-divider" style="color:var(--text-color) !important"></li>
                                 <li><a class="dropdown-item text-danger fw-bold" href="{% url 'logout' %}">Logout</a></li>
                             </ul>
                         </li>

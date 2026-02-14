@@ -46,12 +46,19 @@ def predict_next_48h(
     df["predicted_specific_energy"] = model.predict(df[INPUT_COLS])
 
     # 7️⃣ Daily aggregation (for UI)
+    # 7️⃣ Daily aggregation
     df["date"] = df["timestamp"].dt.date
 
+    # We must explicitly aggregate the weather columns
     daily_df = (
-        df.groupby("date")["predicted_specific_energy"]
-        .sum()
-        .reset_index(name="daily_energy")
+        df.groupby("date").agg({
+            "predicted_specific_energy": "sum",
+            "ghi": "mean",         
+            "air_temp": "mean",    
+            "wind_speed": "mean"   
+        })
+        .reset_index()
     )
-
+    
+    daily_df = daily_df.rename(columns={"predicted_specific_energy": "daily_energy"})
     return df, daily_df
