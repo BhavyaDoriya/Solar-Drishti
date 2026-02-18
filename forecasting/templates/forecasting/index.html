@@ -130,6 +130,14 @@
 
         [data-theme="dark"] .navbar-toggler-icon { filter: invert(1); }
         h1, h2, h3 { font-family: 'Orbitron'; font-weight: 700; }
+        .sun-glow #main-circle {
+    filter: drop-shadow(0 0 15px rgba(255, 145, 0, 0.8)); /* Intense Orange Glow */
+}
+
+    /* Moon Glow (Dark Mode) */
+    .moon-glow #main-circle {
+        filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.6)); /* Soft White/Blue Glow */
+    }
     </style>
 </head>
 <body onload="initApp()">
@@ -303,7 +311,7 @@
         document.getElementById('celestial-anchor').classList.add('sunrise-animation');
         setTimeout(() => document.getElementById('mouth').setAttribute('d', 'M 40 65 Q 50 75 60 65'), 1500);
     }
-
+    applyTheme(localStorage.getItem('theme') || 'light');
     function guard(route) {
         if ("{{ user.is_authenticated|yesno:'true,false' }}" === "false") new bootstrap.Modal(document.getElementById('authModal')).show();
         else window.location.href = route;
@@ -311,10 +319,22 @@
     function handleRedirect(type) { window.location.href = (type === 'login') ? '/login/' : '/signup/'; }
     function toggleTheme() { const isDark = document.body.getAttribute('data-theme') === 'dark'; applyTheme(isDark ? 'light' : 'dark'); localStorage.setItem('theme', isDark ? 'light' : 'dark'); }
     function applyTheme(mode) {
-        const sun = document.getElementById('main-circle');
-        document.body.setAttribute('data-theme', mode);
-        if(sun) sun.setAttribute('fill', mode === 'dark' ? '#bdc3c7' : '#FFD700');
+    const sun = document.getElementById('main-circle');
+    const container = document.getElementById('celestial-anchor'); // Get the wrapper
+    
+    document.body.setAttribute('data-theme', mode);
+    
+    if (sun && container) {
+        // 1. Change Color
+        sun.setAttribute('fill', mode === 'dark' ? '#bdc3c7' : '#FFD700');
+
+        // 2. Remove old glow classes
+        container.classList.remove('sun-glow', 'moon-glow');
+
+        // 3. Add new glow class based on mode
+        container.classList.add(mode === 'dark' ? 'moon-glow' : 'sun-glow');
     }
+}
 
     // Iris tracking
     document.addEventListener('mousemove', (e) => {
