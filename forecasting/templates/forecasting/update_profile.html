@@ -8,40 +8,87 @@
     <link rel="icon" href="https://img.icons8.com/fluency/48/sun.png" type="image/x-icon">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
     
     <style>
+        /* --- SYNCED CSS VARIABLES --- */
         :root { 
             --primary-orange: #ff9100; 
-            --bg-color: #f0f2f5; 
+            --bg-color: linear-gradient(180deg, #e0f2ff 0%, #ffffff 400px); 
             --text-color: #1a1a1a; 
-            --glass-bg: rgba(255, 255, 255, 0.8); 
-            --glass-border: rgba(255, 255, 255, 0.2); 
-        }
-        [data-theme="dark"] { 
-            --bg-color: #0b0e14; 
-            --text-color: #f1f1f1; 
-            --glass-bg: rgba(20, 25, 35, 0.85); 
-            --glass-border: rgba(255, 255, 255, 0.1);
-        }
-
-        body { 
-            font-family: 'Poppins', sans-serif; 
-            background-color: var(--bg-color); 
-            color: var(--text-color); 
-            transition: 0.5s ease; 
-            min-height: 100vh; 
+            --glass-bg: rgba(255, 255, 255, 0.95); 
+            --glass-border: rgba(0, 0, 0, 0.08); 
+            --card-shadow: 0 10px 30px rgba(0,0,0,0.05);
         }
         
-        /* --- Navbar Fix --- */
+        [data-theme="dark"] { 
+            --bg-color: #020617; 
+            --text-color: #f1f1f1; 
+            --glass-bg: rgba(15, 23, 42, 0.85); 
+            --glass-border: rgba(255, 255, 255, 0.15);
+            --card-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        /* --- GLOBAL TYPOGRAPHY --- */
+        body { 
+            font-family: 'Poppins', sans-serif; 
+            background: var(--bg-color); 
+            color: var(--text-color); 
+            transition: background 0.6s ease; 
+            min-height: 100vh; 
+            overflow-x: hidden;
+        }
+
+        h1, h2, h3, h4, h5, h6, 
+        .navbar-brand, 
+        .nav-link,
+        .btn {
+            font-family: 'Orbitron', sans-serif !important;
+        }
+        
+        /* --- NAVBAR FIXES --- */
         .navbar { 
             background: rgba(255, 255, 255, 0.1); 
             backdrop-filter: blur(15px); 
             border-bottom: 1px solid var(--glass-border); 
         }
-        .nav-link, .navbar-brand { color: var(--text-color) !important; }
+        .navbar-brand { font-weight: 900; color: var(--primary-orange) !important; letter-spacing: 2px; }
+        
+        .nav-link { font-size: 13px !important; font-weight: 400; letter-spacing: 0.5px; color: var(--text-color) !important; transition: 0.3s; }
+        .nav-link:hover { color: var(--primary-orange) !important; text-shadow: 0 0 8px var(--primary-orange); }
+        .nav-link.active-page { color: var(--primary-orange) !important; font-weight: 700 !important; border-bottom: 2px solid var(--primary-orange); }
+        
+        [data-theme="dark"] .navbar-toggler-icon { filter: invert(1); }
 
-        .update-container { padding: 120px 20px 60px 20px; display: flex; justify-content: center; }
+        /* --- SPACE ATMOSPHERE & SCROLLBAR --- */
+        #warpCanvas { position: fixed; inset: 0; z-index: -2; pointer-events: none; opacity: 0; transition: opacity 1s ease; }
+        [data-theme="dark"] #warpCanvas { opacity: 1; }
+        [data-theme="dark"] body::before {
+            content: " "; position: fixed; inset: 0;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.15) 50%), 
+                        linear-gradient(90deg, rgba(255, 0, 0, 0.03), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.03));
+            z-index: 1000; background-size: 100% 4px, 3px 100%; pointer-events: none;
+        }
+        #scroll-progress { position: fixed; top: 0; left: 0; width: 0%; height: 3px; background: var(--primary-orange); z-index: 9999; box-shadow: 0 0 10px var(--primary-orange); }
+        .vignette { position: fixed; inset: 0; z-index: -1; pointer-events: none; background: radial-gradient(circle at center, transparent 0%, rgba(0,0,0,0.4) 100%); }
+
+        /* --- CUSTOM CURSOR --- */
+        .cursor-dot, .cursor-outline { position: fixed; pointer-events: none; z-index: 9999; opacity: 0; }
+        @media (pointer: fine) {
+            [data-theme="dark"] { cursor: none !important; }
+            [data-theme="dark"] a, [data-theme="dark"] button, [data-theme="dark"] input { cursor: none !important; }
+            [data-theme="dark"] .cursor-dot { display: block; width: 8px; height: 8px; background: var(--primary-orange); border-radius: 50%; top: 0; left: 0; opacity: 1; box-shadow: 0 0 10px var(--primary-orange); }
+            [data-theme="dark"] .cursor-outline { display: block; width: 30px; height: 30px; border: 2px solid var(--primary-orange); border-radius: 50%; top: 0; left: 0; opacity: 1; transition: transform 0.15s ease-out; }
+        }
+
+        /* --- UPDATE FORM STYLES --- */
+        .update-container { 
+            padding: 120px 20px 60px 20px; 
+            display: flex; 
+            flex-direction: column;
+            align-items: center;
+        }
         
         .glass-card { 
             background: var(--glass-bg); 
@@ -51,7 +98,7 @@
             padding: 40px; 
             max-width: 600px; 
             width: 100%; 
-            box-shadow: 0 20px 50px rgba(0,0,0,0.1); 
+            box-shadow: var(--card-shadow); 
         }
 
         .form-control { 
@@ -69,43 +116,89 @@
         }
         
         .readonly-box { background: rgba(0, 0, 0, 0.05); border-radius: 15px; padding: 12px 20px; opacity: 0.7; }
-        .section-label { font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; opacity: 0.6; margin-bottom: 10px; display: block; }
+        [data-theme="dark"] .readonly-box { background: rgba(255, 255, 255, 0.05); }
         
+        .section-label { font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; opacity: 0.6; margin-bottom: 10px; display: block; }
         .toggle-password { cursor: pointer; position: absolute; right: 20px; top: 50%; transform: translateY(-50%); z-index: 10; opacity: 0.5; }
         
-        /* --- Celestial Anchor --- */
-       #celestial-anchor { 
-        position: fixed; 
-        bottom: 25px;       
-        right: 25px;        
-        z-index: 2000; 
-        cursor: pointer; 
-        width: 85px;        
-        height: 85px;      
-      
-    }
-    .sun-glow #main-circle {
-    filter: drop-shadow(0 0 15px rgba(255, 145, 0, 0.8)); /* Intense Orange Glow */
-}
+        /* --- CELESTIAL ANCHOR --- */
+        #celestial-anchor { position: fixed; bottom: 25px; right: 25px; z-index: 2000; cursor: pointer; width: 85px; height: 85px; }
+        .sun-glow #main-circle { filter: drop-shadow(0 0 15px rgba(255, 145, 0, 0.8)); }
+        .moon-glow #main-circle { filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.6)); }
 
-/* Moon Glow (Dark Mode) */
-.moon-glow #main-circle {
-    filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.6)); /* Soft White/Blue Glow */
-}
     </style>
 </head>
 <body onload="checkTheme()">
 
-    <nav class="navbar navbar-expand-lg fixed-top shadow-sm">
-        <div class="container">
-            <a class="navbar-brand fw-bold" href="{% url 'home' %}">
-                <i class="fa-solid fa-sun-plant-wilt me-2" style="color: var(--primary-orange);"></i> SOLARDRISHTI
-            </a>
-            <a href="{% url 'profile_view' user_id=request.user.id %}" class="btn btn-sm btn-outline-secondary rounded-pill px-3">Cancel</a>
-        </div>
-    </nav>
+    <div id="scroll-progress"></div>
+    <div class="vignette"></div>
+    <div class="cursor-dot"></div>
+    <div class="cursor-outline"></div>
+    <canvas id="warpCanvas"></canvas>
+
+    <header>
+        <nav class="navbar navbar-expand-lg fixed-top shadow-sm">
+            <div class="container">
+                <a class="navbar-brand d-flex align-items-center" href="/">
+                    <i class="fa-solid fa-sun-plant-wilt me-2"></i> SOLAR<span class="text-secondary">DRISHTI</span>
+                </a>
+
+                <button class="navbar-toggler border-0 shadow-none" type="button" data-bs-toggle="collapse" data-bs-target="#navMain">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <div class="collapse navbar-collapse" id="navMain">
+                    <ul class="navbar-nav ms-auto align-items-center">
+                        <li class="nav-item"><a class="nav-link px-3" href="/">Home</a></li>
+                        <li class="nav-item"><a class="nav-link px-3" href="/predict/">Predict</a></li>
+                        <li class="nav-item"><a class="nav-link px-3" href="/history/">History</a></li>
+                        <li class="nav-item"><a class="nav-link px-3" href="/about/">About</a></li>
+
+                        {% if user.is_authenticated %}
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle px-3 active-page" href="#" id="profileDrop" data-bs-toggle="dropdown">
+                                <i class="fa-solid fa-circle-user"></i> {{ user.username|upper }}
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end shadow border-0" style="background: var(--glass-bg); backdrop-filter: blur(10px); --bs-dropdown-divider-bg: var(--text-color);">
+                                <li><a class="dropdown-item" href="{% url 'profile_view' user_id=request.user.id %}" style="color:var(--text-color) !important">View Profile</a></li>
+                                <li><a class="dropdown-item" href="{% url 'update_profile' %}" style="color:var(--text-color) !important">Update Profile</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item text-danger fw-bold" href="{% url 'logout' %}">Logout</a></li>
+                            </ul>
+                        </li>
+                        {% else %}
+                        <li class="nav-item ms-lg-3">
+                            <a href="{% url 'login' %}" class="btn btn-warning rounded-pill px-4 fw-bold shadow">Sign-in</a>
+                        </li>
+                        {% endif %}
+                    </ul>
+                </div>
+            </div>
+        </nav>
+    </header>
 
     <main class="update-container">
+        
+        <div id="status-notif" class="w-100 mb-4" style="max-width: 600px;">
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-dismissible fade show rounded-3 shadow-sm border-0 
+                    {% if message.tags == 'success' %}bg-success text-white{% else %}bg-warning text-dark{% endif %}" 
+                    role="alert" style="backdrop-filter: blur(10px); opacity: 0.9;">
+                    <div class="d-flex align-items-center">
+                        {% if message.tags == 'success' %}
+                            <i class="fa-solid fa-circle-check me-2"></i>
+                        {% else %}
+                            <i class="fa-solid fa-circle-exclamation me-2"></i>
+                        {% endif %}
+                        <span>{{ message }}</span>
+                    </div>
+                    <button type="button" class="btn-close {% if message.tags == 'success' %}btn-close-white{% endif %}" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+        </div>
+
         <div class="glass-card">
             <h2 class="fw-bold mb-4">Edit Profile</h2>
             
@@ -132,24 +225,27 @@
                     </div>
                 </div>
 
-                <button type="submit" class="btn btn-warning w-100 rounded-pill py-3 fw-bold text-white shadow">
+                <button type="submit" class="btn btn-warning w-100 rounded-pill py-3 fw-bold text-white shadow" style="background: linear-gradient(45deg, var(--primary-orange), #ff6d00); border: none;">
                     Update Profile
                 </button>
             </form>
 
             <div class="mt-5 pt-3 border-top border-danger border-opacity-10 text-center">
-                <button class="btn btn-link text-danger text-decoration-none small fw-bold" onclick="confirmDelete()">
+                <button class="btn btn-link text-danger text-decoration-none small fw-bold" onclick="confirmDelete()" style="font-family: 'Poppins', sans-serif !important;">
                     <i class="fa-solid fa-trash-can me-1"></i> Delete Account
                 </button>
             </div>
         </div>
     </main>
 
-    <aside id="celestial-anchor" onclick="toggleTheme()">
-        <svg width="100%" height="100%" viewBox="0 0 100 100">
-            <circle id="main-circle" cx="50" cy="50" r="40" fill="#FFD700" />
-            <g id="eyes"><circle cx="35" cy="45" r="7" fill="white" /><circle class="iris" cx="35" cy="45" r="3.5" fill="black" /><circle cx="65" cy="45" r="7" fill="white" /><circle class="iris" cx="65" cy="45" r="3.5" fill="black" /></g>
-            <path id="mouth" d="M 40 65 Q 50 75 60 65" stroke="black" stroke-width="2" fill="none" stroke-linecap="round" />    
+    <aside id="celestial-anchor" onclick="toggleTheme()" title="Toggle Theme">
+        <svg viewBox="0 0 100 100">
+            <circle id="main-circle" cx="50" cy="50" r="40" fill="#FFD700"/>
+            <g id="eyes">
+                <circle cx="35" cy="45" r="7" fill="white"/><circle class="iris" cx="35" cy="45" r="3.5" fill="black"/>
+                <circle cx="65" cy="45" r="7" fill="white"/><circle class="iris" cx="65" cy="45" r="3.5" fill="black"/>
+            </g>
+            <path id="mouth" d="M 40 65 Q 50 75 60 65" stroke="black" stroke-width="2" fill="none" stroke-linecap="round" />
         </svg>
     </aside>
 
@@ -167,8 +263,10 @@
             }
         }
 
-        function checkTheme() {     applyTheme(localStorage.getItem('theme') || 'light');
-}
+        function checkTheme() { 
+            applyTheme(localStorage.getItem('theme') || 'light');
+            animateWarp();
+        }
 
         function toggleTheme() {
             const isDark = document.body.getAttribute('data-theme') === 'dark';
@@ -176,39 +274,86 @@
             localStorage.setItem('theme', isDark ? 'light' : 'dark');
         }
 
-     function applyTheme(mode) {
-    const sun = document.getElementById('main-circle');
-    const container = document.getElementById('celestial-anchor'); // Get the wrapper
-    
-    document.body.setAttribute('data-theme', mode);
-    
-    if (sun && container) {
-        // 1. Change Color
-        sun.setAttribute('fill', mode === 'dark' ? '#bdc3c7' : '#FFD700');
+        function applyTheme(mode) {
+            const sun = document.getElementById('main-circle');
+            const container = document.getElementById('celestial-anchor'); 
+            
+            document.body.setAttribute('data-theme', mode);
+            
+            if (sun && container) {
+                sun.setAttribute('fill', mode === 'dark' ? '#bdc3c7' : '#FFD700');
+                container.classList.remove('sun-glow', 'moon-glow');
+                container.classList.add(mode === 'dark' ? 'moon-glow' : 'sun-glow');
+            }
+        }
 
-        // 2. Remove old glow classes
-        container.classList.remove('sun-glow', 'moon-glow');
-
-        // 3. Add new glow class based on mode
-        container.classList.add(mode === 'dark' ? 'moon-glow' : 'sun-glow');
-    }
-}
         function confirmDelete() {
             if (confirm("Permanently delete account? This cannot be undone.")) {
                 window.location.href = "{% url 'delete_account' %}";
             }
         }
 
-        // Eye-tracking Effect
-      document.addEventListener('mousemove', (e) => {
+        // --- EYETRACKING & CUSTOM CURSOR ---
+        const dot = document.querySelector('.cursor-dot');
+        const outline = document.querySelector('.cursor-outline');
+        
+        document.addEventListener('mousemove', (e) => {
+            // Move Cursor Dots (only active in dark mode via CSS media query)
+            if (dot && outline) {
+                dot.style.transform = `translate(${e.clientX}px, ${e.clientY}px)`;
+                outline.animate({ transform: `translate(${e.clientX - 15}px, ${e.clientY - 15}px)` }, { duration: 400, fill: "forwards" });
+            }
+
+            // Move Eyes
             document.querySelectorAll('.iris').forEach(iris => {
                 const rect = iris.getBoundingClientRect();
-                // Calculate angle between eye center and mouse
                 const angle = Math.atan2(e.clientY - (rect.top + 3.5), e.clientX - (rect.left + 3.5));
-                // Move the iris slightly in that direction
                 iris.style.transform = `translate(${Math.cos(angle) * 3}px, ${Math.sin(angle) * 3}px)`;
             });
         });
+
+        // --- WARP ENGINE (Space Theme) ---
+        const canvas = document.getElementById('warpCanvas');
+        const ctx = canvas ? canvas.getContext('2d') : null;
+        let stars = Array(window.innerWidth < 768 ? 150 : 350).fill().map(() => ({ 
+            x: Math.random()*innerWidth-innerWidth/2, 
+            y: Math.random()*innerHeight-innerHeight/2, 
+            z: Math.random()*innerWidth 
+        }));
+        
+        function animateWarp() {
+            if (!canvas || !ctx) return;
+            canvas.width = window.innerWidth; 
+            canvas.height = window.innerHeight;
+            const isDark = document.body.getAttribute('data-theme') === 'dark';
+            
+            ctx.fillStyle = isDark ? "rgba(2, 6, 23, 0.4)" : "rgba(255, 255, 255, 0)";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            if(isDark) {
+                stars.forEach(s => {
+                    s.z -= 1.5; if (s.z <= 0) s.z = canvas.width;
+                    const x = (s.x / s.z) * canvas.width + canvas.width/2;
+                    const y = (s.y / s.z) * canvas.height + canvas.height/2;
+                    const size = (1 - s.z/canvas.width) * 2;
+                    
+                    ctx.beginPath(); 
+                    ctx.fillStyle = "white"; 
+                    ctx.arc(x, y, size, 0, Math.PI*2); 
+                    ctx.fill();
+                });
+            }
+            requestAnimationFrame(animateWarp);
+        }
+
+        // --- SCROLL PROGRESS TRACKER ---
+        window.onscroll = function() {
+            let winScroll = document.body.scrollTop || document.documentElement.scrollTop;
+            let height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+            let scrolled = (winScroll / height) * 100;
+            const progress = document.getElementById("scroll-progress");
+            if (progress) progress.style.width = scrolled + "%";
+        };
     </script>
 </body>
 </html>

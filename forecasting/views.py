@@ -449,3 +449,5 @@ def manual_update_actual(request):
         
         messages.success(request, f"Yield for {entry.target_date} updated successfully!")
     return redirect('history_view')
+def about_view(request):
+    return render(request, 'forecasting/about.html')

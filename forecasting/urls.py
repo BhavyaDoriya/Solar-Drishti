@@ -15,7 +15,7 @@ urlpatterns = [
     path('predict/', views.predictview, name='predict'),
     path('history/', views.history_view, name='history_view'),
     path('predict/', views.predictview, name='predict'),
-    
+    path('about/', views.about_view, name='about'),
     # 2. Add a new Solar System configuration
     path('add-system/', views.add_system, name='add_system'),
     

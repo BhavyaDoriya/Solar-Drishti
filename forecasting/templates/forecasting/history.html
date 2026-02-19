@@ -8,113 +8,248 @@
     <link rel="icon" href="https://img.icons8.com/fluency/48/sun.png" type="image/x-icon">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
     
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
 
     <style>
-        [data-theme="dark"] .stat-card .val.text-dark {
-    color: #ffffff !important;
-}
         :root {
             --primary-orange: #ff9100;
-            --brand-dark: #1a1a1a;
-            --bg-color: #f0f2f5;
+            --bg-color: linear-gradient(180deg, #e0f2ff 0%, #ffffff 400px); 
             --text-color: #1a1a1a;
-            --glass-card: rgba(255, 255, 255, 0.9);
+            --glass-card: rgba(255, 255, 255, 0.95);
+            --border: rgba(0, 0, 0, 0.08);
+            --card-shadow: 0 10px 30px rgba(0,0,0,0.05);
+            
+            /* NEW: Solid background color for button hover text */
+            --bg-solid: #ffffff; 
         }
 
         [data-theme="dark"] {
-            --bg-color: #0b0e14;
+            --bg-color: #020617; 
             --text-color: #f1f1f1;
-            --glass-card: rgba(28, 33, 40, 0.95);
-            --brand-dark: #ffffff;
+            --glass-card: rgba(15, 23, 42, 0.85);
+            --border: rgba(255, 255, 255, 0.15);
+            --card-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            
+            /* NEW: Solid background color for button hover text */
+            --bg-solid: #020617; 
         }
-
         body {
             font-family: 'Poppins', sans-serif;
-            background-color: var(--bg-color);
+            background: var(--bg-color);
             color: var(--text-color);
-            transition: background 0.5s ease;
+            transition: background 0.6s ease;
             min-height: 100vh;
         }
 
-        .navbar { background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(15px); border-bottom: 1px solid rgba(255, 145, 0, 0.1); }
-        .nav-link { color: var(--text-color) !important; font-weight: 600; transition: 0.3s; }
-        .nav-link.active { color: var(--primary-orange) !important; border-bottom: 2px solid var(--primary-orange); }
-        .navbar-brand { font-weight: 800; color: var(--primary-orange) !important; letter-spacing: -1px; }
+        /* --- TYPOGRAPHY FIXES --- */
+        h1, h2, h3, h4, h5, h6, 
+        .navbar-brand, 
+        .nav-link, 
+        .stat-card .val,
+        th {
+            font-family: 'Orbitron', sans-serif !important;
+        }
 
-        .dashboard-container { padding-top: 110px; }
+        /* --- NAVBAR --- */
+        .navbar { background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(15px); border-bottom: 1px solid var(--border); }
+        .navbar-brand { font-weight: 900; color: var(--primary-orange) !important; letter-spacing: 2px; }
+        
+        .nav-link {
+            font-size: 13px !important;
+            font-weight: 400;
+            letter-spacing: 0.5px;
+            color: var(--text-color) !important;
+            transition: 0.3s;
+        }
+        
+        .nav-link:hover { color: var(--primary-orange) !important; text-shadow: 0 0 8px var(--primary-orange); }
+        
+        /* --- FIX 2: MATCHED CLASS NAME (.active-page) --- */
+        .nav-link.active-page { 
+            color: var(--primary-orange) !important; 
+            font-weight: 700 !important; 
+            border-bottom: 2px solid var(--primary-orange); 
+        }
 
+        .dashboard-container { padding-top: 100px; }
+
+        /* --- STAT CARDS --- */
         .stat-card {
             background: var(--glass-card);
-            border-radius: 25px;
+            border-radius: 20px;
             padding: 30px;
             text-align: center;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
-            border-top: 5px solid var(--primary-orange);
-            margin-bottom: 20px;
+            box-shadow: var(--card-shadow);
+            border: 1px solid var(--border);
+            border-top: 5px solid var(--primary-orange); /* Restored Top Border */
+            transition: transform 0.3s;
         }
-        .stat-card small { letter-spacing: 2px; font-weight: 700; color: #64748b; }
-        .stat-card .val { font-size: 2rem; font-weight: 900; }
+        .stat-card:hover { transform: translateY(-5px); }
+        .stat-card small { letter-spacing: 1px; font-weight: 600; opacity: 0.7; text-transform: uppercase; font-size: 0.8rem; }
+        .stat-card .val { font-size: 2.5rem; font-weight: 900; margin-top: 10px; color: var(--text-color); }
+        
+        .stat-card .val.text-success { color: #28a745 !important; }
 
+        /* --- HISTORY TABLE --- */
         .history-card-fixed {
-            background: #ffffff !important;
-            border-radius: 30px;
-            padding: 35px;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.1);
+            background: var(--glass-card) !important;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: var(--card-shadow);
+            border: 1px solid var(--border);
             margin-top: 20px;
         }
-        .history-card-fixed th { color: #94a3b8; text-transform: uppercase; font-size: 0.75rem; font-weight: 800; padding: 15px; }
-        .history-card-fixed td { color: #1e293b; font-weight: 600; padding: 15px; }
 
-        .accuracy-badge { padding: 6px 14px; border-radius: 50px; font-size: 0.75rem; font-weight: 800; background: #fef3c7; color: #d97706; }
-        .bg-high { background: #dcfce7; color: #166534; }
+        /* --- FIX 3: DARK MODE TABLE VISIBILITY --- */
+        .history-card-fixed th { 
+            color: var(--text-color); 
+            opacity: 0.6; 
+            text-transform: uppercase; 
+            font-size: 0.8rem; 
+            padding: 15px; 
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .history-card-fixed td { 
+            color: var(--text-color); /* Uses variable so it works in dark mode */
+            font-weight: 500; 
+            padding: 15px; 
+            border-bottom: 1px solid var(--border);
+        }
 
-        .btn-orange { background-color: var(--primary-orange); color: white; border-radius: 50px; font-weight: 700; border: none; padding: 10px 30px; transition: 0.3s; }
-        .btn-orange:hover { background-color: #e68200; transform: translateY(-2px); box-shadow: 0 8px 20px rgba(255, 145, 0, 0.3); color: white; }
+        .text-muted { color: var(--text-color) !important; opacity: 0.5; }
+        .text-dark { color: var(--text-color) !important; }
 
-#celestial-anchor { 
-        position: fixed; 
-        bottom: 25px;       
-        right: 25px;        
-        z-index: 2000; 
-        cursor: pointer; 
-        width: 85px;        
-        height: 85px;      
-      
-    }      
-    .sun-glow #main-circle {
-    filter: drop-shadow(0 0 15px rgba(255, 145, 0, 0.8)); /* Intense Orange Glow */
-}
+        /* --- BADGES & BUTTONS --- */
+        .accuracy-badge { padding: 6px 14px; border-radius: 50px; font-size: 0.75rem; font-weight: 800; background: rgba(255, 193, 7, 0.2); color: #ffc107; border: 1px solid rgba(255, 193, 7, 0.3); }
+        .bg-high { background: rgba(40, 167, 69, 0.2); color: #28a745; border: 1px solid rgba(40, 167, 69, 0.3); }
 
-/* Moon Glow (Dark Mode) */
-.moon-glow #main-circle {
-    filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.6)); /* Soft White/Blue Glow */
-}
+        .btn-orange { 
+            background: linear-gradient(45deg, var(--primary-orange), #ff6d00); 
+            color: white; border-radius: 50px; font-weight: 700; border: none; padding: 10px 30px; 
+            box-shadow: 0 4px 15px rgba(255, 145, 0, 0.3);
+        }
+        .btn-orange:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(255, 145, 0, 0.5); color: white; }
 
-        /* Alert Custom Borders */
+        /* --- CELESTIAL ANCHOR --- */
+        #celestial-anchor { position: fixed; bottom: 25px; right: 25px; z-index: 2000; cursor: pointer; width: 85px; height: 85px; }
+        .sun-glow #main-circle { filter: drop-shadow(0 0 15px rgba(255, 145, 0, 0.8)); }
+        .moon-glow #main-circle { filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.6)); }
+
+        /* --- MODAL FIXES --- */
+        .modal-content { background: var(--glass-card); backdrop-filter: blur(20px); border: 1px solid var(--border); color: var(--text-color); }
+        .modal-header, .modal-footer { border-color: var(--border); }
+        
+        /* Invert close button in dark mode */
+        .btn-close { filter: invert(var(--invert-val)); }
+        [data-theme="dark"] { --invert-val: 1; }
+        [data-theme="light"] { --invert-val: 0; }
+        
+        /* Custom Alert Borders */
         .border-success-custom { border-left: 5px solid #28a745 !important; }
         .border-warning-custom { border-left: 5px solid #ffc107 !important; }
         .border-danger-custom { border-left: 5px solid #dc3545 !important; }
         .border-info-custom { border-left: 5px solid #17a2b8 !important; }
+        /* --- STABLE SPACE THEME BACKGROUND --- */
+        #warpCanvas { position: fixed; inset: 0; z-index: -2; pointer-events: none; opacity: 0; transition: opacity 1s ease; }
+        [data-theme="dark"] #warpCanvas { opacity: 1; }
+        [data-theme="dark"] body::before {
+            content: " "; position: fixed; inset: 0;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.15) 50%), 
+                        linear-gradient(90deg, rgba(255, 0, 0, 0.03), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.03));
+            z-index: 1000; background-size: 100% 4px, 3px 100%; pointer-events: none;
+        }
+
+        /* --- NAVBAR BLEND FIX (Dark Mode) --- */
+        [data-theme="dark"] .navbar {
+            background: rgba(15, 23, 42, 0.9) !important; /* Darker glass stops table from bleeding through */
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        /* --- BOOTSTRAP TABLE OVERRIDES (The fix for the ugly white blocks) --- */
+        .table {
+            --bs-table-bg: transparent; /* Stops bootstrap from forcing white backgrounds */
+            --bs-table-color: var(--text-color);
+        }
+        .table td, .table th {
+            background-color: transparent !important;
+            border-bottom-color: var(--border);
+        }
+        
+        /* Force Bootstrap text colors to invert in dark mode */
+        [data-theme="dark"] .text-dark { color: #f8fafc !important; }
+        [data-theme="dark"] .text-muted { color: #94a3b8 !important; opacity: 1; }
+        [data-theme="dark"] .history-card-fixed td, 
+        [data-theme="dark"] .history-card-fixed th {
+            color: #f1f1f1 !important;
+        }
+        /* --- FIX: Invert Hamburger Icon in Dark Mode --- */
+        [data-theme="dark"] .navbar-toggler-icon { filter: invert(1); }
+       .btn-report {
+            background: transparent;
+            color: var(--text-color) !important;
+            border: 2px solid var(--text-color) !important;
+            transition: all 0.3s ease;
+        }
+        .btn-report:hover {
+            background: var(--text-color) !important;
+            /* Uses the solid color instead of the gradient */
+            color: var(--bg-solid) !important; 
+        }
+        #scroll-progress { 
+            position: fixed; top: 0; left: 0; width: 0%; height: 3px; 
+            background: var(--primary-orange); z-index: 9999; 
+            box-shadow: 0 0 10px var(--primary-orange); 
+        }
+        .vignette { 
+            position: fixed; inset: 0; z-index: -1; pointer-events: none; 
+            background: radial-gradient(circle at center, transparent 0%, rgba(0,0,0,0.4) 100%); 
+        }
     </style>
 </head>
 <body onload="checkTheme()">
-
-    <header>
+<div id="scroll-progress"></div>
+    <canvas id="warpCanvas"></canvas>
+    <div class="vignette"></div>    <header>
         <nav class="navbar navbar-expand-lg fixed-top shadow-sm">
             <div class="container">
-                <a class="navbar-brand d-flex align-items-center no-underline" href="/">
+                <a class="navbar-brand d-flex align-items-center" href="/">
                     <i class="fa-solid fa-sun-plant-wilt me-2"></i> SOLAR<span class="text-secondary">DRISHTI</span>
                 </a>
+
+                <button class="navbar-toggler border-0 shadow-none" type="button" data-bs-toggle="collapse" data-bs-target="#navMain">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
                 <div class="collapse navbar-collapse" id="navMain">
-                    <ul class="navbar-nav ms-auto">
+                    <ul class="navbar-nav ms-auto align-items-center">
                         <li class="nav-item"><a class="nav-link px-3" href="/">Home</a></li>
-                        <li class="nav-item"><a class="nav-link px-3" href="/predict">Predict</a></li>
-                        <li class="nav-item"><a class="nav-link px-3 active" href="/history">History</a></li>
+                        <li class="nav-item"><a class="nav-link px-3" href="/predict/">Predict</a></li>
+                        <li class="nav-item"><a class="nav-link px-3 active-page" href="/history/">History</a></li>
+                        <li class="nav-item"><a class="nav-link px-3" href="/about/">About</a></li>
+
+                        {% if user.is_authenticated %}
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle px-3" href="#" id="profileDrop" data-bs-toggle="dropdown">
+                                <i class="fa-solid fa-circle-user"></i> {{ user.username|upper }}
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end shadow border-0" style="background: var(--glass-card); backdrop-filter: blur(10px); --bs-dropdown-divider-bg: var(--text-color);">
+                                <li><a class="dropdown-item" href="{% url 'profile_view' user_id=request.user.id %}" style="color:var(--text-color) !important">View Profile</a></li>
+                                <li><a class="dropdown-item" href="{% url 'update_profile' %}" style="color:var(--text-color) !important">Update Profile</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item text-danger fw-bold" href="{% url 'logout' %}">Logout</a></li>
+                            </ul>
+                        </li>
+                        {% else %}
+                        <li class="nav-item ms-lg-3">
+                            <a href="{% url 'login' %}" class="btn btn-warning rounded-pill px-4 fw-bold shadow">Sign-in</a>
+                        </li>
+                        {% endif %}
                     </ul>
                 </div>
             </div>
@@ -133,16 +268,10 @@
                  style="background: var(--glass-card); backdrop-filter: blur(10px);">
                 
                 <div class="d-flex align-items-center w-100">
-                    {% if message.tags == 'success' %}
-                        <i class="fa-solid fa-circle-check text-success me-3 fs-5"></i>
-                    {% elif message.tags == 'warning' %}
-                        <i class="fa-solid fa-triangle-exclamation text-warning me-3 fs-5"></i>
-                    {% elif message.tags == 'error' or message.tags == 'danger' %}
-                        <i class="fa-solid fa-circle-xmark text-danger me-3 fs-5"></i>
-                    {% else %}
-                        <i class="fa-solid fa-circle-info text-info me-3 fs-5"></i>
-                    {% endif %}
-                    <span style="color: var(--text-color); font-weight: 500;">{{ message }}</span>
+                    <span style="color: var(--text-color); font-weight: 500;">
+                        <i class="fa-solid {% if message.tags == 'success' %}fa-circle-check text-success{% elif message.tags == 'warning' %}fa-triangle-exclamation text-warning{% else %}fa-circle-info text-info{% endif %} me-2"></i>
+                        {{ message }}
+                    </span>
                 </div>
                 <button type="button" class="btn-close shadow-none" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
@@ -154,19 +283,19 @@
         <div class="row g-4 mb-5">
             <div class="col-md-4">
                 <div class="stat-card">
-                    <small class="text-uppercase block mb-2">Total Logs</small>
-                    <div class="val text-dark">{{ history_list|length }}</div>
+                    <small class="block mb-2">Total Logs</small>
+                    <div class="val">{{ history_list|length }}</div>
                 </div>
             </div>
             <div class="col-md-4">
                 <div class="stat-card">
-                    <small class="text-uppercase block mb-2">Avg Accuracy</small>
-                    <div class="val text-success">{{ avg_acc }}%</div>
+                    <small class="block mb-2">Avg Accuracy</small>
+                    <p class="val text-success">{{ avg_acc }}%</p>
                 </div>
             </div>
             <div class="col-md-4">
                 <div class="stat-card">
-                    <small class="text-uppercase block mb-2">Active Systems</small>
+                    <small class="block mb-2">Active Systems</small>
                     <div class="val" style="color: var(--primary-orange);">{{ system_count|default:0 }}</div>
                 </div>
             </div>
@@ -185,7 +314,7 @@
                     <button class="btn btn-orange px-4" type="button" onclick="filterTable()" style="border-radius: 0 50px 50px 0;">Search</button>
                 </div>
 
-                <button class="btn btn-outline-dark rounded-pill px-4 fw-bold" onclick="exportToPDF()">Report</button>
+                <button class="btn btn-report rounded-pill px-4 fw-bold" onclick="exportToPDF()">Report</button>
                 <button class="btn btn-orange shadow-sm" data-bs-toggle="modal" data-bs-target="#analyticsModal">Analytics</button>
             </div>
         </div>
@@ -327,22 +456,16 @@
         });
 
         // EYE TRACKING
-      document.addEventListener('mousemove', (e) => {
+        document.addEventListener('mousemove', (e) => {
             document.querySelectorAll('.iris').forEach(iris => {
                 const rect = iris.getBoundingClientRect();
-                // Calculate angle between eye center and mouse
                 const angle = Math.atan2(e.clientY - (rect.top + 3.5), e.clientX - (rect.left + 3.5));
-                // Move the iris slightly in that direction
                 iris.style.transform = `translate(${Math.cos(angle) * 3}px, ${Math.sin(angle) * 3}px)`;
             });
         });
 
-    const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => { if (entry.isIntersecting) entry.target.classList.add('active'); });
-    }, { threshold: 0.1 });
-    document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
-
         // CHART LOGIC
+        // CHART LOGIC (UPDATED FOR DARK MODE)
         let chartInstance = null;
         document.getElementById('analyticsModal').addEventListener('shown.bs.modal', function () {
             const ctx = document.getElementById('historyChart').getContext('2d');
@@ -350,6 +473,12 @@
             const predData = JSON.parse(document.getElementById('history-pred').textContent).reverse().map(Number);
             const actualData = JSON.parse(document.getElementById('history-actual').textContent).reverse().map(Number);
             
+            // --- NEW: DETECT THEME FOR CHART COLORS ---
+            const isDark = document.body.getAttribute('data-theme') === 'dark';
+            const textColor = isDark ? '#f8fafc' : '#334155'; // White in dark mode, Slate in light mode
+            const gridColor = isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)'; 
+            // ------------------------------------------
+
             if (chartInstance) chartInstance.destroy();
             chartInstance = new Chart(ctx, {
                 type: 'line',
@@ -362,15 +491,22 @@
                 },
                 options: {
                     responsive: true, maintainAspectRatio: false,
-                    plugins: { legend: { labels: { color: '#334155', font: { family: 'Poppins', weight: 'bold' } } } },
+                    plugins: { legend: { labels: { color: textColor, font: { family: 'Poppins', weight: 'bold' } } } },
                     scales: {
-                        y: { ticks: { color: '#334155' }, title: { display: true, text: 'Energy Output (kWh)', color: '#334155', font: { weight: 'bold' } } },
-                        x: { ticks: { color: '#334155' }, title: { display: true, text: 'Date', color: '#334155', font: { weight: 'bold' } } }
+                        y: { 
+                            grid: { color: gridColor }, // Adapts grid lines
+                            ticks: { color: textColor }, // Adapts numbers
+                            title: { display: true, text: 'Energy Output (kWh)', color: textColor, font: { weight: 'bold' } } 
+                        },
+                        x: { 
+                            grid: { color: gridColor }, // Adapts grid lines
+                            ticks: { color: textColor }, // Adapts dates
+                            title: { display: true, text: 'Date', color: textColor, font: { weight: 'bold' } } 
+                        }
                     }
                 }
             });
         });
-
         function openEditModal(event, id, date, val) {
             event.preventDefault();
             document.getElementById('modal_prediction_id').value = id;
@@ -379,31 +515,98 @@
             new bootstrap.Modal(document.getElementById('editModal')).show();
         }
 
-        function checkTheme() {     applyTheme(localStorage.getItem('theme') || 'light');
- }
-        function toggleTheme() { const isDark = document.body.getAttribute('data-theme') === 'dark'; applyTheme(isDark ? 'light' : 'dark'); localStorage.setItem('theme', isDark ? 'light' : 'dark'); }
+        // THEME LOGIC
+        function checkTheme() { applyTheme(localStorage.getItem('theme') || 'light'); 
+            animateWarp();
+        }
+        function toggleTheme() { 
+            const isDark = document.body.getAttribute('data-theme') === 'dark'; 
+            applyTheme(isDark ? 'light' : 'dark'); 
+            localStorage.setItem('theme', isDark ? 'light' : 'dark'); 
+        }
         function applyTheme(mode) {
-    const sun = document.getElementById('main-circle');
-    const container = document.getElementById('celestial-anchor'); // Get the wrapper
-    
-    document.body.setAttribute('data-theme', mode);
-    
-    if (sun && container) {
-        // 1. Change Color
-        sun.setAttribute('fill', mode === 'dark' ? '#bdc3c7' : '#FFD700');
+            const sun = document.getElementById('main-circle');
+            const container = document.getElementById('celestial-anchor'); 
+            
+            document.body.setAttribute('data-theme', mode);
+            
+            if (sun && container) {
+                sun.setAttribute('fill', mode === 'dark' ? '#bdc3c7' : '#FFD700');
+                container.classList.remove('sun-glow', 'moon-glow');
+                container.classList.add(mode === 'dark' ? 'moon-glow' : 'sun-glow');
+            }
 
-        // 2. Remove old glow classes
-        container.classList.remove('sun-glow', 'moon-glow');
+            // --- NEW: DYNAMICALLY UPDATE CHART COLORS IF IT IS OPEN ---
+            if (typeof chartInstance !== 'undefined' && chartInstance !== null) {
+                const isDark = mode === 'dark';
+                const textColor = isDark ? '#f8fafc' : '#334155'; 
+                const gridColor = isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)'; 
 
-        // 3. Add new glow class based on mode
-        container.classList.add(mode === 'dark' ? 'moon-glow' : 'sun-glow');
-    }
-}
+                // Update Legend
+                chartInstance.options.plugins.legend.labels.color = textColor;
+                
+                // Update X-Axis
+                chartInstance.options.scales.x.ticks.color = textColor;
+                chartInstance.options.scales.x.title.color = textColor;
+                chartInstance.options.scales.x.grid.color = gridColor;
+                
+                // Update Y-Axis
+                chartInstance.options.scales.y.ticks.color = textColor;
+                chartInstance.options.scales.y.title.color = textColor;
+                chartInstance.options.scales.y.grid.color = gridColor;
+                
+                // Force Chart to re-render
+                chartInstance.update();
+            }
+        }
+        // --- WARP ENGINE (Space Theme) ---
+        const canvas = document.getElementById('warpCanvas');
+        const ctx = canvas ? canvas.getContext('2d') : null;
+        let stars = Array(window.innerWidth < 768 ? 150 : 350).fill().map(() => ({ 
+            x: Math.random()*innerWidth-innerWidth/2, 
+            y: Math.random()*innerHeight-innerHeight/2, 
+            z: Math.random()*innerWidth 
+        }));
+        
+        function animateWarp() {
+            if (!canvas || !ctx) return;
+            canvas.width = window.innerWidth; 
+            canvas.height = window.innerHeight;
+            const isDark = document.body.getAttribute('data-theme') === 'dark';
+            
+            ctx.fillStyle = isDark ? "rgba(2, 6, 23, 0.4)" : "rgba(255, 255, 255, 0)";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            if(isDark) {
+                stars.forEach(s => {
+                    s.z -= 1.5; if (s.z <= 0) s.z = canvas.width;
+                    const x = (s.x / s.z) * canvas.width + canvas.width/2;
+                    const y = (s.y / s.z) * canvas.height + canvas.height/2;
+                    const size = (1 - s.z/canvas.width) * 2;
+                    
+                    ctx.beginPath(); 
+                    ctx.fillStyle = "white"; 
+                    ctx.arc(x, y, size, 0, Math.PI*2); 
+                    ctx.fill();
+                });
+            }
+            requestAnimationFrame(animateWarp);
+        }
+        
         function exportToPDF() {
-            const { jsPDF } = window.jspdf; const doc = new jsPDF();
+            const { jsPDF } = window.jspdf; 
+            const doc = new jsPDF();
             doc.autoTable({ html: '#historyTable', startY: 35, theme: 'striped', headStyles: { fillColor: [255, 145, 0] } });
             doc.save("SolarDrishti_Log.pdf");
         }
+        // SCROLL PROGRESS TRACKER
+        window.onscroll = function() {
+            let winScroll = document.body.scrollTop || document.documentElement.scrollTop;
+            let height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+            let scrolled = (winScroll / height) * 100;
+            const progress = document.getElementById("scroll-progress");
+            if (progress) progress.style.width = scrolled + "%";
+        };
     </script>
 </body>
 </html>

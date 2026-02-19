@@ -58,14 +58,19 @@
         [data-theme="dark"] #warpCanvas { opacity: 1; }
         .vignette { position: fixed; inset: 0; z-index: -1; pointer-events: none; background: radial-gradient(circle at center, transparent 0%, rgba(0,0,0,0.4) 100%); }
 
-        /* --- CYBER HUD BUTTON --- */
-        .terminal-btn {
-            position: relative; overflow: hidden;
-            border: 1px solid var(--primary-orange);
-            box-shadow: 0 0 5px var(--primary-orange);
-            transition: 0.3s;
+        /* --- GRADIENT BUTTONS --- */
+        .btn-gradient {
+            background: linear-gradient(45deg, var(--primary-orange), #ff6d00) !important;
+            border: none !important;
+            color: white !important;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(255, 145, 0, 0.3);
         }
-        .terminal-btn:hover { box-shadow: 0 0 20px var(--primary-orange); transform: translateY(-2px); }
+        .btn-gradient:hover { 
+            transform: translateY(-2px); 
+            box-shadow: 0 8px 25px rgba(255, 145, 0, 0.5); 
+            color: white !important; 
+        }
 
         /* --- GLITCH TITLE --- */
         .glitch-hover { position: relative; display: inline-block; }
@@ -129,11 +134,20 @@
         @keyframes rise { 0% { transform: translateY(150px); opacity: 0; } 100% { transform: translateY(0); opacity: 1; } }
 
         [data-theme="dark"] .navbar-toggler-icon { filter: invert(1); }
-        h1, h2, h3 { font-family: 'Orbitron'; font-weight: 700; }
-        .sun-glow #main-circle {
+/* --- GLOBAL TYPOGRAPHY FIX --- */
+        h1, h2, h3, h4, h5, h6, 
+        .navbar-brand, 
+        .nav-link, 
+        .btn, 
+        .btn-gradient {
+            font-family: 'Orbitron', sans-serif !important;
+        }        .sun-glow #main-circle {
     filter: drop-shadow(0 0 15px rgba(255, 145, 0, 0.8)); /* Intense Orange Glow */
 }
-
+    /* --- INVERT MODAL CLOSE BUTTON IN DARK MODE --- */
+        [data-theme="dark"] .btn-close {
+            filter: invert(1);
+        }
     /* Moon Glow (Dark Mode) */
     .moon-glow #main-circle {
         filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.6)); /* Soft White/Blue Glow */
@@ -151,13 +165,16 @@
 
     <div class="modal fade" id="authModal" tabindex="-1">
         <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header border-0"><h5 class="fw-bold">TERMINAL AUTHORIZATION</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+            <div class="modal-content border-0 rounded-4" style="background: var(--card-bg); backdrop-filter: blur(20px);">
+                <div class="modal-header border-0">
+                    <h5 class="fw-bold m-0" style="color: var(--primary-orange);">TERMINAL AUTHORIZATION</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
                 <div class="modal-body text-center p-4">
-                    <p style="color:black !important">Access restricted to authorized terminal users. Please verify identity.</p>
+                    <p class="text-muted mb-4">Access restricted to authorized terminal users. Please verify identity.</p>
                     <div class="d-grid gap-3">
-                        <button class="btn btn-warning py-3 rounded-pill fw-bold terminal-btn" onclick="handleRedirect('login')">Sign-in</button>
-                        <button class="btn btn-outline-dark py-3 rounded-pill fw-bold" onclick="handleRedirect('signup')">Sign-Up</button>
+                        <button class="btn btn-gradient py-3 rounded-pill fw-bold" onclick="handleRedirect('login')">Sign-In</button>
+                        <button class="btn btn-gradient py-3 rounded-pill fw-bold" onclick="handleRedirect('signup')">Sign-Up</button>
                     </div>
                 </div>
             </div>
@@ -174,6 +191,7 @@
                         <li class="nav-item"><a class="nav-link px-3 active-page" href="/">Home</a></li>
                         <li class="nav-item"><a class="nav-link px-3" href="javascript:void(0)" onclick="guard(predictURL)">Predict</a></li>
                         <li class="nav-item"><a class="nav-link px-3" href="javascript:void(0)" onclick="guard(historyURL)">History</a></li>
+                        <li class="nav-item"><a class="nav-link px-3" href="/about/">About</a></li>
                         {% if user.is_authenticated %}
                         <li class="nav-item dropdown"><a class="nav-link dropdown-toggle px-3" href="#" id="profileDrop" data-bs-toggle="dropdown"><i class="fa-solid fa-circle-user"></i> {{ user.username|upper }}</a>
                             <ul class="dropdown-menu dropdown-menu-end shadow border-0" style="background: var(--card-bg); backdrop-filter: blur(10px);--bs-dropdown-divider-bg: var(--text-color);">
@@ -184,7 +202,7 @@
                             </ul>
                         </li>
                         {% else %}
-                        <li class="nav-item ms-lg-3"><button class="btn btn-warning rounded-pill px-4 fw-bold shadow terminal-btn" data-bs-toggle="modal" data-bs-target="#authModal"> Sign-up /Sign-in </button></li>
+                        <li class="nav-item ms-lg-3"><button class="btn btn-gradient rounded-pill px-4 fw-bold shadow" data-bs-toggle="modal" data-bs-target="#authModal">Sign-Up / Sign-In</button></li>
                         {% endif %}
                     </ul>
                 </div>

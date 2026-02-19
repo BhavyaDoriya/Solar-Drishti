@@ -14,21 +14,26 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet-geosearch@3.11.0/dist/geosearch.css" />
 
     <style>
+        
         :root {
             --primary-orange: #ff9100;
             --bg-color: linear-gradient(180deg, #e0f2ff 0%, #ffffff 400px); 
             --text-color: #1a1a1a;
-            --glass-bg: rgba(255, 255, 255, 0.9);
-            --glass-border: rgba(0, 0, 0, 0.1);
+            --glass-bg: rgba(255, 255, 255, 0.95);
+            --glass-border: rgba(0, 0, 0, 0.08);
+            --card-shadow: 0 10px 30px rgba(0,0,0,0.05);
         }
 
         [data-theme="dark"] {
             --bg-color: #020617; 
             --text-color: #f1f1f1;
-            --glass-bg: rgba(15, 23, 42, 0.8);
+            --glass-bg: rgba(15, 23, 42, 0.85);
             --glass-border: rgba(255, 255, 255, 0.15);
+            --card-shadow: 0 10px 30px rgba(0,0,0,0.2);
         }
-
+        /* --- FIX: Invert Hamburger Icon in Dark Mode --- */
+        [data-theme="dark"] .navbar-toggler-icon { filter: invert(1); }
+        /* --- GLOBAL TYPOGRAPHY --- */
         body {
             font-family: 'Poppins', sans-serif;
             background: var(--bg-color);
@@ -38,19 +43,45 @@
             overflow-x: hidden;
         }
 
+        h1, h2, h3, h4, h5, h6, 
+        .navbar-brand, 
+        .nav-link,
+        .btn-text,
+        .add-btn {
+            font-family: 'Orbitron', sans-serif !important;
+        }
+
+        /* --- NAVBAR --- */
+/* --- NAVBAR --- */
+        .navbar { background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(15px); border-bottom: 1px solid var(--glass-border); }
+        .navbar-brand { font-weight: 900; color: var(--primary-orange) !important; letter-spacing: 2px; }
+        
+        .nav-link {
+            font-size: 13px !important;
+            font-weight: 400;
+            letter-spacing: 0.5px;
+            color: var(--text-color) !important;
+            transition: 0.3s;
+        }
+        
+        .nav-link:hover { color: var(--primary-orange) !important; text-shadow: 0 0 8px var(--primary-orange); }
+        
+        /* THIS WAS MISSING: The orange highlight */
+        .nav-link.active-page { 
+            color: var(--primary-orange) !important; 
+            font-weight: 700 !important; 
+            border-bottom: 2px solid var(--primary-orange); 
+        }
+
         /* --- STABLE SPACE THEME --- */
         #warpCanvas { position: fixed; inset: 0; z-index: -2; pointer-events: none; opacity: 0; transition: opacity 1s ease; }
         [data-theme="dark"] #warpCanvas { opacity: 1; }
         [data-theme="dark"] body::before {
-            content: " "; position: fixed; inset: 0;
-            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.15) 50%);
-            z-index: 1000; pointer-events: none;
-        }
-
-        /* --- NAVBAR --- */
-        .navbar { background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(15px); border-bottom: 1px solid var(--glass-border); height: 60px; }
-        .navbar-brand { font-family: 'Orbitron'; color: var(--primary-orange) !important; font-weight: 900; }
-        [data-theme="dark"] .nav-link { color: #ffffff !important; }
+    content: " "; position: fixed; inset: 0;
+    background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.15) 50%), 
+                linear-gradient(90deg, rgba(255, 0, 0, 0.03), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.03));
+    z-index: 1000; background-size: 100% 4px, 3px 100%; pointer-events: none;
+}
 
         /* --- CARD UI --- */
         .system-card {
@@ -58,73 +89,55 @@
             border: 1px solid var(--glass-border); border-radius: 20px;
             padding: 20px; height: 100%; transition: 0.3s ease;
             display: flex; flex-direction: column;
+            box-shadow: var(--card-shadow);
         }
         .system-card:hover { transform: translateY(-5px); border-color: var(--primary-orange); }
 
-        /* --- SPINNER --- */
+        /* --- SPINNER & BUTTONS --- */
         .spinner-border-sm { width: 1rem; height: 1rem; display: none; margin-right: 5px; }
         .predicting .spinner-border-sm { display: inline-block; }
         .predicting .btn-text { display: none; }
-        .predicting::after { content: "Calculating..."; }
+        .predicting::after { content: "Calculating..."; font-family: 'Orbitron', sans-serif; }
 
         .add-btn {
             width: 55px; height: 55px; background: linear-gradient(45deg, var(--primary-orange), #ff6d00);
             border-radius: 50%; border: none; color: white; font-size: 1.4rem;
-            box-shadow: 0 8px 20px rgba(255, 145, 0, 0.3); cursor: pointer;
+            box-shadow: 0 8px 20px rgba(255, 145, 0, 0.3); cursor: pointer; transition: 0.3s;
         }
+        .add-btn:hover { transform: scale(1.1); }
 
         #map-picker { height: 280px; width: 100%; border-radius: 12px; border: 1px solid var(--glass-border); }
+
+        /* --- CELESTIAL ANCHOR --- */
+        #celestial-anchor { position: fixed; bottom: 25px; right: 25px; z-index: 2000; cursor: pointer; width: 85px; height: 85px; }
+        .sun-glow #main-circle { filter: drop-shadow(0 0 15px rgba(255, 145, 0, 0.8)); }
+        .moon-glow #main-circle { filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.6)); }
 
         /* --- MAP SEARCH FIX --- */
         .leaflet-geosearch-results, .leaflet-geosearch-bar form input { 
             background-color: var(--bg-color) !important; color: var(--text-color) !important;filter:invert(1); backdrop-filter: none !important; opacity: 1 !important; 
         }
-
-        #celestial-anchor { 
-        position: fixed; 
-        bottom: 25px;       
-        right: 25px;        
-        z-index: 2000; 
-        cursor: pointer; 
-        width: 85px;        
-        height: 85px;      
-      
-    }
-    .sun-glow #main-circle {
-    filter: drop-shadow(0 0 15px rgba(255, 145, 0, 0.8)); /* Intense Orange Glow */
-}
-
-/* Moon Glow (Dark Mode) */
-.moon-glow #main-circle {
-    filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.6)); /* Soft White/Blue Glow */
-}
-        .leaflet-geosearch-results, 
-.leaflet-geosearch-results .results,
-.leaflet-geosearch-results .results > div,
-.leaflet-geosearch-bar form,
-.leaflet-geosearch-bar form input {
-    background-color: #ffffff !important; /* Force solid white */
-    color: #000000 !important;            /* Force solid black text */
-    filter: none !important;               /* Remove any inversions */
-    backdrop-filter: none !important;      /* Remove glass blur */
-    opacity: 1 !important;                 /* Ensure no transparency */
-    border: none !important;
-}
-
-/* Hover effect for the suggestions */
-.leaflet-geosearch-results .results > div:hover {
-    background-color: #f0f0f0 !important;
-    color: var(--primary-orange) !important;
-}
-
-/* Fix for the magnifying glass/reset icons */
-.leaflet-geosearch-bar a.reset {
-    color: #000 !important;
-    background: none !important;
-}
+        .leaflet-geosearch-results, .leaflet-geosearch-results .results, .leaflet-geosearch-results .results > div, .leaflet-geosearch-bar form, .leaflet-geosearch-bar form input {
+            background-color: #ffffff !important; color: #000000 !important; filter: none !important; backdrop-filter: none !important; opacity: 1 !important; border: none !important;
+        }
+        .leaflet-geosearch-results .results > div:hover { background-color: #f0f0f0 !important; color: var(--primary-orange) !important; }
+        .leaflet-geosearch-bar a.reset { color: #000 !important; background: none !important; }
+        #scroll-progress { 
+            position: fixed; top: 0; left: 0; width: 0%; height: 3px; 
+            background: var(--primary-orange); z-index: 9999; 
+            box-shadow: 0 0 10px var(--primary-orange); 
+        }
+        .vignette { 
+            position: fixed; inset: 0; z-index: -1; pointer-events: none; 
+            background: radial-gradient(circle at center, transparent 0%, rgba(0,0,0,0.4) 100%); 
+        }
+        
     </style>
 </head>
 <body onload="initApp()">
+
+    <div id="scroll-progress"></div>
+    <div class="vignette"></div>
 
     <div class="cursor-dot"></div>
     <div class="cursor-outline"></div>
@@ -133,20 +146,48 @@
     <header>
         <nav class="navbar navbar-expand-lg fixed-top shadow-sm">
             <div class="container">
-                <a class="navbar-brand d-flex align-items-center" href="/"><i class="fa-solid fa-sun-plant-wilt me-2"></i> SOLAR<span class="text-secondary">DRISHTI</span></a>
+                <a class="navbar-brand d-flex align-items-center" href="/">
+                    <i class="fa-solid fa-sun-plant-wilt me-2"></i> SOLAR<span class="text-secondary">DRISHTI</span>
+                </a>
+
+                <button class="navbar-toggler border-0 shadow-none" type="button" data-bs-toggle="collapse" data-bs-target="#navMain">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
                 <div class="collapse navbar-collapse" id="navMain">
                     <ul class="navbar-nav ms-auto align-items-center">
                         <li class="nav-item"><a class="nav-link px-3" href="/">Home</a></li>
+                        
                         <li class="nav-item"><a class="nav-link px-3 active-page" href="/predict/">Predict</a></li>
+                        
                         <li class="nav-item"><a class="nav-link px-3" href="/history/">History</a></li>
+                        <li class="nav-item"><a class="nav-link px-3" href="/about/">About</a></li>
+
+                        {% if user.is_authenticated %}
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle px-3" href="#" id="profileDrop" data-bs-toggle="dropdown">
+                                <i class="fa-solid fa-circle-user"></i> {{ user.username|upper }}
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end shadow border-0" style="background: var(--glass-bg); backdrop-filter: blur(10px); --bs-dropdown-divider-bg: var(--text-color);">
+                                <li><a class="dropdown-item" href="{% url 'profile_view' user_id=request.user.id %}" style="color:var(--text-color) !important">View Profile</a></li>
+                                <li><a class="dropdown-item" href="{% url 'update_profile' %}" style="color:var(--text-color) !important">Update Profile</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item text-danger fw-bold" href="{% url 'logout' %}">Logout</a></li>
+                            </ul>
+                        </li>
+                        {% else %}
+                        <li class="nav-item ms-lg-3">
+                            <a href="{% url 'login' %}" class="btn btn-warning rounded-pill px-4 fw-bold shadow">Sign-in</a>
+                        </li>
+                        {% endif %}
                     </ul>
                 </div>
             </div>
         </nav>
     </header>
 
-    <main class="container mt-5 pt-4">
-        <div id="status-notif">
+<main class="container mb-5" style="padding-top: 100px;">
+            <div id="status-notif">
             {% if messages %}
                 {% for message in messages %}
                     <div class="alert alert-dismissible fade show rounded-3 shadow-sm border-0 {% if message.tags == 'success' %}bg-success text-white{% else %}bg-warning text-dark{% endif %}" role="alert">
@@ -408,6 +449,14 @@
         container.classList.add(mode === 'dark' ? 'moon-glow' : 'sun-glow');
     }
 }
+// --- SCROLL PROGRESS TRACKER ---
+    window.onscroll = function() {
+        let winScroll = document.body.scrollTop || document.documentElement.scrollTop;
+        let height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+        let scrolled = (winScroll / height) * 100;
+        const progress = document.getElementById("scroll-progress");
+        if (progress) progress.style.width = scrolled + "%";
+    };
 </script>
 </body>
 </html>

@@ -8,28 +8,110 @@
     <script src="https://accounts.google.com/gsi/client" async defer></script>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    
     <style>
-        :root { --primary-orange: #ff9100; --secondary-blue: #2c3e50; --bg-color: #f0f2f5; --text-color: #1a1a1a; --glass-bg: rgba(255, 255, 255, 0.85); }
-        [data-theme="dark"] { --bg-color: #0b0e14; --text-color: #f1f1f1; --glass-bg: rgba(28, 33, 40, 0.95); }
-        body { font-family: 'Poppins', sans-serif; background-color: var(--bg-color); color: var(--text-color); transition: 0.5s ease; min-height: 100vh; display: flex; flex-direction: column; }
-        .navbar { background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(15px); border-bottom: 1px solid rgba(255, 255, 255, 0.1); }
-        .login-section { flex: 1; display: flex; align-items: center; justify-content: center; padding: 100px 20px 50px 20px; }
+        /* --- SYNCED CSS VARIABLES --- */
+        :root { 
+            --primary-orange: #ff9100; 
+            --secondary-blue: #2c3e50; 
+            --bg-color: linear-gradient(180deg, #e0f2ff 0%, #ffffff 400px); 
+            --text-color: #1a1a1a; 
+            --glass-bg: rgba(255, 255, 255, 0.85); 
+            --glass-border: rgba(0, 0, 0, 0.08); 
+            --card-shadow: 0 10px 30px rgba(0,0,0,0.05);
+        }
         
-        /* --- MOBILE CENTER FIX START --- */
+        [data-theme="dark"] { 
+            --bg-color: #020617; 
+            --text-color: #f1f1f1; 
+            --glass-bg: rgba(15, 23, 42, 0.85); 
+            --glass-border: rgba(255, 255, 255, 0.15);
+            --card-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        /* --- GLOBAL TYPOGRAPHY --- */
+        body { 
+            font-family: 'Poppins', sans-serif; 
+            background: var(--bg-color); 
+            color: var(--text-color); 
+            transition: background 0.6s ease; 
+            min-height: 100vh; 
+            display: flex; 
+            flex-direction: column; 
+            overflow-x: hidden;
+        }
+
+        h1, h2, h3, h4, h5, h6, 
+        .navbar-brand, 
+        .nav-link, 
+        .btn {
+            font-family: 'Orbitron', sans-serif !important;
+        }
+
+        /* --- SPACE ATMOSPHERE --- */
+        #warpCanvas { position: fixed; inset: 0; z-index: -2; pointer-events: none; opacity: 0; transition: opacity 1s ease; }
+        [data-theme="dark"] #warpCanvas { opacity: 1; }
+        [data-theme="dark"] body::before {
+            content: " "; position: fixed; inset: 0;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.15) 50%), 
+                        linear-gradient(90deg, rgba(255, 0, 0, 0.03), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.03));
+            z-index: 1000; background-size: 100% 4px, 3px 100%; pointer-events: none;
+        }
+        .vignette { position: fixed; inset: 0; z-index: -1; pointer-events: none; background: radial-gradient(circle at center, transparent 0%, rgba(0,0,0,0.4) 100%); }
+
+        /* --- CUSTOM CURSOR --- */
+        .cursor-dot, .cursor-outline { position: fixed; pointer-events: none; z-index: 9999; opacity: 0; }
+        @media (pointer: fine) {
+            [data-theme="dark"] { cursor: none !important; }
+            [data-theme="dark"] a, [data-theme="dark"] button, [data-theme="dark"] input { cursor: none !important; }
+            [data-theme="dark"] .cursor-dot { display: block; width: 8px; height: 8px; background: var(--primary-orange); border-radius: 50%; top: 0; left: 0; opacity: 1; box-shadow: 0 0 10px var(--primary-orange); }
+            [data-theme="dark"] .cursor-outline { display: block; width: 30px; height: 30px; border: 2px solid var(--primary-orange); border-radius: 50%; top: 0; left: 0; opacity: 1; transition: transform 0.15s ease-out; }
+        }
+
+        /* --- NAVBAR --- */
+        .navbar { background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(15px); border-bottom: 1px solid var(--glass-border); z-index: 1000; }
+        .navbar-brand { font-weight: 900; color: var(--primary-orange) !important; letter-spacing: 2px; }
+        .nav-link { font-size: 13px !important; font-weight: 400; letter-spacing: 0.5px; color: var(--text-color) !important; transition: 0.3s; }
+        .nav-link:hover { color: var(--primary-orange) !important; text-shadow: 0 0 8px var(--primary-orange); }
+        .nav-link.active-page { color: var(--primary-orange) !important; font-weight: 700 !important; border-bottom: 2px solid var(--primary-orange); }
+        [data-theme="dark"] .navbar-toggler-icon { filter: invert(1); }
+
+        /* --- LOGIN CARD --- */
+        .login-section { 
+            flex: 1; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            padding: 100px 20px 50px 20px; 
+            z-index: 10;
+        }
+        
         .login-card { 
             background: var(--glass-bg); 
-            backdrop-filter: blur(20px); 
+            backdrop-filter: blur(25px); 
+            border: 1px solid var(--glass-border); 
             border-radius: 30px; 
             overflow: hidden; 
             max-width: 850px; 
             width: 100%; 
-            box-shadow: 0 25px 60px rgba(0,0,0,0.15); 
+            box-shadow: var(--card-shadow); 
             display: flex; 
-            flex-direction: row; /* Desktop horizontal flow */
+            flex-direction: row; 
         }
         
-        .login-sidebar { background: linear-gradient(135deg, var(--secondary-blue), #1a1a1a); color: white; padding: 40px; width: 40%; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; }
+        .login-sidebar { 
+            background: linear-gradient(135deg, var(--secondary-blue), #1a1a1a); 
+            color: white; 
+            padding: 40px; 
+            width: 40%; 
+            display: flex; 
+            flex-direction: column; 
+            justify-content: center; 
+            align-items: center; 
+            text-align: center; 
+        }
         
         .login-form-container { 
             padding: 60px; 
@@ -39,57 +121,96 @@
             justify-content: center; 
         }
 
-        /* Adjustments for mobile screens */
         @media (max-width: 768px) {
             .login-card {
-                flex-direction: column; /* Stack vertically if sidebar was visible */
-                max-width: 450px; /* Keep a nice slim width on mobile */
+                flex-direction: column; 
+                max-width: 450px; 
             }
+            .login-sidebar { width: 100%; padding: 30px; }
             .login-form-container {
-                width: 100%; /* Take full width of card */
-                padding: 40px 30px; /* Adjust padding for smaller screens */
+                width: 100%; 
+                padding: 40px 30px; 
             }
         }
-        /* --- MOBILE CENTER FIX END --- */
 
-        .btn-login { background: linear-gradient(45deg, var(--primary-orange), #ff6d00); border: none; color: white; font-weight: 700; padding: 14px; border-radius: 15px; }
+        /* --- FORM ELEMENTS --- */
+       /* --- FLOATING LABEL FIX (Removes the weird white background) --- */
+       .form-control { 
+            border-radius: 12px;
+            background: rgba(0,0,0,0.05); 
+            border: 1px solid var(--glass-border); 
+        }
+        .form-floating > .form-control:focus ~ label::after,
+        .form-floating > .form-control:not(:placeholder-shown) ~ label::after {
+            background: transparent !important; /* Kills the solid white block */
+        }
+        
+        .form-floating label {
+            color: var(--text-color) !important;
+            opacity: 0.7;
+            padding-left: 20px; /* Aligns perfectly with your rounded inputs */
+        }
+        
+        .form-floating > .form-control:focus ~ label,
+        .form-floating > .form-control:not(:placeholder-shown) ~ label {
+            color: var(--primary-orange) !important; /* Glows orange when active */
+            opacity: 1;
+        }
+
+        /* Dark mode specific text fixes */
+        [data-theme="dark"] .form-control { color: #f8fafc !important; background: rgba(255, 255, 255, 0.05); }
+        [data-theme="dark"] .form-floating label { color: #94a3b8 !important; }
+        [data-theme="dark"] .form-floating > .form-control:focus ~ label,
+        [data-theme="dark"] .form-floating > .form-control:not(:placeholder-shown) ~ label {
+            color: var(--primary-orange) !important;
+        }
+
+        .btn-login { 
+            background: linear-gradient(45deg, var(--primary-orange), #ff6d00); 
+            border: none; 
+            color: white; 
+            font-weight: 700; 
+            padding: 14px; 
+            border-radius: 15px; 
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(255, 145, 0, 0.3);
+        }
+        .btn-login:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(255, 145, 0, 0.5); color: white; }
+        
         .separator hr { border-color: var(--text-color); opacity: 0.2; }
-        #celestial-anchor { 
-        position: fixed; 
-        bottom: 25px;       
-        right: 25px;        
-        z-index: 2000; 
-        cursor: pointer; 
-        width: 85px;        
-        height: 85px;      
-      
-    }
-    /* --- FIX: Force form labels to stay dark in Dark Mode --- */
-.form-floating label {
-    color: #1a1a1a !important; /* Always dark gray/black */
-}
+        
+        /* --- CELESTIAL ANCHOR --- */
+        #celestial-anchor { position: fixed; bottom: 25px; right: 25px; z-index: 2000; cursor: pointer; width: 85px; height: 85px; }
+        .sun-glow #main-circle { filter: drop-shadow(0 0 15px rgba(255, 145, 0, 0.8)); }
+        .moon-glow #main-circle { filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.6)); }
 
-/* Optional: Ensure the text you type is also dark */
-.form-control {
-    color: #1a1a1a !important;
-}
-.sun-glow #main-circle {
-    filter: drop-shadow(0 0 15px rgba(255, 145, 0, 0.8)); /* Intense Orange Glow */
-}
-
-/* Moon Glow (Dark Mode) */
-.moon-glow #main-circle {
-    filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.6)); /* Soft White/Blue Glow */
-}
     </style>
 </head>
 <body onload="initApp()">
+    
+    <div class="vignette"></div>
+    <div class="cursor-dot"></div>
+    <div class="cursor-outline"></div>
+    <canvas id="warpCanvas"></canvas>
+
     <header>
         <nav class="navbar navbar-expand-lg fixed-top shadow-sm">
             <div class="container">
-                <a class="navbar-brand fw-bold d-flex align-items-center" href="{% url 'home' %}" style="color: var(--primary-orange);">
+                <a class="navbar-brand fw-bold d-flex align-items-center" href="{% url 'home' %}">
                     <i class="fa-solid fa-sun-plant-wilt me-2"></i> SOLAR<span class="text-secondary">DRISHTI</span>
                 </a>
+                <button class="navbar-toggler shadow-none border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navMain">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navMain">
+                    <ul class="navbar-nav ms-auto align-items-center">
+                        <li class="nav-item"><a class="nav-link px-3" href="{% url 'home' %}">Home</a></li>
+                        <li class="nav-item"><a class="nav-link px-3" href="/about/">About</a></li>
+                        <li class="nav-item ms-lg-3">
+                            <a href="{% url 'signup' %}" class="btn btn-warning rounded-pill px-4 fw-bold shadow-sm" style="background: linear-gradient(45deg, var(--primary-orange), #ff6d00); border: none; color: white;">Sign Up</a>
+                        </li>
+                    </ul>
+                </div>
             </div>
         </nav>
     </header>
@@ -98,13 +219,13 @@
         <div class="login-card">
             <div class="login-sidebar d-none d-md-flex">
                 <i class="fa-solid fa-cloud-sun fa-5x mb-4 text-warning"></i>
-                <h2 class="fw-bold">Ready to shine?</h2>
-                <p class="small opacity-75">Only registered users can access insights.</p>
+                <h2 class="fw-bold" style="font-family: 'Orbitron';">Ready to shine?</h2>
+                <p class="small opacity-75" style="font-family: 'Poppins';">Only registered users can access insights.</p>
             </div>
             
             <div class="login-form-container text-center">
-                <h3 class="fw-bold mb-1">Welcome Back</h3>
-                <p class="text-muted small mb-4">Login to your account</p>
+                <h3 class="fw-bold mb-1" style="color: var(--primary-orange);">Welcome Back</h3>
+                <p class="text-muted small mb-4" style="color:var(--text-color) !important; opacity:0.7;">Login to your account</p>
 
                 <form id="loginForm" method="POST" action="{% url 'login' %}">
                     {% csrf_token %}
@@ -117,11 +238,11 @@
                         <label for="loginPassword">Password</label>
                     </div>
 
-                    <button type="submit" class="btn btn-login w-100 mb-4 shadow">Sign In</button>
+                    <button type="submit" class="btn btn-login w-100 mb-4">Sign In</button>
                     
                     <div class="separator d-flex align-items-center mb-4">
                         <hr class="flex-grow-1">
-                        <span class="mx-2 small text-muted">OR</span>
+                        <span class="mx-2 small" >OR</span>
                         <hr class="flex-grow-1">
                     </div>
                     
@@ -138,26 +259,20 @@
 
     <input type="hidden" id="loginStatus" value="{{ login_success|yesno:'true,false' }}">
     <input type="hidden" id="authFailedMarker" value="{{ auth_failed|yesno:'true,false' }}">
-    <aside id="celestial-anchor" onclick="toggleTheme()">
+    
+    <aside id="celestial-anchor" onclick="toggleTheme()" title="Toggle Theme">
         <svg width="100%" height="100%" viewBox="0 0 100 100">
             <circle id="main-circle" cx="50" cy="50" r="40" fill="#FFD700" />
             <g id="eyes"><circle cx="35" cy="45" r="7" fill="white" /><circle class="iris" cx="35" cy="45" r="3.5" fill="black" /><circle cx="65" cy="45" r="7" fill="white" /><circle class="iris" cx="65" cy="45" r="3.5" fill="black" /></g>
             <path id="mouth" d="M 40 65 Q 50 75 60 65" stroke="black" stroke-width="2" fill="none" stroke-linecap="round" />    
         </svg>
     </aside>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-            // --- ADD THIS TO MAKE THE EYES MOVE ---
-        document.addEventListener('mousemove', (e) => {
-            document.querySelectorAll('.iris').forEach(iris => {
-                const rect = iris.getBoundingClientRect();
-                // Calculate angle between eye center and mouse
-                const angle = Math.atan2(e.clientY - (rect.top + 3.5), e.clientX - (rect.left + 3.5));
-                // Move the iris slightly in that direction
-                iris.style.transform = `translate(${Math.cos(angle) * 3}px, ${Math.sin(angle) * 3}px)`;
-            });
-        });
         function initApp() {
             applyTheme(localStorage.getItem('theme') || 'light');
+            animateWarp();
+            
             const authFailed = document.getElementById('authFailedMarker').value;
             if (authFailed === 'true') alert("❌ Invalid Credentials!");
             const statusElement = document.getElementById('loginStatus');
@@ -196,23 +311,71 @@
             localStorage.setItem('theme', isDark ? 'light' : 'dark');
         }
 
-       function applyTheme(mode) {
-    const sun = document.getElementById('main-circle');
-    const container = document.getElementById('celestial-anchor'); // Get the wrapper
-    
-    document.body.setAttribute('data-theme', mode);
-    
-    if (sun && container) {
-        // 1. Change Color
-        sun.setAttribute('fill', mode === 'dark' ? '#bdc3c7' : '#FFD700');
+        function applyTheme(mode) {
+            const sun = document.getElementById('main-circle');
+            const container = document.getElementById('celestial-anchor'); 
+            
+            document.body.setAttribute('data-theme', mode);
+            
+            if (sun && container) {
+                sun.setAttribute('fill', mode === 'dark' ? '#bdc3c7' : '#FFD700');
+                container.classList.remove('sun-glow', 'moon-glow');
+                container.classList.add(mode === 'dark' ? 'moon-glow' : 'sun-glow');
+            }
+        }
 
-        // 2. Remove old glow classes
-        container.classList.remove('sun-glow', 'moon-glow');
+        // --- EYETRACKING & CUSTOM CURSOR ---
+        const dot = document.querySelector('.cursor-dot');
+        const outline = document.querySelector('.cursor-outline');
+        
+        document.addEventListener('mousemove', (e) => {
+            // Move Cursor Dots
+            if (dot && outline) {
+                dot.style.transform = `translate(${e.clientX}px, ${e.clientY}px)`;
+                outline.animate({ transform: `translate(${e.clientX - 15}px, ${e.clientY - 15}px)` }, { duration: 400, fill: "forwards" });
+            }
 
-        // 3. Add new glow class based on mode
-        container.classList.add(mode === 'dark' ? 'moon-glow' : 'sun-glow');
-    }
-}
+            // Move Eyes
+            document.querySelectorAll('.iris').forEach(iris => {
+                const rect = iris.getBoundingClientRect();
+                const angle = Math.atan2(e.clientY - (rect.top + 3.5), e.clientX - (rect.left + 3.5));
+                iris.style.transform = `translate(${Math.cos(angle) * 3}px, ${Math.sin(angle) * 3}px)`;
+            });
+        });
+
+        // --- WARP ENGINE (Space Theme) ---
+        const canvas = document.getElementById('warpCanvas');
+        const ctx = canvas ? canvas.getContext('2d') : null;
+        let stars = Array(window.innerWidth < 768 ? 150 : 350).fill().map(() => ({ 
+            x: Math.random()*innerWidth-innerWidth/2, 
+            y: Math.random()*innerHeight-innerHeight/2, 
+            z: Math.random()*innerWidth 
+        }));
+        
+        function animateWarp() {
+            if (!canvas || !ctx) return;
+            canvas.width = window.innerWidth; 
+            canvas.height = window.innerHeight;
+            const isDark = document.body.getAttribute('data-theme') === 'dark';
+            
+            ctx.fillStyle = isDark ? "rgba(2, 6, 23, 0.4)" : "rgba(255, 255, 255, 0)";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            if(isDark) {
+                stars.forEach(s => {
+                    s.z -= 1.5; if (s.z <= 0) s.z = canvas.width;
+                    const x = (s.x / s.z) * canvas.width + canvas.width/2;
+                    const y = (s.y / s.z) * canvas.height + canvas.height/2;
+                    const size = (1 - s.z/canvas.width) * 2;
+                    
+                    ctx.beginPath(); 
+                    ctx.fillStyle = "white"; 
+                    ctx.arc(x, y, size, 0, Math.PI*2); 
+                    ctx.fill();
+                });
+            }
+            requestAnimationFrame(animateWarp);
+        }
     </script>
 </body>
 </html>
