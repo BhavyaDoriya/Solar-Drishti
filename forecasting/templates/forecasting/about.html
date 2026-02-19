@@ -9,6 +9,8 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 
     <style>
         :root {
@@ -17,7 +19,6 @@
             --text-color: #1a1a1a;
             --card-bg: rgba(255, 255, 255, 0.85);
             --border: rgba(0, 0, 0, 0.08);
-            --orb-color: radial-gradient(circle at 30% 30%, #ffcc00, #ff9100);
             --orb-shadow: rgba(255, 145, 0, 0.4);
         }
 
@@ -26,7 +27,6 @@
             --text-color: #f8fafc;
             --card-bg: rgba(15, 23, 42, 0.75);
             --border: rgba(255, 255, 255, 0.15);
-            --orb-color: radial-gradient(circle at 30% 30%, #cbd5e1, #64748b);
             --orb-shadow: rgba(255, 255, 255, 0.15);
         }
 
@@ -40,36 +40,12 @@
             width: 100%;
         }
 
-        /* --- RELIABLE FADE-IN ANIMATION (Replaces AOS) --- */
+        /* --- FADE-IN ANIMATION --- */
         .reveal { animation: revealAnim 1s ease forwards; opacity: 0; }
         @keyframes revealAnim { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
         .delay-1 { animation-delay: 0.2s; }
         .delay-2 { animation-delay: 0.4s; }
         .delay-3 { animation-delay: 0.6s; }
-
-        /* --- PRELOADER --- */
-        #preloader {
-            position: fixed; inset: 0; z-index: 9999;
-            background: #020617; transition: opacity 0.8s ease;
-        }
-
-        /* --- DEER ANIMATION --- */
-        #deer-container {
-            position: fixed; bottom: 80px; left: -150px; z-index: 1000;
-            display: none; flex-direction: column; align-items: center;
-        }
-        .deer-icon { font-size: 50px; }
-        .greeting-bubble {
-            background: white; color: black; padding: 5px 15px; border-radius: 20px;
-            font-size: 14px; font-weight: bold; margin-bottom: 10px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1); opacity: 0; transition: 0.3s;
-            position: relative; border: 2px solid var(--primary-orange);
-            font-family: 'Poppins', sans-serif;
-        }
-        .greeting-bubble::after {
-            content: ''; position: absolute; bottom: -10px; left: 50%; transform: translateX(-50%);
-            border-width: 10px 10px 0; border-style: solid; border-color: var(--primary-orange) transparent transparent;
-        }
 
         /* --- SPACE THEME --- */
         #warpCanvas { position: fixed; inset: 0; z-index: -2; pointer-events: none; opacity: 0; transition: opacity 1s ease; }
@@ -80,6 +56,10 @@
             z-index: 1000; background-size: 100% 4px; pointer-events: none;
         }
 
+        /* --- SCROLL PROGRESS & CANVAS --- */
+        #scroll-progress { position: fixed; top: 0; left: 0; width: 0%; height: 3px; background: var(--primary-orange); z-index: 9999; box-shadow: 0 0 10px var(--primary-orange); }
+        .vignette { position: fixed; inset: 0; z-index: -1; pointer-events: none; background: radial-gradient(circle at center, transparent 0%, rgba(0,0,0,0.4) 100%); }
+
         /* --- NAVBAR & TYPOGRAPHY --- */
         h1, h2, h3, h4, h5, h6, .navbar-brand, .nav-link, .btn, .brand-font, .star-letter { font-family: 'Orbitron', sans-serif !important; }
         .navbar { background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(20px); border-bottom: 1px solid var(--border); padding: 10px 0; }
@@ -87,20 +67,31 @@
         .nav-link { font-size: 13px; color: var(--text-color) !important; transition: 0.3s; }
         .nav-link.active-page { color: var(--primary-orange) !important; font-weight: 700; border-bottom: 2px solid var(--primary-orange); }
 
-        /* --- DYNAMIC CELESTIAL ORB --- */
-        .celestial-wrapper { height: 200px; display: flex; align-items: center; justify-content: center; margin: 40px 0; }
-        .orb {
-            width: 160px; height: 160px; background: var(--orb-color); border-radius: 50%;
-            box-shadow: 0 0 60px var(--orb-shadow), inset -15px -15px 40px rgba(0,0,0,0.2);
-            transition: background 1s, box-shadow 1s; animation: float 6s ease-in-out infinite;
-            position: relative; overflow: hidden;
+        /* --- DROPDOWN MENU HOVER FIX --- */
+        .dropdown-menu {
+            background: var(--card-bg) !important;
+            backdrop-filter: blur(25px) !important;
+            border: 1px solid var(--border) !important;
+            border-radius: 15px !important;
+            overflow: hidden; 
+            padding: 5px 0;
         }
-        .crater { position: absolute; background: rgba(0,0,0,0.1); border-radius: 50%; opacity: 0; transition: 0.5s ease; }
-        [data-theme="dark"] .crater { opacity: 0.2; }
-        .c1 { width: 30px; height: 30px; top: 20%; left: 20%; }
-        .c2 { width: 15px; height: 15px; top: 60%; left: 45%; }
-        .c3 { width: 22px; height: 22px; top: 35%; left: 65%; }
-        @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-20px); } }
+        .dropdown-item { color: var(--text-color) !important; padding: 10px 20px; transition: all 0.2s ease; }
+        .dropdown-item:hover { background-color: rgba(255, 145, 0, 0.15) !important; color: var(--primary-orange) !important; }
+        .dropdown-item.text-danger:hover { background-color: rgba(220, 53, 69, 0.15) !important; color: #dc3545 !important; }
+
+        /* --- CUSTOM CURSOR --- */
+        .cursor-dot, .cursor-outline { position: fixed; pointer-events: none; z-index: 9999; opacity: 0; }
+        @media (pointer: fine) {
+            body, html { cursor: none !important; }
+            a, button, input, select, label, .glass-card, .dropdown-item { cursor: none !important; }
+            .cursor-dot { display: block; width: 8px; height: 8px; background: var(--primary-orange); border-radius: 50%; top: 0; left: 0; opacity: 1; box-shadow: 0 0 10px var(--primary-orange); }
+            .cursor-outline { display: block; width: 30px; height: 30px; border: 2px solid var(--primary-orange); border-radius: 50%; top: 0; left: 0; opacity: 1; transition: transform 0.15s ease-out; }
+        }
+
+        /* --- 3D CONTAINER --- */
+        #three-container { height: 350px; width: 100%; display: flex; align-items: center; justify-content: center; margin-top: 50px; position: relative; z-index: 10; cursor: none;}
+        #three-container canvas { filter: drop-shadow(0 0 30px var(--orb-shadow)); }
 
         /* --- GLASS CARDS --- */
         .glass-card {
@@ -123,165 +114,22 @@
             border-radius: 50px; font-size: 0.7rem; font-weight: 600;
         }
 
+        /* --- CELESTIAL ANCHOR --- */
         #celestial-anchor { position: fixed; bottom: 25px; right: 25px; z-index: 2000; cursor: pointer; width: 85px; height: 85px; }
         .sun-glow #main-circle { filter: drop-shadow(0 0 15px rgba(255, 145, 0, 0.8)); }
         .moon-glow #main-circle { filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.6)); }
 
         @media (max-width: 768px) {
             .display-4 { font-size: 1.8rem; }
-            .celestial-wrapper { height: 160px; }
-            .orb { width: 120px; height: 120px; }
+            #three-container { height: 250px; }
             .glass-card { padding: 20px; }
-        }
-         /* --- DROPDOWN MENU HOVER FIX --- */
-        .dropdown-menu {
-            /* This fallback chain automatically finds the right variable for the page! */
-            background: var(--glass-bg, var(--glass-card, var(--card-bg))) !important;
-            backdrop-filter: blur(25px) !important;
-            border: 1px solid var(--glass-border, var(--border)) !important;
-            border-radius: 15px !important;
-            overflow: hidden; 
-            padding: 5px 0;
-        }
-        
-        .dropdown-item {
-            color: var(--text-color) !important;
-            padding: 10px 20px;
-            transition: all 0.2s ease;
-        }
-        
-        .dropdown-item:hover {
-            background-color: rgba(255, 145, 0, 0.15) !important; /* Soft orange highlight */
-            color: var(--primary-orange) !important; /* Text turns orange */
-        }
-        
-        /* Keep the logout button red on hover */
-        .dropdown-item.text-danger:hover {
-            background-color: rgba(220, 53, 69, 0.15) !important; 
-            color: #dc3545 !important;
-        }
-          /* --- CUSTOM CURSOR (Light & Dark Mode) --- */
-        .cursor-dot, .cursor-outline { 
-            position: fixed; 
-            pointer-events: none; 
-            z-index: 9999; 
-            opacity: 0; /* Hidden by default (prevents it from showing on mobile touch screens) */
-        }
-        
-        @media (pointer: fine) {
-            /* Hide native cursor on ALL themes */
-            body, html { cursor: none !important; }
-            a, button, input, select, label, .flip-card, .dropdown-item { cursor: none !important; }
-            
-            /* Show custom cursor dots on ALL themes */
-            .cursor-dot { 
-                display: block; 
-                width: 8px; 
-                height: 8px; 
-                background: var(--primary-orange); 
-                border-radius: 50%; 
-                top: 0; 
-                left: 0; 
-                opacity: 1; 
-                box-shadow: 0 0 10px var(--primary-orange); 
-            }
-            .cursor-outline { 
-                display: block; 
-                width: 30px; 
-                height: 30px; 
-                border: 2px solid var(--primary-orange); 
-                border-radius: 50%; 
-                top: 0; 
-                left: 0; 
-                opacity: 1; 
-                transition: transform 0.15s ease-out; 
-            }
-        }
-         #scroll-progress { 
-            position: fixed; top: 0; left: 0; width: 0%; height: 3px; 
-            background: var(--primary-orange); z-index: 9999; 
-            box-shadow: 0 0 10px var(--primary-orange); 
-        }
-        .vignette { 
-            position: fixed; inset: 0; z-index: -1; pointer-events: none; 
-            background: radial-gradient(circle at center, transparent 0%, rgba(0,0,0,0.4) 100%); 
-        }
-        /* --- UPGRADED 3D CELESTIAL ENERGY CORE --- */
-        .celestial-wrapper { 
-            position: relative;
-            height: 250px; 
-            display: flex; align-items: center; justify-content: center; 
-            margin: 40px 0; 
-            perspective: 1000px; /* Creates depth for the 3D ring */
-        }
-        
-        .orb {
-            width: 140px; height: 140px; 
-            background: var(--orb-color); 
-            border-radius: 50%;
-            /* Intense inner shadow for spherical depth */
-            box-shadow: inset -20px -20px 40px rgba(0,0,0,0.3);
-            animation: pulse-glow 4s infinite alternate, float 6s ease-in-out infinite;
-            position: relative; 
-            z-index: 2;
-            overflow: hidden;
-        }
-
-        /* The 3D Orbiting Energy Ring */
-        .celestial-wrapper::after {
-            content: '';
-            position: absolute;
-            width: 280px;
-            height: 280px;
-            border: 2px solid var(--primary-orange);
-            border-radius: 50%;
-            border-left-color: transparent;
-            border-right-color: transparent;
-            opacity: 0.6;
-            animation: spin-ring 10s linear infinite, float 6s ease-in-out infinite;
-            z-index: 1;
-        }
-
-        /* Change ring color in dark mode to match the moon */
-        [data-theme="dark"] .celestial-wrapper::after {
-            border-top-color: #94a3b8;
-            border-bottom-color: #94a3b8;
-        }
-
-        .crater { position: absolute; background: rgba(0,0,0,0.1); border-radius: 50%; opacity: 0; transition: 0.5s ease; }
-        [data-theme="dark"] .crater { opacity: 0.2; }
-        .c1 { width: 30px; height: 30px; top: 20%; left: 20%; }
-        .c2 { width: 15px; height: 15px; top: 60%; left: 45%; }
-        .c3 { width: 22px; height: 22px; top: 35%; left: 65%; }
-
-        /* 3D Ring Rotation Math */
-        @keyframes spin-ring {
-            0% { transform: rotateX(75deg) rotateZ(0deg); }
-            100% { transform: rotateX(75deg) rotateZ(360deg); }
-        }
-
-        /* Pulsing Glow Effect */
-        @keyframes pulse-glow {
-            0% { box-shadow: 0 0 40px var(--orb-shadow), inset -20px -20px 40px rgba(0,0,0,0.3); }
-            100% { box-shadow: 0 0 90px var(--orb-shadow), 0 0 20px var(--primary-orange), inset -20px -20px 40px rgba(0,0,0,0.3); }
-        }
-        
-        /* Sync the floating motion of both the orb and the ring */
-        @keyframes float { 
-            0%, 100% { top: 0px; } 
-            50% { top: -15px; } 
         }
     </style>
 </head>
 <body onload="initApp()">
 
-    <div id="preloader"></div>
     <div id="scroll-progress"></div>
     <div class="vignette"></div>
-    <div id="deer-container">
-        <div class="greeting-bubble" id="deer-speech">Hello System User!</div>
-        <div class="deer-icon">🦌</div>
-    </div>
     <div class="cursor-dot"></div>
     <div class="cursor-outline"></div>
     <canvas id="warpCanvas"></canvas>
@@ -290,7 +138,7 @@
         <nav class="navbar navbar-expand-lg fixed-top shadow-sm">
             <div class="container">
                 <a class="navbar-brand d-flex align-items-center" href="/">
-                    <i class="fa-solid fa-sun-plant-wilt me-2"></i> SOLAR<span style="color: #64748b;">DRISHTI</span>
+                    <i class="fa-solid fa-sun-plant-wilt me-2"></i> SOLAR<span class="text-secondary">DRISHTI</span>
                 </a>
                 <button class="navbar-toggler border-0 shadow-none" type="button" data-bs-toggle="collapse" data-bs-target="#navMain"><span class="navbar-toggler-icon"></span></button>
                 <div class="collapse navbar-collapse" id="navMain">
@@ -302,13 +150,15 @@
                         {% if user.is_authenticated %}
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle px-3" href="#" id="profileDrop" data-bs-toggle="dropdown"><i class="fa-solid fa-circle-user"></i> {{ user.username|upper }}</a>
-                            <ul class="dropdown-menu dropdown-menu-end shadow border-0" style="background: var(--card-bg); backdrop-filter: blur(10px); --bs-dropdown-divider-bg: var(--text-color);">
+                            <ul class="dropdown-menu dropdown-menu-end shadow border-0">
                                 <li><a class="dropdown-item" href="{% url 'profile_view' user_id=request.user.id %}">View Profile</a></li>
                                 <li><a class="dropdown-item" href="{% url 'update_profile' %}">Update Profile</a></li>
                                 <li><hr class="dropdown-divider"></li>
                                 <li><a class="dropdown-item text-danger fw-bold" href="{% url 'logout' %}">Logout</a></li>
                             </ul>
                         </li>
+                        {% else %}
+                        <li class="nav-item ms-lg-3"><a href="{% url 'login' %}" class="btn btn-warning rounded-pill px-4 fw-bold shadow" style="background: linear-gradient(45deg, var(--primary-orange), #ff6d00); border: none; color: white;">Sign-in</a></li>
                         {% endif %}
                     </ul>
                 </div>
@@ -317,13 +167,10 @@
     </header>
 
     <main class="container py-5 mt-5">
-        <section class="text-center py-5 reveal">
-            <div class="celestial-wrapper">
-                <div class="orb">
-                    <div class="crater c1"></div><div class="crater c2"></div><div class="crater c3"></div>
-                </div>
-            </div>
-            <h1 class="display-4 fw-bold mb-3">PRECISION <span style="color: var(--primary-orange);">SOLAR INTELLIGENCE</span></h1>
+        <div id="three-container" class="reveal"></div>
+
+        <section class="text-center pb-5 reveal">
+            <h1 class="display-4 fw-bold mb-3 mt-4">PRECISION <span style="color: var(--primary-orange);">SOLAR INTELLIGENCE</span></h1>
             <p class="lead mx-auto" style="max-width: 850px; opacity: 0.85;">Transforming atmospheric complexity into reliable clean energy foresight through end-to-end engineering.</p>
         </section>
 
@@ -367,7 +214,7 @@
                         <h4 class="brand-font mb-1">Bhavya Doriya</h4>
                         <p class="fw-bold small mb-2" style="color: var(--primary-orange);">Data Analyst</p>
                         <p class="small mb-3">Sourcing NREL 'engine oil' and training predictive models.</p>
-                        <button class="btn btn-sm btn-outline-warning rounded-pill px-4 mb-2" data-bs-toggle="collapse" data-bs-target="#bStack">Stack</button>
+                        <button class="btn btn-sm btn-outline-warning rounded-pill px-4 mb-2" data-bs-toggle="collapse" data-bs-target="#bStack" style="border-color: var(--primary-orange); color: var(--primary-orange);">Stack</button>
                         <div class="collapse mt-2" id="bStack"><span class="tech-pill">Pandas</span><span class="tech-pill">NREL API</span><span class="tech-pill">Joblib</span></div>
                     </div>
                 </div>
@@ -377,7 +224,7 @@
                         <h4 class="brand-font mb-1">Pratham</h4>
                         <p class="fw-bold small mb-2" style="color: var(--primary-orange);">Integrity Manager</p>
                         <p class="small mb-3">Architecting Django core: security, scalability, integration.</p>
-                        <button class="btn btn-sm btn-outline-warning rounded-pill px-4 mb-2" data-bs-toggle="collapse" data-bs-target="#pStack">Stack</button>
+                        <button class="btn btn-sm btn-outline-warning rounded-pill px-4 mb-2" data-bs-toggle="collapse" data-bs-target="#pStack" style="border-color: var(--primary-orange); color: var(--primary-orange);">Stack</button>
                         <div class="collapse mt-2" id="pStack"><span class="tech-pill">Django</span><span class="tech-pill">PostgreSQL</span><span class="tech-pill">Render</span></div>
                     </div>
                 </div>
@@ -387,7 +234,7 @@
                         <h4 class="brand-font mb-1">Jyoti</h4>
                         <p class="fw-bold small mb-2" style="color: var(--primary-orange);">UI/UX Designer</p>
                         <p class="small mb-3">Designing futuristic terminal interface and user experience.</p>
-                        <button class="btn btn-sm btn-outline-warning rounded-pill px-4 mb-2" data-bs-toggle="collapse" data-bs-target="#jStack">Stack</button>
+                        <button class="btn btn-sm btn-outline-warning rounded-pill px-4 mb-2" data-bs-toggle="collapse" data-bs-target="#jStack" style="border-color: var(--primary-orange); color: var(--primary-orange);">Stack</button>
                         <div class="collapse mt-2" id="jStack"><span class="tech-pill">Bootstrap</span><span class="tech-pill">JavaScript</span><span class="tech-pill">CSS3</span></div>
                     </div>
                 </div>
@@ -396,17 +243,17 @@
 
         <section class="glass-card text-center my-5 py-5 reveal delay-3">
             <h3 class="fw-bold mb-2">SYSTEM ASSISTANCE</h3>
-            <a href="mailto:solardrishtihelp@gmail.com" class="btn btn-warning rounded-pill px-5 py-3 fw-bold shadow-sm">
+            <a href="mailto:solardrishtihelp@gmail.com" class="btn btn-warning rounded-pill px-5 py-3 fw-bold shadow-sm" style="background: linear-gradient(45deg, var(--primary-orange), #ff6d00); border: none; color: white;">
                 <i class="fa-solid fa-envelope me-2"></i> solardrishtihelp@gmail.com
             </a>
         </section>
     </main>
 
     <footer class="text-center py-5 opacity-50">
-        <p class="small mb-0">&copy; 2026 SolarDrishti Engineering | Built with STAR Methodology</p>
+        <p class="small mb-0" style="font-family: 'Poppins';">&copy; 2026 SolarDrishti Engineering | Built with STAR Methodology</p>
     </footer>
 
-    <aside id="celestial-anchor" onclick="toggleTheme()">
+    <aside id="celestial-anchor" onclick="toggleTheme()" style="cursor: none !important;">
         <svg width="100%" height="100%" viewBox="0 0 100 100">
             <circle id="main-circle" cx="50" cy="50" r="40" fill="#FFD700" />
             <g id="eyes">
@@ -419,7 +266,82 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        // Start warp engine immediately
+
+        // --- THREE.JS 3D MODEL LOGIC ---
+        let scene, camera, renderer, solarGroup, coreMaterial, wireMaterial, particleMaterial;
+        let targetX = 0, targetY = 0;
+
+        function init3D() {
+            const container = document.getElementById('three-container');
+            if (!container) return;
+
+            scene = new THREE.Scene();
+            camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 1000);
+            camera.position.z = 8;
+
+            renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+            renderer.setSize(container.clientWidth, container.clientHeight);
+            container.appendChild(renderer.domElement);
+
+            solarGroup = new THREE.Group();
+            scene.add(solarGroup);
+
+            // Inner Core (Solid)
+            const coreGeo = new THREE.IcosahedronGeometry(1.8, 2);
+            coreMaterial = new THREE.MeshBasicMaterial({ color: 0xff6d00, transparent: true, opacity: 0.9 });
+            const core = new THREE.Mesh(coreGeo, coreMaterial);
+            solarGroup.add(core);
+
+            // Outer Shell (Wireframe Hologram)
+            const wireGeo = new THREE.IcosahedronGeometry(2.1, 2);
+            wireMaterial = new THREE.MeshBasicMaterial({ color: 0xff9100, wireframe: true, transparent: true, opacity: 0.4 });
+            const wire = new THREE.Mesh(wireGeo, wireMaterial);
+            solarGroup.add(wire);
+
+            // Orbiting Particles
+            const particleGeo = new THREE.BufferGeometry();
+            const particleCount = 400;
+            const posArray = new Float32Array(particleCount * 3);
+            for(let i=0; i<particleCount*3; i++) {
+                // Creates a randomized cloud around the sphere
+                posArray[i] = (Math.random() - 0.5) * 12;
+            }
+            particleGeo.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
+            particleMaterial = new THREE.PointsMaterial({ size: 0.05, color: 0xff9100, transparent: true, opacity: 0.7 });
+            const particles = new THREE.Points(particleGeo, particleMaterial);
+            solarGroup.add(particles);
+
+            animate3D();
+
+            // Responsive Resizing
+            window.addEventListener('resize', () => {
+                if(container) {
+                    camera.aspect = container.clientWidth / container.clientHeight;
+                    camera.updateProjectionMatrix();
+                    renderer.setSize(container.clientWidth, container.clientHeight);
+                }
+            });
+        }
+
+        function animate3D() {
+            requestAnimationFrame(animate3D);
+            if(solarGroup) {
+                // Auto spin
+                solarGroup.rotation.y += 0.003;
+                solarGroup.rotation.x += 0.001;
+                
+                // Interactive mouse tilt (parallax)
+                scene.rotation.y += (targetX - scene.rotation.y) * 0.05;
+                scene.rotation.x += (targetY - scene.rotation.x) * 0.05;
+
+                // Breathing/Pulsing effect
+                const scale = 1 + Math.sin(Date.now() * 0.002) * 0.03;
+                solarGroup.scale.set(scale, scale, scale);
+            }
+            renderer.render(scene, camera);
+        }
+
+        // Start warp engine
         const canvas = document.getElementById('warpCanvas'), ctx = canvas.getContext('2d');
         let stars = Array(450).fill().map(() => ({ x: Math.random()*innerWidth-innerWidth/2, y: Math.random()*innerHeight-innerHeight/2, z: Math.random()*innerWidth }));
         
@@ -437,69 +359,61 @@
             }
             requestAnimationFrame(animate);
         }
-        animate();
 
-        window.addEventListener('load', () => {
-            const pre = document.getElementById('preloader');
-            setTimeout(() => { 
-                pre.style.opacity = '0'; 
-                setTimeout(() => { 
-                    pre.remove(); 
-                    runDeer(); 
-                }, 800); 
-            }, 800);
-        });
-
-        function runDeer() {
-            const deer = document.getElementById('deer-container');
-            const speech = document.getElementById('deer-speech');
-            deer.style.display = 'flex';
-            let pos = -150;
-            const interval = setInterval(() => {
-                pos += 5;
-                deer.style.left = pos + 'px';
-                if (pos > window.innerWidth / 2 - 100 && pos < window.innerWidth / 2 + 100) {
-                    speech.style.opacity = '1';
-                } else {
-                    speech.style.opacity = '0';
-                }
-                if (pos > window.innerWidth + 200) {
-                    clearInterval(interval);
-                    deer.remove();
-                }
-            }, 10);
+        function initApp() { 
+            applyTheme(localStorage.getItem('theme') || 'light'); 
+            init3D(); // Boots up the 3D model
+            animate(); 
         }
 
-        function initApp() { applyTheme(localStorage.getItem('theme') || 'light'); }
         function toggleTheme() { applyTheme(document.body.getAttribute('data-theme') === 'dark' ? 'light' : 'dark'); }
         
         function applyTheme(mode) {
             document.body.setAttribute('data-theme', mode);
             localStorage.setItem('theme', mode);
+            
+            // 1. Update the Sun/Moon Eye Tracker
             const sun = document.getElementById('main-circle');
             const anc = document.getElementById('celestial-anchor');
             if(sun) sun.setAttribute('fill', mode === 'dark' ? '#bdc3c7' : '#FFD700');
             if(anc) { anc.className = mode === 'dark' ? 'moon-glow' : 'sun-glow'; }
+
+            // 2. DYNAMICALLY UPDATE THE 3D MODEL COLORS
+            if (typeof coreMaterial !== 'undefined') {
+                const isDark = mode === 'dark';
+                // Dark mode: cool greys/blues. Light mode: hot oranges.
+                const colorCore = isDark ? 0x64748b : 0xff6d00; 
+                const colorWire = isDark ? 0xcbd5e1 : 0xff9100;
+                
+                coreMaterial.color.setHex(colorCore);
+                wireMaterial.color.setHex(colorWire);
+                particleMaterial.color.setHex(colorWire);
+            }
         }
 
-        // --- EYETRACKING & CUSTOM CURSOR ---
+        // --- EYETRACKING, PARALLAX & CUSTOM CURSOR ---
         const dot = document.querySelector('.cursor-dot');
         const outline = document.querySelector('.cursor-outline');
         
         document.addEventListener('mousemove', (e) => {
-            // 1. Move the Custom Cursor (only active in dark mode via CSS)
+            // Feed mouse data to the 3D model for parallax tilt
+            targetX = (e.clientX / window.innerWidth) * 2 - 1;
+            targetY = -(e.clientY / window.innerHeight) * 2 + 1;
+
+            // Move the Custom Cursor
             if (dot && outline) {
                 dot.style.transform = `translate(${e.clientX}px, ${e.clientY}px)`;
                 outline.animate({ transform: `translate(${e.clientX - 15}px, ${e.clientY - 15}px)` }, { duration: 400, fill: "forwards" });
             }
 
-            // 2. Move the Celestial Eye Irises
+            // Move the Celestial Eye Irises
             document.querySelectorAll('.iris').forEach(iris => {
                 const rect = iris.getBoundingClientRect();
                 const angle = Math.atan2(e.clientY - (rect.top + 3.5), e.clientX - (rect.left + 3.5));
                 iris.style.transform = `translate(${Math.cos(angle) * 3}px, ${Math.sin(angle) * 3}px)`;
             });
         });
+
         // SCROLL PROGRESS TRACKER
         window.onscroll = function() {
             let winScroll = document.body.scrollTop || document.documentElement.scrollTop;
