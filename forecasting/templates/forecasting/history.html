@@ -390,6 +390,7 @@
                 <table class="table align-middle" id="historyTable">
                     <thead>
                         <tr>
+                            <th>System</th>
                             <th>Commit Date</th>
                             <th>Forecast Date</th>
                             <th>Predicted</th>
@@ -401,6 +402,9 @@
                     <tbody id="historyBody">
                         {% for entry in history_list %}
                         <tr>
+                            <td class="fw-bold" style="color: var(--primary-orange);">
+                             <i class="fa-solid fa-microchip me-1 small"></i> 
+                             {{ entry.system.name }} </td>
                             <td class="text-muted small">{{ entry.created_at|date:"M d, H:i" }}</td>
                             <td class="text-dark">{{ entry.target_date|date:"M d, Y" }}</td>
                             <td style="color: var(--primary-orange);">{{ entry.pred_value }} kWh</td>
@@ -470,18 +474,24 @@
     </div>
 
     <div class="modal fade" id="analyticsModal" tabindex="-1">
-        <div class="modal-dialog modal-lg modal-dialog-centered">
-            <div class="modal-content border-0 rounded-5 shadow-lg">
-                <div class="p-5">
-                    <div class="d-flex justify-content-between align-items-center mb-4">
-                        <h4 class="fw-bold text-dark mb-0">Generation Trends</h4>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                    </div>
-                    <div style="height: 400px;"><canvas id="historyChart"></canvas></div>
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content border-0 rounded-5 shadow-lg">
+            <div class="p-5">
+                <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
+                    <h4 class="fw-bold text-dark mb-0">Generation Trends</h4>
+                    <select id="systemGraphFilter" class="form-select rounded-pill border-warning shadow-none" style="width: auto; min-width: 200px;" onchange="updateGraphBySystem()">
+                        <option value="all">All Systems Combined</option>
+                        {% for sys in systems %}
+                            <option value="{{ sys.id }}">{{ sys.name }}</option>
+                        {% endfor %}
+                    </select>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
+                <div style="height: 400px;"><canvas id="historyChart"></canvas></div>
             </div>
         </div>
     </div>
+</div>
 
     <aside id="celestial-anchor" onclick="toggleTheme()">
         <svg width="100%" height="100%" viewBox="0 0 100 100">
@@ -684,6 +694,42 @@
             const progress = document.getElementById("scroll-progress");
             if (progress) progress.style.width = scrolled + "%";
         };
+        
+
+        
+    // 1. Safely grab and parse the data
+    const rawHistory = JSON.parse(document.getElementById('history-data-json').textContent);
+    
+    // 2. Format it for our needs
+    const rawData = rawHistory.map(entry => ({
+        systemId: entry.system_id, // Django Serializer uses system_id by default
+        label: new Date(entry.target_date).toLocaleDateString('en-GB', { day: '2d', month: 'short' }),
+        pred: entry.pred_value || 0,
+        actual: entry.actual_value || 0
+    })).reverse();
+
+    function updateGraphBySystem() {
+        const selectedId = document.getElementById('systemGraphFilter').value;
+        const isDark = document.body.getAttribute('data-theme') === 'dark';
+        
+        // Filter logic
+        let filtered = selectedId === 'all' 
+            ? rawData 
+            : rawData.filter(d => String(d.systemId) === String(selectedId));
+
+        // Get last 10 for readability
+        const displayData = filtered.slice(-10);
+
+        // Update Chart
+        chartInstance.data.labels = displayData.map(d => d.label);
+        chartInstance.data.datasets[0].data = displayData.map(d => d.pred);
+        chartInstance.data.datasets[1].data = displayData.map(d => d.actual);
+        
+        // Ensure colors stay sharp in dark mode during update
+        chartInstance.options.plugins.legend.labels.color = isDark ? '#f8fafc' : '#334155';
+        
+        chartInstance.update();
+    }
     </script>
 </body>
 </html>

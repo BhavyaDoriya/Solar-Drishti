@@ -245,19 +245,23 @@ def predictview(request):
 @login_required
 def add_system(request):
     if request.method == "POST":
+        name = request.POST.get('name', '').strip()
         lat = request.POST.get('lat')
         lon = request.POST.get('lon')
-        name = request.POST.get('name')
         
+        # 1. PRE-CHECK: Catch the error before the database does
+        if SolarSystem.objects.filter(user=request.user, name__iexact=name).exists():
+            messages.error(request, f"A system named '{name}' already exists in your account.")
+            return redirect('predict')
+
         try:
-            # 1. Convert size to float and check for negative values
             size = float(request.POST.get('size'))
             
             if size <= 0:
                 messages.error(request, "System capacity must be a positive number.")
                 return redirect('predict')
             
-            # 2. OpenWeather Geocoding logic
+            # Geocoding logic
             api_key = config("OPENWEATHER_API_KEY")
             geo_url = f"http://api.openweathermap.org/geo/1.0/reverse?lat={lat}&lon={lon}&limit=1&appid={api_key}"
             
@@ -267,7 +271,7 @@ def add_system(request):
             except:
                 location_name = "Unknown Location"
 
-            # 3. Create the system
+            # 2. SAVE ATTEMPT: Wrapped in try-except for absolute safety
             SolarSystem.objects.create(
                 user=request.user,
                 name=name,
@@ -278,6 +282,9 @@ def add_system(request):
             )
             messages.success(request, f"System '{name}' added successfully!")
             
+        except IntegrityError:
+            # This catches the specific error shown in your screenshot
+            messages.error(request, "Database error: This system name is already taken.")
         except ValueError:
             messages.error(request, "Please enter a valid number for system capacity.")
             
@@ -398,7 +405,7 @@ from django.utils import timezone
 
 from django.utils import timezone
 from django.db.models import Sum, F
-from django.db import transaction
+from django.db import IntegrityError, transaction
 
 
 from django.db import transaction
@@ -414,6 +421,7 @@ from django.db import transaction
 def history_view(request):
     history_list = Prediction.objects.filter(system__user=request.user).order_by('-target_date')
     verified_logs = history_list.filter(actual_value__isnull=False)
+    systems = SolarSystem.objects.filter(user=request.user)
     
     if verified_logs.exists():
         # High-precision weighted accuracy calculation
@@ -424,6 +432,7 @@ def history_view(request):
         avg_acc_val = 0
     
     return render(request, 'forecasting/history.html', {
+        'systems': systems,
         'history_list': history_list,
         'avg_acc': round(avg_acc_val, 2), # Correctly rounded for summary card
         'system_count': SolarSystem.objects.filter(user=request.user).count()

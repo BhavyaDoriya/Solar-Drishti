@@ -273,16 +273,36 @@
 
         <div class="row g-3">
             {% for system in systems %}
-            <div class="col-12 col-md-6 col-lg-4">
-                <div class="system-card shadow-sm">
-                    <h5 class="fw-bold m-0" style="color: var(--primary-orange);">{{ system.name }}</h5>
-                    <small class="text-muted mb-3 d-block" style="color:var(--text-color) !important;"><i class="fa-solid fa-location-dot me-1"></i> {{ system.location_name }}</small>
-                    <div class="row g-2 mt-auto">
-                        <div class="col-6"><button class="btn btn-outline-warning w-100 rounded-pill fw-bold btn-sm" onclick="runPrediction(this, '{{ system.id }}', 'tomorrow')"><span class="spinner-border spinner-border-sm"></span><span class="btn-text">Tomorrow</span></button></div>
-                        <div class="col-6"><button class="btn btn-outline-warning w-100 rounded-pill fw-bold btn-sm" onclick="runPrediction(this, '{{ system.id }}', 'day_after')"><span class="spinner-border spinner-border-sm"></span><span class="btn-text">Overmorrow</span></button></div>
-                    </div>
-                </div>
+           <div class="col-12 col-md-6 col-lg-4">
+    <div class="system-card shadow-sm position-relative">
+        <div class="position-absolute" style="top: 15px; right: 15px;">
+            <button class="btn btn-link text-danger p-0 border-0 opacity-75" 
+                    style="font-size: 1.1rem; transition: 0.3s;"
+                    onclick="confirmRemoval('{{ system.id }}', '{{ system.name }}')"
+                    title="Remove System">
+                <i class="fa-solid fa-trash-can"></i>
+            </button>
+        </div>
+
+        <h5 class="fw-bold m-0 pe-4" style="color: var(--primary-orange);">{{ system.name }}</h5>
+        <small class="text-muted mb-3 d-block" style="color:var(--text-color) !important;">
+            <i class="fa-solid fa-location-dot me-1"></i> {{ system.location_name }}
+        </small>
+        
+        <div class="row g-2 mt-auto">
+            <div class="col-6">
+                <button class="btn btn-outline-warning w-100 rounded-pill fw-bold btn-sm" onclick="runPrediction(this, '{{ system.id }}', 'tomorrow')">
+                    <span class="spinner-border spinner-border-sm"></span><span class="btn-text">Tomorrow</span>
+                </button>
             </div>
+            <div class="col-6">
+                <button class="btn btn-outline-warning w-100 rounded-pill fw-bold btn-sm" onclick="runPrediction(this, '{{ system.id }}', 'day_after')">
+                    <span class="spinner-border spinner-border-sm"></span><span class="btn-text">Overmorrow</span>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
             {% endfor %}
         </div>
     </main>
@@ -305,21 +325,21 @@
                             <div class="d-flex justify-content-between align-items-center mb-2">
                                 <span>Solar Radiation (GHI) 
                                     <i class="fa-solid fa-circle-info ms-1 text-primary small" style="cursor:help;" 
-                                       title="Global Horizontal Irradiance: The total amount of shortwave radiation received from above by a surface horizontal to the ground. Higher GHI = More Energy Production."></i>
+                                       title="Global Horizontal Irradiance: The total amount of shortwave radiation received from above by a surface horizontal to the ground. Higher GHI = More power."></i>
                                 </span>
                                 <span id="factor-ghi" class="fw-bold text-orange">--</span>
                             </div>
                             <div class="d-flex justify-content-between align-items-center mb-2">
                                 <span>Air Temperature 
                                     <i class="fa-solid fa-circle-info ms-1 text-primary small" style="cursor:help;" 
-                                       title="Higher temperature might refer to sunny day, which increases output."></i>
+                                       title="Ambient temperature. Excessive heat can actually reduce solar panel efficiency."></i>
                                 </span>
                                 <span id="factor-temp" class="fw-bold text-orange">--</span>
                             </div>
                             <div class="d-flex justify-content-between align-items-center">
                                 <span>Wind Speed 
                                     <i class="fa-solid fa-circle-info ms-1 text-primary small" style="cursor:help;" 
-                                       title="Higher wind speed may indicate storm resulting in reduced output."></i>
+                                       title="Wind helps cool panels down, potentially improving performance in hot conditions."></i>
                                 </span>
                                 <span id="factor-wind" class="fw-bold text-orange">--</span>
                             </div>
@@ -362,8 +382,31 @@
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="https://unpkg.com/leaflet-geosearch@3.11.0/dist/bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-
+    <div class="modal fade" id="removeSystemModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered modal-sm">
+        <div class="modal-content rounded-4 border-0" style="background: var(--glass-bg); backdrop-filter: blur(20px); color: var(--text-color);">
+            <div class="modal-body text-center p-4">
+                <i class="fa-solid fa-triangle-exclamation text-danger fa-3x mb-3"></i>
+                <h5 class="fw-bold mb-2">Decommission System?</h5>
+                <p class="small opacity-75">Are you sure you want to remove <span id="remove-sys-name" class="fw-bold text-warning"></span>? All telemetry and history will be lost.</p>
+                
+                <div class="d-grid gap-2 mt-4">
+                   <a href="#" id="confirm-remove-btn" class="btn btn-danger rounded-pill fw-bold py-2" onclick="disableOnclick(this)">YES, REMOVE</a>
+                    <button class="btn btn-outline-secondary rounded-pill btn-sm border-0" data-bs-dismiss="modal">CANCEL</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
     <script>
+    function disableOnclick(btn) {
+    // Add a loading state visually
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Deleting...';
+    
+    // Disable clicks to prevent the 404 error from double-tapping
+    btn.style.pointerEvents = 'none';
+    btn.classList.add('disabled', 'opacity-50');
+}    
     let map, marker;
     const US_BOUNDS = L.latLngBounds([24.39, -125.0], [49.38, -66.93]);
 
@@ -529,6 +572,19 @@
         const progress = document.getElementById("scroll-progress");
         if (progress) progress.style.width = scrolled + "%";
     };
+    function confirmRemoval(systemId, systemName) {
+    // Set the name in the modal text
+    document.getElementById('remove-sys-name').innerText = systemName;
+    
+    // Construct the URL dynamically based on your views.py structure
+    // We use a template literal and replace the ID
+    const removeUrl = "{% url 'remove_system' system_id=0 %}".replace('0', systemId);
+    document.getElementById('confirm-remove-btn').setAttribute('href', removeUrl);
+    
+    // Show the modal
+    const removeModal = new bootstrap.Modal(document.getElementById('removeSystemModal'));
+    removeModal.show();
+}
 </script>
 </body>
 </html>

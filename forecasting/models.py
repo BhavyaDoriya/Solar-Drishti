@@ -61,6 +61,10 @@ class SolarSystem(models.Model):
     latitude = models.FloatField()
     longitude = models.FloatField()
     location_name = models.CharField(max_length=255)
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=['user', 'name'], name='unique_system_name_per_user')
+        ]
 
     # --- LOGIC FIELDS ---
     # Tracks when the first prediction of the 7-day cycle was made
