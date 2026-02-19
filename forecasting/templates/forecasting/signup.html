@@ -313,9 +313,17 @@
                             <label for="userEmail">Email Address</label>
                         </div>
                         
-                        <div class="form-floating mb-4">
-                            <input type="password" name="password" class="form-control shadow-none" id="signupPassword" placeholder="Password" required autocomplete="new-password">
+                       <div class="form-floating mb-1">
+                            <input type="password" name="password" class="form-control shadow-none" id="signupPassword" placeholder="Password" required autocomplete="new-password" oninput="validatePassword()">
                             <label for="signupPassword">Password</label>
+                        </div>
+                        
+                        <div id="password-reqs" class="text-start small mb-4 mt-2" style="display: none; padding-left: 10px; font-size: 0.8rem; opacity: 0.8;">
+                            <div id="req-length" class="text-danger"><i class="fa-solid fa-xmark me-1"></i> At least 8 characters</div>
+                            <div id="req-upper" class="text-danger"><i class="fa-solid fa-xmark me-1"></i> One uppercase letter</div>
+                            <div id="req-lower" class="text-danger"><i class="fa-solid fa-xmark me-1"></i> One lowercase letter</div>
+                            <div id="req-num" class="text-danger"><i class="fa-solid fa-xmark me-1"></i> One number</div>
+                            <div id="req-spec" class="text-danger"><i class="fa-solid fa-xmark me-1"></i> One special character (@$!%*?&)</div>
                         </div>
                         
                         <button type="button" class="btn btn-signup w-100" id="sendOtpBtn" onclick="handleSendOTP(event)">
@@ -385,8 +393,13 @@
         function handleSendOTP(e) {
             e.preventDefault();
             const btn = document.getElementById('sendOtpBtn');
+            
+            // SECURITY CHECK: Ensure button isn't disabled by password validator
+            if(btn.disabled) return; 
+            
             const container = document.getElementById('django-messages-container');
             const form = document.getElementById('signupForm');
+            
             const formData = new FormData(form);
 
             container.innerHTML = '';
@@ -529,6 +542,43 @@
                 });
             }
             requestAnimationFrame(animateWarp);
+        }
+        // --- PASSWORD VALIDATION LOGIC ---
+        function validatePassword() {
+            const pwd = document.getElementById('signupPassword').value;
+            const reqBox = document.getElementById('password-reqs');
+            const btn = document.getElementById('sendOtpBtn');
+            
+            // Show requirements box when user starts typing
+            if(pwd.length > 0) { reqBox.style.display = 'block'; } 
+            else { reqBox.style.display = 'none'; }
+
+            // Regex Patterns
+            const rules = {
+                'req-length': pwd.length >= 8,
+                'req-upper': /[A-Z]/.test(pwd),
+                'req-lower': /[a-z]/.test(pwd),
+                'req-num': /[0-9]/.test(pwd),
+                'req-spec': /[@$!%*?&]/.test(pwd)
+            };
+
+            let isValid = true;
+
+            // Update UI for each rule
+            for (const [id, passed] of Object.entries(rules)) {
+                const el = document.getElementById(id);
+                if (passed) {
+                    el.className = "text-success"; // Turns green
+                    el.innerHTML = '<i class="fa-solid fa-check me-1"></i> ' + el.innerText;
+                } else {
+                    el.className = "text-danger"; // Turns red
+                    el.innerHTML = '<i class="fa-solid fa-xmark me-1"></i> ' + el.innerText;
+                    isValid = false;
+                }
+            }
+
+            // Disable button if password isn't strong enough
+            btn.disabled = !isValid;
         }
     </script>
 </body>

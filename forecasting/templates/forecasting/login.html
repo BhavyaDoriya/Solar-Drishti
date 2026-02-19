@@ -8,7 +8,6 @@
     <script src="https://accounts.google.com/gsi/client" async defer></script>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
     
     <style>
@@ -43,12 +42,7 @@
             overflow-x: hidden;
         }
 
-        h1, h2, h3, h4, h5, h6, 
-        .navbar-brand, 
-        .nav-link, 
-        .btn {
-            font-family: 'Orbitron', sans-serif !important;
-        }
+        h1, h2, h3, h4, h5, h6, .navbar-brand, .nav-link, .btn { font-family: 'Orbitron', sans-serif !important; }
 
         /* --- SPACE ATMOSPHERE --- */
         #warpCanvas { position: fixed; inset: 0; z-index: -2; pointer-events: none; opacity: 0; transition: opacity 1s ease; }
@@ -64,10 +58,10 @@
         /* --- CUSTOM CURSOR --- */
         .cursor-dot, .cursor-outline { position: fixed; pointer-events: none; z-index: 9999; opacity: 0; }
         @media (pointer: fine) {
-            [data-theme="dark"] { cursor: none !important; }
-            [data-theme="dark"] a, [data-theme="dark"] button, [data-theme="dark"] input { cursor: none !important; }
-            [data-theme="dark"] .cursor-dot { display: block; width: 8px; height: 8px; background: var(--primary-orange); border-radius: 50%; top: 0; left: 0; opacity: 1; box-shadow: 0 0 10px var(--primary-orange); }
-            [data-theme="dark"] .cursor-outline { display: block; width: 30px; height: 30px; border: 2px solid var(--primary-orange); border-radius: 50%; top: 0; left: 0; opacity: 1; transition: transform 0.15s ease-out; }
+            body, html { cursor: none !important; }
+            a, button, input, select, label { cursor: none !important; }
+            .cursor-dot { display: block; width: 8px; height: 8px; background: var(--primary-orange); border-radius: 50%; top: 0; left: 0; opacity: 1; box-shadow: 0 0 10px var(--primary-orange); }
+            .cursor-outline { display: block; width: 30px; height: 30px; border: 2px solid var(--primary-orange); border-radius: 50%; top: 0; left: 0; opacity: 1; transition: transform 0.15s ease-out; }
         }
 
         /* --- NAVBAR --- */
@@ -79,147 +73,62 @@
         [data-theme="dark"] .navbar-toggler-icon { filter: invert(1); }
 
         /* --- LOGIN CARD --- */
-        .login-section { 
-            flex: 1; 
-            display: flex; 
-            align-items: center; 
-            justify-content: center; 
-            padding: 100px 20px 50px 20px; 
-            z-index: 10;
-        }
-        
-        .login-card { 
-            background: var(--glass-bg); 
-            backdrop-filter: blur(25px); 
-            border: 1px solid var(--glass-border); 
-            border-radius: 30px; 
-            overflow: hidden; 
-            max-width: 850px; 
-            width: 100%; 
-            box-shadow: var(--card-shadow); 
-            display: flex; 
-            flex-direction: row; 
-        }
-        
-        .login-sidebar { 
-            background: linear-gradient(135deg, var(--secondary-blue), #1a1a1a); 
-            color: white; 
-            padding: 40px; 
-            width: 40%; 
-            display: flex; 
-            flex-direction: column; 
-            justify-content: center; 
-            align-items: center; 
-            text-align: center; 
-        }
-        
-        .login-form-container { 
-            padding: 60px; 
-            width: 60%; 
-            display: flex; 
-            flex-direction: column; 
-            justify-content: center; 
-        }
+        .login-section { flex: 1; display: flex; align-items: center; justify-content: center; padding: 100px 20px 50px 20px; z-index: 10; }
+        .login-card { background: var(--glass-bg); backdrop-filter: blur(25px); border: 1px solid var(--glass-border); border-radius: 30px; overflow: hidden; max-width: 850px; width: 100%; box-shadow: var(--card-shadow); display: flex; flex-direction: row; }
+        .login-sidebar { background: linear-gradient(135deg, var(--secondary-blue), #1a1a1a); color: white; padding: 40px; width: 40%; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; }
+        .login-form-container { padding: 60px; width: 60%; display: flex; flex-direction: column; justify-content: center; position: relative;}
 
         @media (max-width: 768px) {
-            .login-card {
-                flex-direction: column; 
-                max-width: 450px; 
-            }
+            .login-card { flex-direction: column; max-width: 450px; }
             .login-sidebar { width: 100%; padding: 30px; }
-            .login-form-container {
-                width: 100%; 
-                padding: 40px 30px; 
-            }
+            .login-form-container { width: 100%; padding: 40px 30px; }
         }
 
         /* --- FORM ELEMENTS --- */
-       /* --- FLOATING LABEL FIX (Removes the weird white background) --- */
-       .form-control { 
-            border-radius: 12px;
-            background: rgba(0,0,0,0.05); 
-            border: 1px solid var(--glass-border); 
-        }
-        .form-floating > .form-control:focus ~ label::after,
-        .form-floating > .form-control:not(:placeholder-shown) ~ label::after {
-            background: transparent !important; /* Kills the solid white block */
-        }
+        .form-control { border-radius: 12px; background: rgba(0,0,0,0.05); border: 1px solid var(--glass-border); }
+        .form-floating > .form-control:focus ~ label::after, .form-floating > .form-control:not(:placeholder-shown) ~ label::after { background: transparent !important; }
+        .form-floating label { color: var(--text-color) !important; opacity: 0.7; padding-left: 20px; }
+        .form-floating > .form-control:focus ~ label, .form-floating > .form-control:not(:placeholder-shown) ~ label { color: var(--primary-orange) !important; opacity: 1; }
         
-        .form-floating label {
-            color: var(--text-color) !important;
-            opacity: 0.7;
-            padding-left: 20px; /* Aligns perfectly with your rounded inputs */
-        }
-        
-        .form-floating > .form-control:focus ~ label,
-        .form-floating > .form-control:not(:placeholder-shown) ~ label {
-            color: var(--primary-orange) !important; /* Glows orange when active */
-            opacity: 1;
-        }
-
-        /* Dark mode specific text fixes */
         [data-theme="dark"] .form-control { color: #f8fafc !important; background: rgba(255, 255, 255, 0.05); }
         [data-theme="dark"] .form-floating label { color: #94a3b8 !important; }
-        [data-theme="dark"] .form-floating > .form-control:focus ~ label,
-        [data-theme="dark"] .form-floating > .form-control:not(:placeholder-shown) ~ label {
-            color: var(--primary-orange) !important;
+        [data-theme="dark"] .form-floating > .form-control:focus ~ label, [data-theme="dark"] .form-floating > .form-control:not(:placeholder-shown) ~ label { color: var(--primary-orange) !important; }
+
+        .btn-login { background: linear-gradient(45deg, var(--primary-orange), #ff6d00); border: none; color: white; font-weight: 700; padding: 14px; border-radius: 15px; transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(255, 145, 0, 0.3); }
+        .btn-login:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(255, 145, 0, 0.5); color: white; }
+        .btn-login:disabled { opacity: 0.7; cursor: not-allowed; }
+        .separator hr { border-color: var(--text-color); opacity: 0.2; }
+
+        /* --- OTP SECTION & FORGOT PASSWORD --- */
+        .otp-input { width: 45px; height: 55px; font-size: 1.8rem; font-weight: 700; text-align: center; padding: 0; margin: 0 4px; border: 2px solid rgba(0,0,0,0.1); border-radius: 12px; }
+        [data-theme="dark"] .otp-input { border: 2px solid rgba(255,255,255,0.1); }
+        .otp-input:focus { border-color: var(--primary-orange); box-shadow: none; background: transparent; }
+
+        /* Hide the reset sections by default */
+        /* Hide the reset sections by default */
+        #forgot-email-view, #forgot-otp-view, #new-password-view { display: none; }
+
+        /* --- FORGOT PASSWORD LINK HOVER --- */
+        .forgot-link-text { font-size: 0.9rem; color: var(--text-color); }
+        
+        .forgot-link-text a { 
+            color: var(--primary-orange) !important; /* Forces it to be orange */
+            text-decoration: none; 
+            font-weight: 600; 
+            cursor: pointer; 
+            transition: all 0.3s ease;
+        }
+        
+        .forgot-link-text a:hover { 
+            color: var(--text-color) !important; /* Turns pure white on hover */
+            text-decoration: none; 
+            text-shadow: 0 0 8px rgba(255, 255, 255, 0.6); /* Adds a nice white glow */
         }
 
-        .btn-login { 
-            background: linear-gradient(45deg, var(--primary-orange), #ff6d00); 
-            border: none; 
-            color: white; 
-            font-weight: 700; 
-            padding: 14px; 
-            border-radius: 15px; 
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 15px rgba(255, 145, 0, 0.3);
-        }
-        .btn-login:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(255, 145, 0, 0.5); color: white; }
-        
-        .separator hr { border-color: var(--text-color); opacity: 0.2; }
-        
         /* --- CELESTIAL ANCHOR --- */
         #celestial-anchor { position: fixed; bottom: 25px; right: 25px; z-index: 2000; cursor: pointer; width: 85px; height: 85px; }
         .sun-glow #main-circle { filter: drop-shadow(0 0 15px rgba(255, 145, 0, 0.8)); }
         .moon-glow #main-circle { filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.6)); }
-          /* --- CUSTOM CURSOR (Light & Dark Mode) --- */
-        .cursor-dot, .cursor-outline { 
-            position: fixed; 
-            pointer-events: none; 
-            z-index: 9999; 
-            opacity: 0; /* Hidden by default (prevents it from showing on mobile touch screens) */
-        }
-        
-        @media (pointer: fine) {
-            /* Hide native cursor on ALL themes */
-            body, html { cursor: none !important; }
-            a, button, input, select, label, .flip-card, .dropdown-item { cursor: none !important; }
-            
-            /* Show custom cursor dots on ALL themes */
-            .cursor-dot { 
-                display: block; 
-                width: 8px; 
-                height: 8px; 
-                background: var(--primary-orange); 
-                border-radius: 50%; 
-                top: 0; 
-                left: 0; 
-                opacity: 1; 
-                box-shadow: 0 0 10px var(--primary-orange); 
-            }
-            .cursor-outline { 
-                display: block; 
-                width: 30px; 
-                height: 30px; 
-                border: 2px solid var(--primary-orange); 
-                border-radius: 50%; 
-                top: 0; 
-                left: 0; 
-                opacity: 1; 
-                transition: transform 0.15s ease-out; 
-            }
-        }
     </style>
 </head>
 <body onload="initApp()">
@@ -260,36 +169,111 @@
             </div>
             
             <div class="login-form-container text-center">
-                <h3 class="fw-bold mb-1" style="color: var(--primary-orange);">Welcome Back</h3>
-                <p class="text-muted small mb-4" style="color:var(--text-color) !important; opacity:0.7;">Login to your account</p>
+                <div id="alert-container">
+                    {% if messages %}
+                        {% for message in messages %}
+                            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                                {{ message }}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+                </div>
 
-                <form id="loginForm" method="POST" action="{% url 'login' %}">
-                    {% csrf_token %}
-                    <div class="form-floating mb-3">
-                        <input type="text" name="username" class="form-control shadow-none" id="loginUsername" placeholder="Username" required>
-                        <label for="loginUsername">Username</label>
-                    </div>
-                    <div class="form-floating mb-3">
-                        <input type="password" name="password" class="form-control shadow-none" id="loginPassword" placeholder="Password" required>
-                        <label for="loginPassword">Password</label>
-                    </div>
+                <div id="login-view">
+                    <h3 class="fw-bold mb-1" style="color: var(--primary-orange);">Welcome Back</h3>
+                    <p class="text-muted small mb-4" style="color:var(--text-color) !important; opacity:0.7;">Login to your account</p>
 
-                    <button type="submit" class="btn btn-login w-100 mb-4">Sign In</button>
+                    <form id="loginForm" method="POST" action="{% url 'login' %}">
+                        {% csrf_token %}
+                        <div class="form-floating mb-3">
+                            <input type="text" name="username" class="form-control shadow-none" id="loginUsername" placeholder="Username" required>
+                            <label for="loginUsername">Username or Email</label>
+                        </div>
+                        <div class="form-floating mb-1">
+                            <input type="password" name="password" class="form-control shadow-none" id="loginPassword" placeholder="Password" required>
+                            <label for="loginPassword">Password</label>
+                        </div>
+                        <div class="text-end forgot-link-text mb-3 mt-2">
+                             <a onclick="switchView('forgot-email-view')"  >Forgot Password?</a>
+                        </div>
+                        <button type="submit" class="btn btn-login w-100 mb-4">Sign In</button>
+                        
+                        <div class="separator d-flex align-items-center mb-4">
+                            <hr class="flex-grow-1"><span class="mx-2 small">OR</span><hr class="flex-grow-1">
+                        </div>
+                        
+                        <div id="g_id_onload" data-client_id="720615112942-okm42cqmp0d7tbvcn3c5lthi68vd7312.apps.googleusercontent.com" data-callback="handleCredentialResponse" data-auto_prompt="false"></div>
+                        <div class="g_id_signin d-flex justify-content-center" data-type="standard" data-shape="pill" data-theme="outline" data-size="large" style="width: 100%;"></div>
+                    </form>
+                </div>
+
+                <div id="forgot-email-view">
+                    <i class="fa-solid fa-lock text-warning fa-3x mb-3" style="color: var(--primary-orange) !important;"></i>
+                    <h3 class="fw-bold mb-1" style="color: var(--primary-orange);">Reset Password</h3>
+                    <p class="text-muted small mb-4" style="color:var(--text-color) !important; opacity:0.7;">Enter your registered email address.</p>
+
+                    <form id="forgotEmailForm" onsubmit="handleForgotEmail(event)">
+                        {% csrf_token %}
+                        <div class="form-floating mb-4">
+                            <input type="email" name="reset_email" class="form-control shadow-none" id="resetEmail" placeholder="name@example.com" required>
+                            <label for="resetEmail">Email Address</label>
+                        </div>
+                        <button type="submit" class="btn btn-login w-100 mb-3" id="btn-send-reset-otp">Send Reset OTP</button>
+                        <div class="forgot-link-text">
+                            <a onclick="switchView('login-view')"><i class="fa-solid fa-arrow-left me-1"></i> Back to Login</a>
+                        </div>
+                    </form>
+                </div>
+
+                <div id="forgot-otp-view">
+                    <i class="fa-solid fa-envelope-open-text text-warning fa-3x mb-3" style="color: var(--primary-orange) !important;"></i>
+                    <h3 class="fw-bold mb-1">Verify Identity</h3>
+                    <p class="text-muted small mb-4" style="color:var(--text-color) !important; opacity:0.7;">We sent a code to <br><b id="displayResetEmail" style="color: var(--primary-orange);"></b></p>
                     
-                    <div class="separator d-flex align-items-center mb-4">
-                        <hr class="flex-grow-1">
-                        <span class="mx-2 small" >OR</span>
-                        <hr class="flex-grow-1">
-                    </div>
-                    
-                    <div id="g_id_onload" 
-                         data-client_id="720615112942-okm42cqmp0d7tbvcn3c5lthi68vd7312.apps.googleusercontent.com" 
-                         data-callback="handleCredentialResponse" 
-                         data-auto_prompt="false">
-                    </div>
-                    <div class="g_id_signin d-flex justify-content-center" data-type="standard" data-shape="pill" data-theme="outline" data-size="large" style="width: 100%;"></div>
-                </form>
-            </div>
+                    <form id="forgotOtpForm" onsubmit="handleVerifyResetOTP(event)" autocomplete="off">
+                        <div class="d-flex justify-content-center mb-4 mt-2">
+                            <input type="tel" class="form-control otp-input reset-otp" maxlength="1" required>
+                            <input type="tel" class="form-control otp-input reset-otp" maxlength="1" required>
+                            <input type="tel" class="form-control otp-input reset-otp" maxlength="1" required>
+                            <input type="tel" class="form-control otp-input reset-otp" maxlength="1" required>
+                            <input type="tel" class="form-control otp-input reset-otp" maxlength="1" required>
+                            <input type="tel" class="form-control otp-input reset-otp" maxlength="1" required>
+                        </div>
+                        <button type="submit" class="btn btn-login w-100 mb-3" id="btn-verify-reset">Verify Code</button>
+                        <div class="forgot-link-text">
+                            <a onclick="switchView('forgot-email-view')">Wrong Email?</a>
+                        </div>
+                    </form>
+                </div>
+
+                <div id="new-password-view">
+                    <i class="fa-solid fa-key text-warning fa-3x mb-3" style="color: var(--primary-orange) !important;"></i>
+                    <h3 class="fw-bold mb-1" style="color: var(--primary-orange);">New Password</h3>
+                    <p class="text-muted small mb-4" style="color:var(--text-color) !important; opacity:0.7;">Secure your account with a new password.</p>
+
+                    <form id="newPasswordForm" onsubmit="handleSaveNewPassword(event)">
+                        <div class="form-floating mb-1">
+                            <input type="password" name="new_password" class="form-control shadow-none" id="newPassword1" placeholder="New Password" required oninput="validateResetPassword()">
+                            <label for="newPassword1">New Password</label>
+                        </div>
+
+                        <div id="reset-password-reqs" class="text-start small mb-3 mt-2" style="display: none; padding-left: 10px; font-size: 0.8rem; opacity: 0.8;">
+                            <div id="reset-req-length" class="text-danger"><i class="fa-solid fa-xmark me-1"></i> At least 8 characters</div>
+                            <div id="reset-req-upper" class="text-danger"><i class="fa-solid fa-xmark me-1"></i> One uppercase letter</div>
+                            <div id="reset-req-lower" class="text-danger"><i class="fa-solid fa-xmark me-1"></i> One lowercase letter</div>
+                            <div id="reset-req-num" class="text-danger"><i class="fa-solid fa-xmark me-1"></i> One number</div>
+                            <div id="reset-req-spec" class="text-danger"><i class="fa-solid fa-xmark me-1"></i> One special character (@$!%*?&)</div>
+                        </div>
+
+                        <div class="form-floating mb-4">
+                            <input type="password" name="confirm_password" class="form-control shadow-none" id="newPassword2" placeholder="Confirm Password" required>
+                            <label for="newPassword2">Confirm Password</label>
+                        </div>
+                        <button type="submit" class="btn btn-login w-100 mb-3" id="btn-save-pwd">Save Password</button>
+                    </form>
+                </div>
+                </div>
         </div>
     </main>
 
@@ -303,11 +287,13 @@
             <path id="mouth" d="M 40 65 Q 50 75 60 65" stroke="black" stroke-width="2" fill="none" stroke-linecap="round" />    
         </svg>
     </aside>
+    
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         function initApp() {
             applyTheme(localStorage.getItem('theme') || 'light');
             animateWarp();
+            setupOTPInputs();
             
             const authFailed = document.getElementById('authFailedMarker').value;
             if (authFailed === 'true') alert("❌ Invalid Credentials!");
@@ -318,6 +304,149 @@
             }
         }
 
+        // --- VIEW SWITCHER ---
+        function switchView(viewId) {
+            const views = ['login-view', 'forgot-email-view', 'forgot-otp-view', 'new-password-view'];
+            views.forEach(id => document.getElementById(id).style.display = 'none');
+            document.getElementById(viewId).style.display = 'block';
+            document.getElementById('alert-container').innerHTML = ''; // Clear alerts on switch
+        }
+
+        // --- OTP LOGIC (For Reset) ---
+        function setupOTPInputs() {
+            const otpInputs = document.querySelectorAll('.reset-otp');
+            otpInputs.forEach((input, index) => {
+                input.addEventListener('keyup', (e) => {
+                    if (input.value.length > 0 && otpInputs[index + 1]) otpInputs[index + 1].focus();
+                    if (e.key === "Backspace" && otpInputs[index - 1]) otpInputs[index - 1].focus();
+                });
+            });
+        }
+
+        function showAlert(message, type="danger") {
+            document.getElementById('alert-container').innerHTML = `
+                <div class="alert alert-${type} alert-dismissible fade show" role="alert">
+                    <i class="fa-solid fa-circle-exclamation me-2"></i> ${message}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            `;
+        }
+
+        // --- FETCH CALLS ---
+        
+        // Step 1: Send OTP for Reset
+        function handleForgotEmail(e) {
+            e.preventDefault();
+            const btn = document.getElementById('btn-send-reset-otp');
+            const email = document.getElementById('resetEmail').value;
+            
+            btn.disabled = true;
+            btn.innerHTML = 'Sending... <i class="fa-solid fa-spinner fa-spin ms-2"></i>';
+
+            fetch("{% url 'forgot_password_send_otp' %}", {
+                method: 'POST',
+                headers: { 'X-Requested-With': 'XMLHttpRequest', 'Content-Type': 'application/json', 'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value },
+                body: JSON.stringify({ email: email })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.status === "success") {
+                    document.getElementById('displayResetEmail').innerText = email;
+                    switchView('forgot-otp-view');
+                } else {
+                    showAlert(data.message || "Email not found in system.");
+                }
+                btn.disabled = false; btn.innerHTML = 'Send Reset OTP';
+            })
+            .catch(err => {
+                showAlert("Server error. Please try again.");
+                btn.disabled = false; btn.innerHTML = 'Send Reset OTP';
+            });
+        }
+
+        // Step 2: Verify OTP
+        function handleVerifyResetOTP(e) {
+            e.preventDefault();
+            const btn = document.getElementById('btn-verify-reset');
+            let otpCode = "";
+            document.querySelectorAll('.reset-otp').forEach(input => otpCode += input.value);
+
+            btn.disabled = true;
+            btn.innerHTML = 'Verifying... <i class="fa-solid fa-spinner fa-spin ms-2"></i>';
+
+            fetch("{% url 'forgot_password_verify_otp' %}", {
+                method: 'POST',
+                headers: { 'X-Requested-With': 'XMLHttpRequest', 'Content-Type': 'application/json', 'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value },
+                body: JSON.stringify({ otp: otpCode, email: document.getElementById('resetEmail').value })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.status === "success") {
+                    switchView('new-password-view');
+                } else {
+                    showAlert(data.message || "Invalid OTP code.");
+                }
+                btn.disabled = false; btn.innerHTML = 'Verify Code';
+            })
+            .catch(err => {
+                showAlert("Server error. Please try again.");
+                btn.disabled = false; btn.innerHTML = 'Verify Code';
+            });
+        }
+
+        // Step 3: Save New Password
+        function handleSaveNewPassword(e) {
+            e.preventDefault();
+            
+            const btn = document.getElementById('btn-save-pwd');
+            
+            // SECURITY CHECK: Ensure password met all regex requirements
+            // If the button was disabled by the live-validator, block submission!
+            if(btn.disabled) {
+                showAlert("Please ensure your password meets all requirements.", "warning");
+                return;
+            }
+
+            const pwd1 = document.getElementById('newPassword1').value;
+            const pwd2 = document.getElementById('newPassword2').value;
+            
+            if(pwd1 !== pwd2) {
+                showAlert("Passwords do not match!", "danger");
+                return;
+            }
+
+            // Temporarily disable while sending to server
+            btn.disabled = true;
+            btn.innerHTML = 'Saving... <i class="fa-solid fa-spinner fa-spin ms-2"></i>';
+
+            fetch("{% url 'reset_password_save' %}", {
+                method: 'POST',
+                headers: { 
+                    'X-Requested-With': 'XMLHttpRequest', 
+                    'Content-Type': 'application/json', 
+                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value 
+                },
+                body: JSON.stringify({ new_password: pwd1, email: document.getElementById('resetEmail').value })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.status === "success") {
+                    showAlert("Password reset successfully! Please login.", "success");
+                    switchView('login-view');
+                } else {
+                    showAlert(data.message || "Failed to reset password.");
+                }
+                btn.disabled = false; 
+                btn.innerHTML = 'Save Password';
+            })
+            .catch(err => {
+                showAlert("Server error. Please try again.");
+                btn.disabled = false; 
+                btn.innerHTML = 'Save Password';
+            });
+        }
+
+        // --- THEME & ANIMATION ---
         function handleCredentialResponse(response) {
             const base64Url = response.credential.split('.')[1];
             const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
@@ -325,19 +454,11 @@
             
             fetch("{% url 'google_verify' %}", {
                 method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    "X-CSRFToken": "{{ csrf_token }}"
-                },
+                headers: { "Content-Type": "application/json", "X-CSRFToken": "{{ csrf_token }}" },
                 body: JSON.stringify({ email: payload.email })
-            })
-            .then(res => {
-                if (res.ok) {
-                    localStorage.setItem('isLoggedIn', 'true');
-                    window.location.href = "{% url 'home' %}";
-                } else {
-                    alert("❌ Account not found! Please Sign Up first.");
-                }
+            }).then(res => {
+                if (res.ok) { localStorage.setItem('isLoggedIn', 'true'); window.location.href = "{% url 'home' %}"; } 
+                else { alert("❌ Account not found! Please Sign Up first."); }
             });
         }
         
@@ -350,9 +471,7 @@
         function applyTheme(mode) {
             const sun = document.getElementById('main-circle');
             const container = document.getElementById('celestial-anchor'); 
-            
             document.body.setAttribute('data-theme', mode);
-            
             if (sun && container) {
                 sun.setAttribute('fill', mode === 'dark' ? '#bdc3c7' : '#FFD700');
                 container.classList.remove('sun-glow', 'moon-glow');
@@ -360,58 +479,69 @@
             }
         }
 
-        // --- EYETRACKING & CUSTOM CURSOR ---
-        // --- EYETRACKING & CUSTOM CURSOR ---
-        const dot = document.querySelector('.cursor-dot');
-        const outline = document.querySelector('.cursor-outline');
-        
+        const dot = document.querySelector('.cursor-dot'), outline = document.querySelector('.cursor-outline');
         document.addEventListener('mousemove', (e) => {
-            // 1. Move the Custom Cursor (only active in dark mode via CSS)
             if (dot && outline) {
                 dot.style.transform = `translate(${e.clientX}px, ${e.clientY}px)`;
                 outline.animate({ transform: `translate(${e.clientX - 15}px, ${e.clientY - 15}px)` }, { duration: 400, fill: "forwards" });
             }
-
-            // 2. Move the Celestial Eye Irises
             document.querySelectorAll('.iris').forEach(iris => {
-                const rect = iris.getBoundingClientRect();
-                const angle = Math.atan2(e.clientY - (rect.top + 3.5), e.clientX - (rect.left + 3.5));
+                const rect = iris.getBoundingClientRect(), angle = Math.atan2(e.clientY - (rect.top + 3.5), e.clientX - (rect.left + 3.5));
                 iris.style.transform = `translate(${Math.cos(angle) * 3}px, ${Math.sin(angle) * 3}px)`;
             });
         });
 
-        // --- WARP ENGINE (Space Theme) ---
-        const canvas = document.getElementById('warpCanvas');
-        const ctx = canvas ? canvas.getContext('2d') : null;
-        let stars = Array(window.innerWidth < 768 ? 150 : 350).fill().map(() => ({ 
-            x: Math.random()*innerWidth-innerWidth/2, 
-            y: Math.random()*innerHeight-innerHeight/2, 
-            z: Math.random()*innerWidth 
-        }));
+        const canvas = document.getElementById('warpCanvas'), ctx = canvas ? canvas.getContext('2d') : null;
+        let stars = Array(window.innerWidth < 768 ? 150 : 350).fill().map(() => ({ x: Math.random()*innerWidth-innerWidth/2, y: Math.random()*innerHeight-innerHeight/2, z: Math.random()*innerWidth }));
         
         function animateWarp() {
             if (!canvas || !ctx) return;
-            canvas.width = window.innerWidth; 
-            canvas.height = window.innerHeight;
+            canvas.width = window.innerWidth; canvas.height = window.innerHeight;
             const isDark = document.body.getAttribute('data-theme') === 'dark';
-            
             ctx.fillStyle = isDark ? "rgba(2, 6, 23, 0.4)" : "rgba(255, 255, 255, 0)";
             ctx.fillRect(0, 0, canvas.width, canvas.height);
             
             if(isDark) {
                 stars.forEach(s => {
                     s.z -= 1.5; if (s.z <= 0) s.z = canvas.width;
-                    const x = (s.x / s.z) * canvas.width + canvas.width/2;
-                    const y = (s.y / s.z) * canvas.height + canvas.height/2;
-                    const size = (1 - s.z/canvas.width) * 2;
-                    
-                    ctx.beginPath(); 
-                    ctx.fillStyle = "white"; 
-                    ctx.arc(x, y, size, 0, Math.PI*2); 
-                    ctx.fill();
+                    const x = (s.x / s.z) * canvas.width + canvas.width/2, y = (s.y / s.z) * canvas.height + canvas.height/2, size = (1 - s.z/canvas.width) * 2;
+                    ctx.beginPath(); ctx.fillStyle = "white"; ctx.arc(x, y, size, 0, Math.PI*2); ctx.fill();
                 });
             }
             requestAnimationFrame(animateWarp);
+        }
+        // --- RESET PASSWORD VALIDATION LOGIC ---
+        function validateResetPassword() {
+            const pwd = document.getElementById('newPassword1').value;
+            const reqBox = document.getElementById('reset-password-reqs');
+            const btn = document.getElementById('btn-save-pwd');
+            
+            if(pwd.length > 0) { reqBox.style.display = 'block'; } 
+            else { reqBox.style.display = 'none'; }
+
+            const rules = {
+                'reset-req-length': pwd.length >= 8,
+                'reset-req-upper': /[A-Z]/.test(pwd),
+                'reset-req-lower': /[a-z]/.test(pwd),
+                'reset-req-num': /[0-9]/.test(pwd),
+                'reset-req-spec': /[@$!%*?&]/.test(pwd)
+            };
+
+            let isValid = true;
+
+            for (const [id, passed] of Object.entries(rules)) {
+                const el = document.getElementById(id);
+                if (passed) {
+                    el.className = "text-success";
+                    el.innerHTML = '<i class="fa-solid fa-check me-1"></i> ' + el.innerText;
+                } else {
+                    el.className = "text-danger";
+                    el.innerHTML = '<i class="fa-solid fa-xmark me-1"></i> ' + el.innerText;
+                    isValid = false;
+                }
+            }
+
+            btn.disabled = !isValid;
         }
     </script>
 </body>

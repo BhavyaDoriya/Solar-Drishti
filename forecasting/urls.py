@@ -27,6 +27,7 @@ urlpatterns = [
     path('remove-system/<int:system_id>/', views.remove_system, name='remove_system'),
     path('delete-entry/<int:entry_id>/', views.delete_entry, name='delete_entry'),
     path('history/update/', views.manual_update_actual, name='manual_update_actual'),
-
-
+    path('forgot-password-send-otp/', views.forgot_password_send_otp, name='forgot_password_send_otp'),
+    path('forgot-password-verify-otp/', views.forgot_password_verify_otp, name='forgot_password_verify_otp'),
+    path('reset-password-save/', views.reset_password_save, name='reset_password_save'),
 ]

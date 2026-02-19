@@ -156,9 +156,19 @@ def verify_otp(request):
     return HttpResponse(status=405)
 def login_view(request):
     if request.method == 'POST':
-        u = request.POST.get('username')
+        login_input = request.POST.get('username') # This could now be username OR email
         p = request.POST.get('password')
-        user = authenticate(request, username=u, password=p)
+
+        # --- NEW EMAIL-TO-USERNAME LOGIC ---
+        # If the input contains an '@', assume it's an email address
+        if '@' in login_input:
+            user_obj = User.objects.filter(email__iexact=login_input).first()
+            if user_obj:
+                # If we found a user with this email, swap the input to their actual username
+                login_input = user_obj.username
+
+        # Now authenticate normally (login_input is guaranteed to be a username here)
+        user = authenticate(request, username=login_input, password=p)
 
         if user:
             login(request, user)
@@ -451,3 +461,85 @@ def manual_update_actual(request):
     return redirect('history_view')
 def about_view(request):
     return render(request, 'forecasting/about.html')
+# --- FORGOT PASSWORD LOGIC ---
+
+@csrf_exempt
+def forgot_password_send_otp(request):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            email = data.get('email', '').strip()
+            
+            user = User.objects.filter(email__iexact=email).first()
+            if not user:
+                return JsonResponse({"status": "error", "message": "Email not found in our system."}, status=404)
+            
+            # Generate 6-digit OTP
+            otp = str(random.randint(100000, 999999))
+            
+            # Save to session safely
+            request.session['reset_otp'] = otp
+            request.session['reset_email'] = email
+            
+            # Send via Brevo (Using Django's send_mail which connects to your settings.py)
+            send_mail(
+                subject="SolarDrishti - Password Reset",
+                message=f"Hello {user.username},\n\nYour password reset OTP is: {otp}\n\nIf you did not request this, please ignore this email.",
+                from_email=settings.EMAIL_HOST_USER,
+                recipient_list=[email],
+                fail_silently=False,
+            )
+            logger.info(f"Password reset OTP sent to {email}")
+            return JsonResponse({"status": "success"})
+            
+        except Exception as e:
+            logger.error(f"Reset OTP email FAILED for {email}: {repr(e)}")
+            return JsonResponse({"status": "error", "message": "Failed to send email. Try again later."}, status=500)
+            
+    return JsonResponse({"status": "invalid"}, status=405)
+
+@csrf_exempt
+def forgot_password_verify_otp(request):
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        submitted_otp = str(data.get('otp', '')).strip()
+        submitted_email = str(data.get('email', '')).strip()
+        
+        session_otp = str(request.session.get('reset_otp', '')).strip()
+        session_email = str(request.session.get('reset_email', '')).strip()
+        
+        if session_otp and session_otp == submitted_otp and session_email == submitted_email:
+            return JsonResponse({"status": "success"})
+        else:
+            return JsonResponse({"status": "error", "message": "Invalid OTP"}, status=400)
+            
+    return JsonResponse({"status": "invalid"}, status=405)
+
+@csrf_exempt
+def reset_password_save(request):
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        new_password = data.get('new_password')
+        email = data.get('email', '').strip()
+        
+        # Security check: ensure they actually verified the OTP for THIS email
+        if request.session.get('reset_email') != email:
+            return JsonResponse({"status": "error", "message": "Unauthorized request."}, status=403)
+            
+        user = User.objects.filter(email__iexact=email).first()
+        if user and new_password:
+            user.set_password(new_password) # Automatically hashes the new password
+            user.save()
+            
+            # Clear session variables to prevent reuse
+            if 'reset_otp' in request.session:
+                del request.session['reset_otp']
+            if 'reset_email' in request.session:
+                del request.session['reset_email']
+                
+            logger.info(f"Password successfully reset for {email}")
+            return JsonResponse({"status": "success"})
+            
+        return JsonResponse({"status": "error", "message": "Invalid data."}, status=400)
+        
+    return JsonResponse({"status": "invalid"}, status=405)

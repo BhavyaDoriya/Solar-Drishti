@@ -55,6 +55,18 @@
             background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.15) 50%);
             z-index: 1000; background-size: 100% 4px; pointer-events: none;
         }
+        /* --- GLOBAL DARK MODE TEXT & MODAL FIXES --- */
+        [data-theme="dark"] p, 
+        [data-theme="dark"] .text-muted, 
+        [data-theme="dark"] .modal-body p {
+            color: #e2e8f0 !important;
+        }
+        [data-theme="dark"] .modal-content h5 { 
+            color: #ffffff !important; 
+        }
+        [data-theme="dark"] .btn-close {
+            filter: invert(1); /* Turns the black X into a white X in dark mode */
+        }
 
         /* --- SCROLL PROGRESS & CANVAS --- */
         #scroll-progress { position: fixed; top: 0; left: 0; width: 0%; height: 3px; background: var(--primary-orange); z-index: 9999; box-shadow: 0 0 10px var(--primary-orange); }
@@ -135,7 +147,23 @@
     <div class="cursor-dot"></div>
     <div class="cursor-outline"></div>
     <canvas id="warpCanvas"></canvas>
-
+    <div class="modal fade" id="authModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 rounded-4" style="background: var(--card-bg); backdrop-filter: blur(20px);">
+                <div class="modal-header border-0">
+                    <h5 class="fw-bold m-0" style="color: var(--primary-orange);">TERMINAL AUTHORIZATION</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body text-center p-4">
+                    <p class="text-muted mb-4">Access restricted to authorized terminal users. Please verify identity.</p>
+                    <div class="d-grid gap-3">
+                        <button class="btn btn-warning py-3 rounded-pill fw-bold shadow-sm" style="background: linear-gradient(45deg, var(--primary-orange), #ff6d00); border: none; color: white;" onclick="handleRedirect('login')">Sign-In</button>
+                        <button class="btn btn-warning py-3 rounded-pill fw-bold shadow-sm" style="background: linear-gradient(45deg, var(--primary-orange), #ff6d00); border: none; color: white;" onclick="handleRedirect('signup')">Sign-Up</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
     <header>
         <nav class="navbar navbar-expand-lg fixed-top shadow-sm">
             <div class="container">
@@ -146,8 +174,8 @@
                 <div class="collapse navbar-collapse" id="navMain">
                     <ul class="navbar-nav ms-auto align-items-center text-center">
                         <li class="nav-item"><a class="nav-link px-3" href="/">Home</a></li>
-                        <li class="nav-item"><a class="nav-link px-3" href="/predict/">Predict</a></li>
-                        <li class="nav-item"><a class="nav-link px-3" href="/history/">History</a></li>
+<li class="nav-item"><a class="nav-link px-3" href="javascript:void(0)" onclick="guard(predictURL)">Predict</a></li>
+<li class="nav-item"><a class="nav-link px-3" href="javascript:void(0)" onclick="guard(historyURL)">History</a></li>
                         <li class="nav-item"><a class="nav-link px-3 active-page" href="/about/">About</a></li>
                         {% if user.is_authenticated %}
                         <li class="nav-item dropdown">
@@ -268,7 +296,9 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-
+        // --- URL CONSTANTS ---
+        const predictURL = "{% url 'predict' %}";
+        const historyURL = "{% url 'history_view' %}";
         // --- THREE.JS 3D MODEL LOGIC ---
         let scene, camera, renderer, solarGroup, coreMaterial, wireMaterial, particleMaterial;
         let targetX = 0, targetY = 0;
@@ -424,6 +454,18 @@
             const progress = document.getElementById("scroll-progress");
             if (progress) progress.style.width = scrolled + "%";
         };
+        // --- AUTH GUARD LOGIC ---
+        function guard(route) {
+            if ("{{ user.is_authenticated|yesno:'true,false' }}" === "false") {
+                new bootstrap.Modal(document.getElementById('authModal')).show();
+            } else {
+                window.location.href = route;
+            }
+        }
+        
+        function handleRedirect(type) { 
+            window.location.href = (type === 'login') ? '/login/' : '/signup/'; 
+        }
     </script>
 </body>
 </html>
