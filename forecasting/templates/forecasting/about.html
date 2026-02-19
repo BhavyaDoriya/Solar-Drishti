@@ -393,8 +393,8 @@
         }
 
         function initApp() { 
-            applyTheme(localStorage.getItem('theme') || 'light'); 
             init3D(); // Boots up the 3D model
+            applyTheme(localStorage.getItem('theme') || 'light'); 
             animate(); 
         }
 
