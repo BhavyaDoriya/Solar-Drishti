@@ -208,7 +208,43 @@
         #celestial-anchor { position: fixed; bottom: 25px; right: 25px; z-index: 2000; cursor: pointer; width: 85px; height: 85px; }
         .sun-glow #main-circle { filter: drop-shadow(0 0 15px rgba(255, 145, 0, 0.8)); }
         .moon-glow #main-circle { filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.6)); }
-
+          /* --- CUSTOM CURSOR (Light & Dark Mode) --- */
+        .cursor-dot, .cursor-outline { 
+            position: fixed; 
+            pointer-events: none; 
+            z-index: 9999; 
+            opacity: 0; /* Hidden by default (prevents it from showing on mobile touch screens) */
+        }
+        
+        @media (pointer: fine) {
+            /* Hide native cursor on ALL themes */
+            body, html { cursor: none !important; }
+            a, button, input, select, label, .flip-card, .dropdown-item { cursor: none !important; }
+            
+            /* Show custom cursor dots on ALL themes */
+            .cursor-dot { 
+                display: block; 
+                width: 8px; 
+                height: 8px; 
+                background: var(--primary-orange); 
+                border-radius: 50%; 
+                top: 0; 
+                left: 0; 
+                opacity: 1; 
+                box-shadow: 0 0 10px var(--primary-orange); 
+            }
+            .cursor-outline { 
+                display: block; 
+                width: 30px; 
+                height: 30px; 
+                border: 2px solid var(--primary-orange); 
+                border-radius: 50%; 
+                top: 0; 
+                left: 0; 
+                opacity: 1; 
+                transition: transform 0.15s ease-out; 
+            }
+        }
     </style>
 </head>
 <body onload="initApp()">
@@ -442,17 +478,18 @@
         }
 
         // --- EYETRACKING & CUSTOM CURSOR ---
+        // --- EYETRACKING & CUSTOM CURSOR ---
         const dot = document.querySelector('.cursor-dot');
         const outline = document.querySelector('.cursor-outline');
         
         document.addEventListener('mousemove', (e) => {
-            // Move Cursor Dots
+            // 1. Move the Custom Cursor (only active in dark mode via CSS)
             if (dot && outline) {
                 dot.style.transform = `translate(${e.clientX}px, ${e.clientY}px)`;
                 outline.animate({ transform: `translate(${e.clientX - 15}px, ${e.clientY - 15}px)` }, { duration: 400, fill: "forwards" });
             }
 
-            // Move Eyes
+            // 2. Move the Celestial Eye Irises
             document.querySelectorAll('.iris').forEach(iris => {
                 const rect = iris.getBoundingClientRect();
                 const angle = Math.atan2(e.clientY - (rect.top + 3.5), e.clientX - (rect.left + 3.5));

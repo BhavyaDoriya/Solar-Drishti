@@ -114,12 +114,77 @@
         #celestial-anchor { position: fixed; bottom: 25px; right: 25px; z-index: 2000; cursor: pointer; width: 85px; height: 85px; }
         .sun-glow #main-circle { filter: drop-shadow(0 0 15px rgba(255, 145, 0, 0.8)); }
         .moon-glow #main-circle { filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.6)); }
-
+         /* --- DROPDOWN MENU HOVER FIX --- */
+        .dropdown-menu {
+            /* This fallback chain automatically finds the right variable for the page! */
+            background: var(--glass-bg, var(--glass-card, var(--card-bg))) !important;
+            backdrop-filter: blur(25px) !important;
+            border: 1px solid var(--glass-border, var(--border)) !important;
+            border-radius: 15px !important;
+            overflow: hidden; 
+            padding: 5px 0;
+        }
+        
+        .dropdown-item {
+            color: var(--text-color) !important;
+            padding: 10px 20px;
+            transition: all 0.2s ease;
+        }
+        
+        .dropdown-item:hover {
+            background-color: rgba(255, 145, 0, 0.15) !important; /* Soft orange highlight */
+            color: var(--primary-orange) !important; /* Text turns orange */
+        }
+        
+        /* Keep the logout button red on hover */
+        .dropdown-item.text-danger:hover {
+            background-color: rgba(220, 53, 69, 0.15) !important; 
+            color: #dc3545 !important;
+        }
+          /* --- CUSTOM CURSOR (Light & Dark Mode) --- */
+        .cursor-dot, .cursor-outline { 
+            position: fixed; 
+            pointer-events: none; 
+            z-index: 9999; 
+            opacity: 0; /* Hidden by default (prevents it from showing on mobile touch screens) */
+        }
+        
+        @media (pointer: fine) {
+            /* Hide native cursor on ALL themes */
+            body, html { cursor: none !important; }
+            a, button, input, select, label, .flip-card, .dropdown-item { cursor: none !important; }
+            
+            /* Show custom cursor dots on ALL themes */
+            .cursor-dot { 
+                display: block; 
+                width: 8px; 
+                height: 8px; 
+                background: var(--primary-orange); 
+                border-radius: 50%; 
+                top: 0; 
+                left: 0; 
+                opacity: 1; 
+                box-shadow: 0 0 10px var(--primary-orange); 
+            }
+            .cursor-outline { 
+                display: block; 
+                width: 30px; 
+                height: 30px; 
+                border: 2px solid var(--primary-orange); 
+                border-radius: 50%; 
+                top: 0; 
+                left: 0; 
+                opacity: 1; 
+                transition: transform 0.15s ease-out; 
+            }
+        }
     </style>
 </head>
 <body onload="checkTheme()">
     <div id="scroll-progress"></div>
     <div class="vignette"></div>
+    <div class="cursor-dot"></div>
+    <div class="cursor-outline"></div>
     <canvas id="warpCanvas"></canvas>
 
     <header>
@@ -144,9 +209,9 @@
                             <a class="nav-link dropdown-toggle px-3 active-page" href="#" id="profileDrop" data-bs-toggle="dropdown">
                                 <i class="fa-solid fa-circle-user"></i> {{ user.username|upper }}
                             </a>
-                            <ul class="dropdown-menu dropdown-menu-end shadow border-0" style="background: var(--glass-bg); backdrop-filter: blur(10px); --bs-dropdown-divider-bg: var(--text-color);">
-                                <li><a class="dropdown-item" href="{% url 'profile_view' user_id=request.user.id %}" style="color:var(--text-color) !important">View Profile</a></li>
-                                <li><a class="dropdown-item" href="{% url 'update_profile' %}" style="color:var(--text-color) !important">Update Profile</a></li>
+                             <ul class="dropdown-menu dropdown-menu-end shadow border-0" style="background: var(--card-bg); backdrop-filter: blur(10px); --bs-dropdown-divider-bg: var(--text-color);">
+                                <li><a class="dropdown-item" href="{% url 'profile_view' user_id=request.user.id %}">View Profile</a></li>
+                                <li><a class="dropdown-item" href="{% url 'update_profile' %}">Update Profile</a></li>
                                 <li><hr class="dropdown-divider"></li>
                                 <li><a class="dropdown-item text-danger fw-bold" href="{% url 'logout' %}">Logout</a></li>
                             </ul>
@@ -270,12 +335,22 @@
         }
 
         // Eye-tracking effect
+       // --- EYETRACKING & CUSTOM CURSOR ---
+        const dot = document.querySelector('.cursor-dot');
+        const outline = document.querySelector('.cursor-outline');
+        
         document.addEventListener('mousemove', (e) => {
-            const irises = document.querySelectorAll('.iris');
-            irises.forEach(iris => {
+            // 1. Move the Custom Cursor (only active in dark mode via CSS)
+            if (dot && outline) {
+                dot.style.transform = `translate(${e.clientX}px, ${e.clientY}px)`;
+                outline.animate({ transform: `translate(${e.clientX - 15}px, ${e.clientY - 15}px)` }, { duration: 400, fill: "forwards" });
+            }
+
+            // 2. Move the Celestial Eye Irises
+            document.querySelectorAll('.iris').forEach(iris => {
                 const rect = iris.getBoundingClientRect();
                 const angle = Math.atan2(e.clientY - (rect.top + 3.5), e.clientX - (rect.left + 3.5));
-                iris.style.transform = `translate(${Math.cos(angle) * 4}px, ${Math.sin(angle) * 4}px)`;
+                iris.style.transform = `translate(${Math.cos(angle) * 3}px, ${Math.sin(angle) * 3}px)`;
             });
         });
 
