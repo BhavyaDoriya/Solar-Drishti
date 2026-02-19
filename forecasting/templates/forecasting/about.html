@@ -133,17 +133,157 @@
             .orb { width: 120px; height: 120px; }
             .glass-card { padding: 20px; }
         }
+         /* --- DROPDOWN MENU HOVER FIX --- */
+        .dropdown-menu {
+            /* This fallback chain automatically finds the right variable for the page! */
+            background: var(--glass-bg, var(--glass-card, var(--card-bg))) !important;
+            backdrop-filter: blur(25px) !important;
+            border: 1px solid var(--glass-border, var(--border)) !important;
+            border-radius: 15px !important;
+            overflow: hidden; 
+            padding: 5px 0;
+        }
+        
+        .dropdown-item {
+            color: var(--text-color) !important;
+            padding: 10px 20px;
+            transition: all 0.2s ease;
+        }
+        
+        .dropdown-item:hover {
+            background-color: rgba(255, 145, 0, 0.15) !important; /* Soft orange highlight */
+            color: var(--primary-orange) !important; /* Text turns orange */
+        }
+        
+        /* Keep the logout button red on hover */
+        .dropdown-item.text-danger:hover {
+            background-color: rgba(220, 53, 69, 0.15) !important; 
+            color: #dc3545 !important;
+        }
+          /* --- CUSTOM CURSOR (Light & Dark Mode) --- */
+        .cursor-dot, .cursor-outline { 
+            position: fixed; 
+            pointer-events: none; 
+            z-index: 9999; 
+            opacity: 0; /* Hidden by default (prevents it from showing on mobile touch screens) */
+        }
+        
+        @media (pointer: fine) {
+            /* Hide native cursor on ALL themes */
+            body, html { cursor: none !important; }
+            a, button, input, select, label, .flip-card, .dropdown-item { cursor: none !important; }
+            
+            /* Show custom cursor dots on ALL themes */
+            .cursor-dot { 
+                display: block; 
+                width: 8px; 
+                height: 8px; 
+                background: var(--primary-orange); 
+                border-radius: 50%; 
+                top: 0; 
+                left: 0; 
+                opacity: 1; 
+                box-shadow: 0 0 10px var(--primary-orange); 
+            }
+            .cursor-outline { 
+                display: block; 
+                width: 30px; 
+                height: 30px; 
+                border: 2px solid var(--primary-orange); 
+                border-radius: 50%; 
+                top: 0; 
+                left: 0; 
+                opacity: 1; 
+                transition: transform 0.15s ease-out; 
+            }
+        }
+         #scroll-progress { 
+            position: fixed; top: 0; left: 0; width: 0%; height: 3px; 
+            background: var(--primary-orange); z-index: 9999; 
+            box-shadow: 0 0 10px var(--primary-orange); 
+        }
+        .vignette { 
+            position: fixed; inset: 0; z-index: -1; pointer-events: none; 
+            background: radial-gradient(circle at center, transparent 0%, rgba(0,0,0,0.4) 100%); 
+        }
+        /* --- UPGRADED 3D CELESTIAL ENERGY CORE --- */
+        .celestial-wrapper { 
+            position: relative;
+            height: 250px; 
+            display: flex; align-items: center; justify-content: center; 
+            margin: 40px 0; 
+            perspective: 1000px; /* Creates depth for the 3D ring */
+        }
+        
+        .orb {
+            width: 140px; height: 140px; 
+            background: var(--orb-color); 
+            border-radius: 50%;
+            /* Intense inner shadow for spherical depth */
+            box-shadow: inset -20px -20px 40px rgba(0,0,0,0.3);
+            animation: pulse-glow 4s infinite alternate, float 6s ease-in-out infinite;
+            position: relative; 
+            z-index: 2;
+            overflow: hidden;
+        }
+
+        /* The 3D Orbiting Energy Ring */
+        .celestial-wrapper::after {
+            content: '';
+            position: absolute;
+            width: 280px;
+            height: 280px;
+            border: 2px solid var(--primary-orange);
+            border-radius: 50%;
+            border-left-color: transparent;
+            border-right-color: transparent;
+            opacity: 0.6;
+            animation: spin-ring 10s linear infinite, float 6s ease-in-out infinite;
+            z-index: 1;
+        }
+
+        /* Change ring color in dark mode to match the moon */
+        [data-theme="dark"] .celestial-wrapper::after {
+            border-top-color: #94a3b8;
+            border-bottom-color: #94a3b8;
+        }
+
+        .crater { position: absolute; background: rgba(0,0,0,0.1); border-radius: 50%; opacity: 0; transition: 0.5s ease; }
+        [data-theme="dark"] .crater { opacity: 0.2; }
+        .c1 { width: 30px; height: 30px; top: 20%; left: 20%; }
+        .c2 { width: 15px; height: 15px; top: 60%; left: 45%; }
+        .c3 { width: 22px; height: 22px; top: 35%; left: 65%; }
+
+        /* 3D Ring Rotation Math */
+        @keyframes spin-ring {
+            0% { transform: rotateX(75deg) rotateZ(0deg); }
+            100% { transform: rotateX(75deg) rotateZ(360deg); }
+        }
+
+        /* Pulsing Glow Effect */
+        @keyframes pulse-glow {
+            0% { box-shadow: 0 0 40px var(--orb-shadow), inset -20px -20px 40px rgba(0,0,0,0.3); }
+            100% { box-shadow: 0 0 90px var(--orb-shadow), 0 0 20px var(--primary-orange), inset -20px -20px 40px rgba(0,0,0,0.3); }
+        }
+        
+        /* Sync the floating motion of both the orb and the ring */
+        @keyframes float { 
+            0%, 100% { top: 0px; } 
+            50% { top: -15px; } 
+        }
     </style>
 </head>
 <body onload="initApp()">
 
     <div id="preloader"></div>
-
+    <div id="scroll-progress"></div>
+    <div class="vignette"></div>
     <div id="deer-container">
         <div class="greeting-bubble" id="deer-speech">Hello System User!</div>
         <div class="deer-icon">🦌</div>
     </div>
-
+    <div class="cursor-dot"></div>
+    <div class="cursor-outline"></div>
     <canvas id="warpCanvas"></canvas>
 
     <header>
@@ -162,7 +302,7 @@
                         {% if user.is_authenticated %}
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle px-3" href="#" id="profileDrop" data-bs-toggle="dropdown"><i class="fa-solid fa-circle-user"></i> {{ user.username|upper }}</a>
-                            <ul class="dropdown-menu dropdown-menu-end shadow border-0 text-center text-lg-start" style="background: var(--card-bg); backdrop-filter: blur(15px);">
+                            <ul class="dropdown-menu dropdown-menu-end shadow border-0" style="background: var(--card-bg); backdrop-filter: blur(10px); --bs-dropdown-divider-bg: var(--text-color);">
                                 <li><a class="dropdown-item" href="{% url 'profile_view' user_id=request.user.id %}">View Profile</a></li>
                                 <li><a class="dropdown-item" href="{% url 'update_profile' %}">Update Profile</a></li>
                                 <li><hr class="dropdown-divider"></li>
@@ -342,12 +482,32 @@
             if(anc) { anc.className = mode === 'dark' ? 'moon-glow' : 'sun-glow'; }
         }
 
+        // --- EYETRACKING & CUSTOM CURSOR ---
+        const dot = document.querySelector('.cursor-dot');
+        const outline = document.querySelector('.cursor-outline');
+        
         document.addEventListener('mousemove', (e) => {
+            // 1. Move the Custom Cursor (only active in dark mode via CSS)
+            if (dot && outline) {
+                dot.style.transform = `translate(${e.clientX}px, ${e.clientY}px)`;
+                outline.animate({ transform: `translate(${e.clientX - 15}px, ${e.clientY - 15}px)` }, { duration: 400, fill: "forwards" });
+            }
+
+            // 2. Move the Celestial Eye Irises
             document.querySelectorAll('.iris').forEach(iris => {
-                const rect = iris.getBoundingClientRect(), angle = Math.atan2(e.clientY - (rect.top + 3.5), e.clientX - (rect.left + 3.5));
+                const rect = iris.getBoundingClientRect();
+                const angle = Math.atan2(e.clientY - (rect.top + 3.5), e.clientX - (rect.left + 3.5));
                 iris.style.transform = `translate(${Math.cos(angle) * 3}px, ${Math.sin(angle) * 3}px)`;
             });
         });
+        // SCROLL PROGRESS TRACKER
+        window.onscroll = function() {
+            let winScroll = document.body.scrollTop || document.documentElement.scrollTop;
+            let height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+            let scrolled = (winScroll / height) * 100;
+            const progress = document.getElementById("scroll-progress");
+            if (progress) progress.style.width = scrolled + "%";
+        };
     </script>
 </body>
 </html>
