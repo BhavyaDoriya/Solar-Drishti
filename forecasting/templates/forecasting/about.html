@@ -3,9 +3,351 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-</head>
-<body>
+    <title>About Us | SolarDrishti</title>
     
+    <link rel="icon" href="https://img.icons8.com/fluency/48/sun.png" type="image/x-icon">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --primary-orange: #ff9100;
+            --bg-color: linear-gradient(180deg, #e0f2ff 0%, #ffffff 400px); 
+            --text-color: #1a1a1a;
+            --card-bg: rgba(255, 255, 255, 0.85);
+            --border: rgba(0, 0, 0, 0.08);
+            --orb-color: radial-gradient(circle at 30% 30%, #ffcc00, #ff9100);
+            --orb-shadow: rgba(255, 145, 0, 0.4);
+        }
+
+        [data-theme="dark"] {
+            --bg-color: #020617; 
+            --text-color: #f8fafc;
+            --card-bg: rgba(15, 23, 42, 0.75);
+            --border: rgba(255, 255, 255, 0.15);
+            --orb-color: radial-gradient(circle at 30% 30%, #cbd5e1, #64748b);
+            --orb-shadow: rgba(255, 255, 255, 0.15);
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: var(--bg-color);
+            color: var(--text-color);
+            transition: background 0.6s ease;
+            min-height: 100vh;
+            overflow-x: hidden;
+            width: 100%;
+        }
+
+        /* --- RELIABLE FADE-IN ANIMATION (Replaces AOS) --- */
+        .reveal { animation: revealAnim 1s ease forwards; opacity: 0; }
+        @keyframes revealAnim { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .delay-1 { animation-delay: 0.2s; }
+        .delay-2 { animation-delay: 0.4s; }
+        .delay-3 { animation-delay: 0.6s; }
+
+        /* --- PRELOADER --- */
+        #preloader {
+            position: fixed; inset: 0; z-index: 9999;
+            background: #020617; transition: opacity 0.8s ease;
+        }
+
+        /* --- DEER ANIMATION --- */
+        #deer-container {
+            position: fixed; bottom: 80px; left: -150px; z-index: 1000;
+            display: none; flex-direction: column; align-items: center;
+        }
+        .deer-icon { font-size: 50px; }
+        .greeting-bubble {
+            background: white; color: black; padding: 5px 15px; border-radius: 20px;
+            font-size: 14px; font-weight: bold; margin-bottom: 10px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1); opacity: 0; transition: 0.3s;
+            position: relative; border: 2px solid var(--primary-orange);
+            font-family: 'Poppins', sans-serif;
+        }
+        .greeting-bubble::after {
+            content: ''; position: absolute; bottom: -10px; left: 50%; transform: translateX(-50%);
+            border-width: 10px 10px 0; border-style: solid; border-color: var(--primary-orange) transparent transparent;
+        }
+
+        /* --- SPACE THEME --- */
+        #warpCanvas { position: fixed; inset: 0; z-index: -2; pointer-events: none; opacity: 0; transition: opacity 1s ease; }
+        [data-theme="dark"] #warpCanvas { opacity: 1; }
+        [data-theme="dark"] body::before {
+            content: " "; position: fixed; inset: 0;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.15) 50%);
+            z-index: 1000; background-size: 100% 4px; pointer-events: none;
+        }
+
+        /* --- NAVBAR & TYPOGRAPHY --- */
+        h1, h2, h3, h4, h5, h6, .navbar-brand, .nav-link, .btn, .brand-font, .star-letter { font-family: 'Orbitron', sans-serif !important; }
+        .navbar { background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(20px); border-bottom: 1px solid var(--border); padding: 10px 0; }
+        .navbar-brand { color: var(--primary-orange) !important; font-weight: 900; letter-spacing: 2px; }
+        .nav-link { font-size: 13px; color: var(--text-color) !important; transition: 0.3s; }
+        .nav-link.active-page { color: var(--primary-orange) !important; font-weight: 700; border-bottom: 2px solid var(--primary-orange); }
+
+        /* --- DYNAMIC CELESTIAL ORB --- */
+        .celestial-wrapper { height: 200px; display: flex; align-items: center; justify-content: center; margin: 40px 0; }
+        .orb {
+            width: 160px; height: 160px; background: var(--orb-color); border-radius: 50%;
+            box-shadow: 0 0 60px var(--orb-shadow), inset -15px -15px 40px rgba(0,0,0,0.2);
+            transition: background 1s, box-shadow 1s; animation: float 6s ease-in-out infinite;
+            position: relative; overflow: hidden;
+        }
+        .crater { position: absolute; background: rgba(0,0,0,0.1); border-radius: 50%; opacity: 0; transition: 0.5s ease; }
+        [data-theme="dark"] .crater { opacity: 0.2; }
+        .c1 { width: 30px; height: 30px; top: 20%; left: 20%; }
+        .c2 { width: 15px; height: 15px; top: 60%; left: 45%; }
+        .c3 { width: 22px; height: 22px; top: 35%; left: 65%; }
+        @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-20px); } }
+
+        /* --- GLASS CARDS --- */
+        .glass-card {
+            background: var(--card-bg); backdrop-filter: blur(25px);
+            border: 1px solid var(--border); border-radius: 30px;
+            padding: 30px; transition: 0.3s ease; height: 100%;
+            display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center;
+        }
+        .glass-card:hover { border-color: var(--primary-orange); transform: translateY(-8px); }
+
+        .star-letter { font-size: 2.5rem; color: var(--primary-orange); font-weight: 900; line-height: 1; }
+        .team-avatar {
+            width: 70px; height: 70px; border-radius: 50%; border: 2px solid var(--primary-orange);
+            display: flex; align-items: center; justify-content: center; margin-bottom: 15px;
+            color: var(--primary-orange); background: rgba(255, 145, 0, 0.1); font-size: 1.5rem;
+        }
+        .tech-pill {
+            display: inline-block; padding: 4px 10px; margin: 3px;
+            background: rgba(255, 145, 0, 0.1); border: 1px solid var(--primary-orange);
+            border-radius: 50px; font-size: 0.7rem; font-weight: 600;
+        }
+
+        #celestial-anchor { position: fixed; bottom: 25px; right: 25px; z-index: 2000; cursor: pointer; width: 85px; height: 85px; }
+        .sun-glow #main-circle { filter: drop-shadow(0 0 15px rgba(255, 145, 0, 0.8)); }
+        .moon-glow #main-circle { filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.6)); }
+
+        @media (max-width: 768px) {
+            .display-4 { font-size: 1.8rem; }
+            .celestial-wrapper { height: 160px; }
+            .orb { width: 120px; height: 120px; }
+            .glass-card { padding: 20px; }
+        }
+    </style>
+</head>
+<body onload="initApp()">
+
+    <div id="preloader"></div>
+
+    <div id="deer-container">
+        <div class="greeting-bubble" id="deer-speech">Hello System User!</div>
+        <div class="deer-icon">🦌</div>
+    </div>
+
+    <canvas id="warpCanvas"></canvas>
+
+    <header>
+        <nav class="navbar navbar-expand-lg fixed-top shadow-sm">
+            <div class="container">
+                <a class="navbar-brand d-flex align-items-center" href="/">
+                    <i class="fa-solid fa-sun-plant-wilt me-2"></i> SOLAR<span style="color: #64748b;">DRISHTI</span>
+                </a>
+                <button class="navbar-toggler border-0 shadow-none" type="button" data-bs-toggle="collapse" data-bs-target="#navMain"><span class="navbar-toggler-icon"></span></button>
+                <div class="collapse navbar-collapse" id="navMain">
+                    <ul class="navbar-nav ms-auto align-items-center text-center">
+                        <li class="nav-item"><a class="nav-link px-3" href="/">Home</a></li>
+                        <li class="nav-item"><a class="nav-link px-3" href="/predict/">Predict</a></li>
+                        <li class="nav-item"><a class="nav-link px-3" href="/history/">History</a></li>
+                        <li class="nav-item"><a class="nav-link px-3 active-page" href="/about/">About</a></li>
+                        {% if user.is_authenticated %}
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle px-3" href="#" id="profileDrop" data-bs-toggle="dropdown"><i class="fa-solid fa-circle-user"></i> {{ user.username|upper }}</a>
+                            <ul class="dropdown-menu dropdown-menu-end shadow border-0 text-center text-lg-start" style="background: var(--card-bg); backdrop-filter: blur(15px);">
+                                <li><a class="dropdown-item" href="{% url 'profile_view' user_id=request.user.id %}">View Profile</a></li>
+                                <li><a class="dropdown-item" href="{% url 'update_profile' %}">Update Profile</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item text-danger fw-bold" href="{% url 'logout' %}">Logout</a></li>
+                            </ul>
+                        </li>
+                        {% endif %}
+                    </ul>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <main class="container py-5 mt-5">
+        <section class="text-center py-5 reveal">
+            <div class="celestial-wrapper">
+                <div class="orb">
+                    <div class="crater c1"></div><div class="crater c2"></div><div class="crater c3"></div>
+                </div>
+            </div>
+            <h1 class="display-4 fw-bold mb-3">PRECISION <span style="color: var(--primary-orange);">SOLAR INTELLIGENCE</span></h1>
+            <p class="lead mx-auto" style="max-width: 850px; opacity: 0.85;">Transforming atmospheric complexity into reliable clean energy foresight through end-to-end engineering.</p>
+        </section>
+
+        <div class="row g-4 mb-5 justify-content-center">
+            <div class="col-sm-6 col-lg-3 reveal delay-1">
+                <div class="glass-card">
+                    <span class="star-letter">S</span>
+                    <h6 class="fw-bold mt-3">Situation</h6>
+                    <p class="small mb-0">Bridging the management gap in the global solar surge.</p>
+                </div>
+            </div>
+            <div class="col-sm-6 col-lg-3 reveal delay-1">
+                <div class="glass-card">
+                    <span class="star-letter">T</span>
+                    <h6 class="fw-bold mt-3">Task</h6>
+                    <p class="small mb-0">Designing a portal for high-precision energy forecasting.</p>
+                </div>
+            </div>
+            <div class="col-sm-6 col-lg-3 reveal delay-1">
+                <div class="glass-card">
+                    <span class="star-letter">A</span>
+                    <h6 class="fw-bold mt-3">Action</h6>
+                    <p class="small mb-0">Engineering a secure Django stack with NREL processing.</p>
+                </div>
+            </div>
+            <div class="col-sm-6 col-lg-3 reveal delay-1">
+                <div class="glass-card">
+                    <span class="star-letter">R</span>
+                    <h6 class="fw-bold mt-3">Result</h6>
+                    <p class="small mb-0">Optimizing natural energy yield for an AI-driven tomorrow.</p>
+                </div>
+            </div>
+        </div>
+
+        <section class="py-5 reveal delay-2">
+            <h2 class="text-center mb-5 fw-bold">MISSION CONTROL</h2>
+            <div class="row g-4 justify-content-center">
+                <div class="col-md-6 col-lg-4">
+                    <div class="glass-card">
+                        <div class="team-avatar"><i class="fa-solid fa-chart-line"></i></div>
+                        <h4 class="brand-font mb-1">Bhavya Doriya</h4>
+                        <p class="fw-bold small mb-2" style="color: var(--primary-orange);">Data Analyst</p>
+                        <p class="small mb-3">Sourcing NREL 'engine oil' and training predictive models.</p>
+                        <button class="btn btn-sm btn-outline-warning rounded-pill px-4 mb-2" data-bs-toggle="collapse" data-bs-target="#bStack">Stack</button>
+                        <div class="collapse mt-2" id="bStack"><span class="tech-pill">Pandas</span><span class="tech-pill">NREL API</span><span class="tech-pill">Joblib</span></div>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-4">
+                    <div class="glass-card">
+                        <div class="team-avatar"><i class="fa-solid fa-shield-halved"></i></div>
+                        <h4 class="brand-font mb-1">Pratham</h4>
+                        <p class="fw-bold small mb-2" style="color: var(--primary-orange);">Integrity Manager</p>
+                        <p class="small mb-3">Architecting Django core: security, scalability, integration.</p>
+                        <button class="btn btn-sm btn-outline-warning rounded-pill px-4 mb-2" data-bs-toggle="collapse" data-bs-target="#pStack">Stack</button>
+                        <div class="collapse mt-2" id="pStack"><span class="tech-pill">Django</span><span class="tech-pill">PostgreSQL</span><span class="tech-pill">Render</span></div>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-4">
+                    <div class="glass-card">
+                        <div class="team-avatar"><i class="fa-solid fa-palette"></i></div>
+                        <h4 class="brand-font mb-1">Jyoti</h4>
+                        <p class="fw-bold small mb-2" style="color: var(--primary-orange);">UI/UX Designer</p>
+                        <p class="small mb-3">Designing futuristic terminal interface and user experience.</p>
+                        <button class="btn btn-sm btn-outline-warning rounded-pill px-4 mb-2" data-bs-toggle="collapse" data-bs-target="#jStack">Stack</button>
+                        <div class="collapse mt-2" id="jStack"><span class="tech-pill">Bootstrap</span><span class="tech-pill">JavaScript</span><span class="tech-pill">CSS3</span></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="glass-card text-center my-5 py-5 reveal delay-3">
+            <h3 class="fw-bold mb-2">SYSTEM ASSISTANCE</h3>
+            <a href="mailto:solardrishtihelp@gmail.com" class="btn btn-warning rounded-pill px-5 py-3 fw-bold shadow-sm">
+                <i class="fa-solid fa-envelope me-2"></i> solardrishtihelp@gmail.com
+            </a>
+        </section>
+    </main>
+
+    <footer class="text-center py-5 opacity-50">
+        <p class="small mb-0">&copy; 2026 SolarDrishti Engineering | Built with STAR Methodology</p>
+    </footer>
+
+    <aside id="celestial-anchor" onclick="toggleTheme()">
+        <svg width="100%" height="100%" viewBox="0 0 100 100">
+            <circle id="main-circle" cx="50" cy="50" r="40" fill="#FFD700" />
+            <g id="eyes">
+                <circle cx="35" cy="45" r="7" fill="white" /><circle class="iris" cx="35" cy="45" r="3.5" fill="black" />
+                <circle cx="65" cy="45" r="7" fill="white" /><circle class="iris" cx="65" cy="45" r="3.5" fill="black" />
+            </g>
+            <path id="mouth" d="M 40 65 Q 50 75 60 65" stroke="black" stroke-width="2" fill="none" stroke-linecap="round" />
+        </svg>
+    </aside>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Start warp engine immediately
+        const canvas = document.getElementById('warpCanvas'), ctx = canvas.getContext('2d');
+        let stars = Array(450).fill().map(() => ({ x: Math.random()*innerWidth-innerWidth/2, y: Math.random()*innerHeight-innerHeight/2, z: Math.random()*innerWidth }));
+        
+        function animate() {
+            canvas.width = window.innerWidth; canvas.height = window.innerHeight;
+            const dark = document.body.getAttribute('data-theme') === 'dark';
+            ctx.fillStyle = dark ? "rgba(2, 6, 23, 0.4)" : "rgba(255, 255, 255, 0)";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            if(dark) {
+                stars.forEach(s => {
+                    s.z -= 1.5; if (s.z <= 0) s.z = canvas.width;
+                    const x = (s.x / s.z) * canvas.width + canvas.width/2, y = (s.y / s.z) * canvas.height + canvas.height/2, size = (1 - s.z/canvas.width) * 2;
+                    ctx.beginPath(); ctx.fillStyle = "white"; ctx.arc(x, y, size, 0, Math.PI*2); ctx.fill();
+                });
+            }
+            requestAnimationFrame(animate);
+        }
+        animate();
+
+        window.addEventListener('load', () => {
+            const pre = document.getElementById('preloader');
+            setTimeout(() => { 
+                pre.style.opacity = '0'; 
+                setTimeout(() => { 
+                    pre.remove(); 
+                    runDeer(); 
+                }, 800); 
+            }, 800);
+        });
+
+        function runDeer() {
+            const deer = document.getElementById('deer-container');
+            const speech = document.getElementById('deer-speech');
+            deer.style.display = 'flex';
+            let pos = -150;
+            const interval = setInterval(() => {
+                pos += 5;
+                deer.style.left = pos + 'px';
+                if (pos > window.innerWidth / 2 - 100 && pos < window.innerWidth / 2 + 100) {
+                    speech.style.opacity = '1';
+                } else {
+                    speech.style.opacity = '0';
+                }
+                if (pos > window.innerWidth + 200) {
+                    clearInterval(interval);
+                    deer.remove();
+                }
+            }, 10);
+        }
+
+        function initApp() { applyTheme(localStorage.getItem('theme') || 'light'); }
+        function toggleTheme() { applyTheme(document.body.getAttribute('data-theme') === 'dark' ? 'light' : 'dark'); }
+        
+        function applyTheme(mode) {
+            document.body.setAttribute('data-theme', mode);
+            localStorage.setItem('theme', mode);
+            const sun = document.getElementById('main-circle');
+            const anc = document.getElementById('celestial-anchor');
+            if(sun) sun.setAttribute('fill', mode === 'dark' ? '#bdc3c7' : '#FFD700');
+            if(anc) { anc.className = mode === 'dark' ? 'moon-glow' : 'sun-glow'; }
+        }
+
+        document.addEventListener('mousemove', (e) => {
+            document.querySelectorAll('.iris').forEach(iris => {
+                const rect = iris.getBoundingClientRect(), angle = Math.atan2(e.clientY - (rect.top + 3.5), e.clientX - (rect.left + 3.5));
+                iris.style.transform = `translate(${Math.cos(angle) * 3}px, ${Math.sin(angle) * 3}px)`;
+            });
+        });
+    </script>
 </body>
 </html>
