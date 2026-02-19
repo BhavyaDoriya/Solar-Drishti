@@ -48,8 +48,9 @@ INSTALLED_APPS = [
     'forecasting',
 ]
 
-# 2. Replace the old Gmail SMTP section with this SendGrid API setup
-# This configuration tells Anymail to use SendGrid's API (Port 443)
+# Email configuration using Brevo API via Anymail
+# This configuration sends transactional emails using Brevo (Port 443 HTTPS API)
+
 ANYMAIL = {
     "BREVO_API_KEY": config("BREVO_API_KEY"),
 }
