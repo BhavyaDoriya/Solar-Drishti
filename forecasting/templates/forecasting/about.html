@@ -137,6 +137,18 @@
             .glass-card { padding: 20px; }
         }
                 [data-theme="dark"] .navbar-toggler-icon { filter: invert(1); }
+        .border-orange-glow {
+    position: relative;
+    box-shadow: 0 0 15px rgba(255, 145, 0, 0.05);
+}
+
+.border-orange-glow:hover {
+    box-shadow: 0 0 25px rgba(255, 145, 0, 0.2);
+}
+
+.text-start p {
+    text-align: left;
+}        
 
     </style>
 </head>
@@ -209,31 +221,95 @@
                 <div class="glass-card">
                     <span class="star-letter">S</span>
                     <h6 class="fw-bold mt-3">Situation</h6>
-                    <p class="small mb-0">Bridging the management gap in the global solar surge.</p>
+                    <p class="small mb-0">Solar energy forecasting suffers from climate uncertainty and data fragmentation.</p>
                 </div>
             </div>
             <div class="col-sm-6 col-lg-3 reveal delay-1">
                 <div class="glass-card">
                     <span class="star-letter">T</span>
                     <h6 class="fw-bold mt-3">Task</h6>
-                    <p class="small mb-0">Designing a portal for high-precision energy forecasting.</p>
+                    <p class="small mb-0">Build an accurate and scalable forecasting engine using high-resolution climate projections.</p>
                 </div>
             </div>
             <div class="col-sm-6 col-lg-3 reveal delay-1">
                 <div class="glass-card">
                     <span class="star-letter">A</span>
                     <h6 class="fw-bold mt-3">Action</h6>
-                    <p class="small mb-0">Engineering a secure Django stack with NREL processing.</p>
+                    <p class="small mb-0">Developed an end-to-end ML pipeline using CONUS 4km hourly datasets and optimized LightGBM models.</p>
                 </div>
             </div>
             <div class="col-sm-6 col-lg-3 reveal delay-1">
                 <div class="glass-card">
                     <span class="star-letter">R</span>
                     <h6 class="fw-bold mt-3">Result</h6>
-                    <p class="small mb-0">Optimizing natural energy yield for an AI-driven tomorrow.</p>
+                    <p class="small mb-0">Delivers reliable next-day solar generation predictions to support informed energy planning.</p>
                 </div>
             </div>
         </div>
+        <section class="py-5 reveal delay-2">
+    <h2 class="text-center mb-5 fw-bold text-uppercase brand-font" style="letter-spacing: 3px;">Platform Capabilities</h2>
+    <div class="row g-4">
+        <div class="col-md-6 col-lg-4">
+            <div class="glass-card h-100 p-4 border-orange-glow">
+                <div class="team-avatar" style="border-radius: 12px; background: rgba(255,145,0,0.2);">
+                    <i class="fa-solid fa-bolt-lightning"></i>
+                </div>
+                <h5 class="brand-font mb-2" style="font-size: 0.9rem;">Next-Day Prediction</h5>
+                <p class="small text-muted mb-0">Predict next-day solar output using localized telemetry and machine learning models.</p>
+            </div>
+        </div>
+        <div class="col-md-6 col-lg-4">
+            <div class="glass-card h-100 p-4 border-orange-glow">
+                <div class="team-avatar" style="border-radius: 12px; background: rgba(255,145,0,0.2);">
+                    <i class="fa-solid fa-cloud-sun"></i>
+                </div>
+                <h5 class="brand-font mb-2" style="font-size: 0.9rem;">Climate Variability</h5>
+                <p class="small text-muted mb-0">Analyze climate-driven variability to understand environmental impacts on energy yield.</p>
+            </div>
+        </div>
+        <div class="col-md-6 col-lg-4">
+            <div class="glass-card h-100 p-4 border-orange-glow">
+                <div class="team-avatar" style="border-radius: 12px; background: rgba(255,145,0,0.2);">
+                    <i class="fa-solid fa-brain"></i>
+                </div>
+                <h5 class="brand-font mb-2" style="font-size: 0.9rem;">Data-Driven Planning</h5>
+                <p class="small text-muted mb-0">Make data-driven energy planning decisions backed by historical accuracy analytics.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="py-5 reveal delay-2">
+    <div class="glass-card p-5 text-start" style="border-left: 5px solid var(--primary-orange); align-items: flex-start;">
+        <div class="row align-items-center w-100">
+            <div class="col-lg-8">
+                <h3 class="brand-font mb-3">TECHNICAL ARCHITECTURE</h3>
+                <p class="mb-4 opacity-75">SolarDrishti is built on a high-fidelity ML pipeline designed for atmospheric precision.</p>
+                <div class="row g-3">
+                    <div class="col-12 d-flex align-items-start">
+                        <i class="fa-solid fa-microchip text-warning mt-1 me-3"></i>
+                        <div>
+                            <h6 class="fw-bold mb-1">Model Specification</h6>
+                            <p class="small text-muted">Trained on high-resolution 4km climate projections using the RCP4.5 scenario for robust future-proofing.</p>
+                        </div>
+                    </div>
+                    <div class="col-12 d-flex align-items-start">
+                        <i class="fa-solid fa-database text-warning mt-1 me-3"></i>
+                        <div>
+                            <h6 class="fw-bold mb-1">Data Integration</h6>
+                            <p class="small text-muted">Processes hourly solar integration datasets (GHI, Temp, Wind) for granular temporal accuracy.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4 d-none d-lg-flex justify-content-center">
+                <div style="font-size: 8rem; opacity: 0.1; color: var(--primary-orange);">
+                    <i class="fa-solid fa-atom"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
 
         <section class="py-5 reveal delay-2">
             <h2 class="text-center mb-5 fw-bold">MISSION CONTROL</h2>
@@ -242,8 +318,8 @@
                     <div class="glass-card">
                         <div class="team-avatar"><i class="fa-solid fa-chart-line"></i></div>
                         <h4 class="brand-font mb-1">Bhavya Doriya</h4>
-                        <p class="fw-bold small mb-2" style="color: var(--primary-orange);">Data Analyst</p>
-                        <p class="small mb-3">Sourcing NREL 'engine oil' and training predictive models.</p>
+                        <p class="fw-bold small mb-2" style="color: var(--primary-orange);">Data & ML Engineer</p>
+                        <p class="small mb-3">Engineering the data infrastructure and machine learning systems powering reliable solar energy predictions..</p>
                         <button class="btn btn-sm btn-outline-warning rounded-pill px-4 mb-2" data-bs-toggle="collapse" data-bs-target="#bStack" style="border-color: var(--primary-orange); color: var(--primary-orange);">Stack</button>
                         <div class="collapse mt-2" id="bStack"><span class="tech-pill">Pandas</span><span class="tech-pill">NREL API</span><span class="tech-pill">Joblib</span></div>
                     </div>
