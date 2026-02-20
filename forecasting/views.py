@@ -330,8 +330,12 @@ def run_prediction(request, system_id):
         }
 
     except Exception as e:
-        logger.error(f"Prediction Error: {str(e)}")
-        return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
+        logger.error(f"Prediction Error: {e}")  # full error stays in backend logs
+        
+        return JsonResponse({
+            'status': 'error',
+            'message': 'Weather service temporarily unavailable.'
+        }, status=500)
 
     Prediction.objects.create(
         system=system, target_date=target_date, day_target=target,

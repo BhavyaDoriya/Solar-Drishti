@@ -32,9 +32,9 @@ Solar-Drishti/
 │
 ├── Solar_Drishti/       # Django project configuration
 ├── forecasting/         # Main Django application
-├── media/               # Dataset storage
+├── media/               # Dataset storage(local development only)
 ├── staticfiles/         # Collected static files
-├── .env                 # Environment variables (DB URL, API Keys)
+├── .env (local development only)# Environment variables (DB URL, API Keys)
 ├── manage.py
 └── requirements.txt
 ```
