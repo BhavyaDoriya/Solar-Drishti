@@ -308,12 +308,16 @@
                             <label for="signupUsername">Username</label>
                         </div>
                         
-                        <div class="form-floating mb-3">
-                            <input type="email" id="userEmail" name="email" class="form-control shadow-none" placeholder="name@example.com" required>
+                        <div class="form-floating mb-1">
+                            <input type="email" id="userEmail" name="email" class="form-control shadow-none" placeholder="name@example.com" required oninput="validateEmail()">
                             <label for="userEmail">Email Address</label>
                         </div>
                         
-                       <div class="form-floating mb-1">
+                        <div id="email-reqs" class="text-start small mb-3 mt-2" style="display: none; padding-left: 10px; font-size: 0.8rem; opacity: 0.8;">
+                            <div id="req-email" class="text-danger"><i class="fa-solid fa-xmark me-1"></i> Valid email format</div>
+                        </div>
+                        
+                        <div class="form-floating mb-1">
                             <input type="password" name="password" class="form-control shadow-none" id="signupPassword" placeholder="Password" required autocomplete="new-password" oninput="validatePassword()">
                             <label for="signupPassword">Password</label>
                         </div>
@@ -326,7 +330,7 @@
                             <div id="req-spec" class="text-danger"><i class="fa-solid fa-xmark me-1"></i> One special character (@$!%*?&)</div>
                         </div>
                         
-                        <button type="button" class="btn btn-signup w-100" id="sendOtpBtn" onclick="handleSendOTP(event)">
+                        <button type="button" class="btn btn-signup w-100" id="sendOtpBtn" onclick="handleSendOTP(event)" disabled>
                             Send OTP <i class="fa-solid fa-paper-plane ms-2"></i>
                         </button>
                     </form>
@@ -376,6 +380,10 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
     <script>
+        // Global variables to track form validity
+        let isEmailValid = false;
+        let isPasswordValid = false;
+
         function initApp() {
             applyTheme(localStorage.getItem('theme') || 'light');
             animateWarp();
@@ -491,7 +499,6 @@
         }
 
         // --- EYETRACKING & CUSTOM CURSOR ---
-        // --- EYETRACKING & CUSTOM CURSOR ---
         const dot = document.querySelector('.cursor-dot');
         const outline = document.querySelector('.cursor-outline');
         
@@ -543,11 +550,46 @@
             }
             requestAnimationFrame(animateWarp);
         }
+
+        // --- MASTER FORM VALIDATOR ---
+        function checkFormValidity() {
+            const btn = document.getElementById('sendOtpBtn');
+            // Button is enabled ONLY if BOTH email and password validations pass
+            btn.disabled = !(isEmailValid && isPasswordValid);
+        }
+
+        function validateEmail() {
+            const email = document.getElementById('userEmail').value;
+            const reqBox = document.getElementById('email-reqs');
+            const reqText = document.getElementById('req-email');
+            const regex = /^\w+([.-]?\w+)*@gmail\.com$/i;
+
+            if (email.length > 0) { 
+                reqBox.style.display = 'block'; 
+            } else { 
+                reqBox.style.display = 'none'; 
+                isEmailValid = false;
+                checkFormValidity();
+                return;
+            }
+
+            if (regex.test(email)) {
+                reqText.className = "text-success"; 
+                reqText.innerHTML = '<i class="fa-solid fa-check me-1"></i> Valid email format';
+                isEmailValid = true;
+            } else {
+                reqText.className = "text-danger"; 
+                reqText.innerHTML = '<i class="fa-solid fa-xmark me-1"></i> Invalid email format. Example: user@gmail.com';
+                isEmailValid = false;
+            }
+
+            checkFormValidity();
+        }
+
         // --- PASSWORD VALIDATION LOGIC ---
         function validatePassword() {
             const pwd = document.getElementById('signupPassword').value;
             const reqBox = document.getElementById('password-reqs');
-            const btn = document.getElementById('sendOtpBtn');
             
             // Show requirements box when user starts typing
             if(pwd.length > 0) { reqBox.style.display = 'block'; } 
@@ -567,18 +609,22 @@
             // Update UI for each rule
             for (const [id, passed] of Object.entries(rules)) {
                 const el = document.getElementById(id);
+                // We use replace to safely clear old icons while preserving the text
+                const baseText = el.innerText.replace(/(<([^>]+)>)/gi, "").trim();
+                
                 if (passed) {
                     el.className = "text-success"; // Turns green
-                    el.innerHTML = '<i class="fa-solid fa-check me-1"></i> ' + el.innerText;
+                    el.innerHTML = '<i class="fa-solid fa-check me-1"></i> ' + baseText;
                 } else {
                     el.className = "text-danger"; // Turns red
-                    el.innerHTML = '<i class="fa-solid fa-xmark me-1"></i> ' + el.innerText;
+                    el.innerHTML = '<i class="fa-solid fa-xmark me-1"></i> ' + baseText;
                     isValid = false;
                 }
             }
 
-            // Disable button if password isn't strong enough
-            btn.disabled = !isValid;
+            // Store validation state and check overall form
+            isPasswordValid = isValid;
+            checkFormValidity();
         }
     </script>
 </body>

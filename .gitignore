@@ -10,7 +10,7 @@ venv/
 
 # ========== Environment Variables ==========
 .env
-.env.*
+
 
 # ========== Databases ==========
 *.sqlite3
