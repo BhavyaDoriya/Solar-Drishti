@@ -136,14 +136,14 @@ SolarDrishti is collaboratively developed and jointly owned by:
 
 ### 🔧 Pratham — Deployment & Environment Support
 
-- GitHub: @prathamshah1910
+- GitHub: [prathamshah1910](https://github.com/prathamshah1910)
 - Assisted with deployment configuration
 - Environment variable setup support
 - Deployment testing assistance
 
 ### 🎨 Jyoti — Frontend & Backend Engineer (UI/UX Lead)
 
-- GitHub: @Shubhra-jyoti
+- GitHub: [Shubhra-jyoti](https://github.com/Shubhra-jyoti)
 - Frontend development (HTML, CSS, JS)
 - Django backend implementation
 - Database integration
