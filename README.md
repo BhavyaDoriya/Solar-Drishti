@@ -132,23 +132,22 @@ SolarDrishti is collaboratively developed and jointly owned by:
 - Machine learning model training
 - Model evaluation & validation
 - ML-backend integration
-- System design architecture
+- System design architecture & ML pipeline design
 
-### 🛡️ Pratham — Integrity Manager
+### 🔧 Pratham — Deployment & Environment Support
 
 - GitHub: @prathamshah1910
-- Backend structural organization
-- Security configuration
-- Scalability oversight
-- Deployment environment management
+- Assisted with deployment configuration
+- Environment variable setup support
+- Deployment testing assistance
 
-### 🎨 Jyoti — UI/UX Designer
+### 🎨 Jyoti — Frontend & Backend Engineer (UI/UX Lead)
 
 - GitHub: @Shubhra-jyoti
-- Visual interface design
-- Dashboard experience layout
-- Frontend interaction design
-- Design system styling
+- Frontend development (HTML, CSS, JS)
+- Django backend implementation
+- Database integration
+- UI/UX design & dashboard layout
 
 This project is an original collaborative engineering effort.
 
