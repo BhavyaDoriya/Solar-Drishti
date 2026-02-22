@@ -95,7 +95,7 @@ The production system performs real-time inference using the pre-trained model.
 - Django
 - PostgreSQL
 - Gunicorn
-- Whitenoise
+  
 
 ### Machine Learning
 - LightGBM
@@ -126,7 +126,7 @@ SolarDrishti is collaboratively developed and jointly owned by:
 
 ### 👨‍💻 Bhavya Doriya — Data & ML Engineer
 
-- GitHub: @BhavyaDoriya  
+- GitHub: [BhavyaDoriya](https://github.com/BhavyaDoriya)
 - Dataset integration
 - Feature engineering & column expansion
 - Machine learning model training
