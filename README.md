@@ -210,7 +210,6 @@ Please review that repository for attribution and usage policies related to NREL
 - ✅ Dataset pipeline complete
 - ✅ ML model trained & validated
 - ✅ Production deployment live
-- 🔄 Continuous performance refinement ongoing
 
 ## 📜 License
 
