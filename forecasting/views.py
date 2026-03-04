@@ -330,6 +330,9 @@ def run_prediction(request, system_id):
         }
 
     except Exception as e:
+        import traceback
+        traceback.print_exc()
+        logger.error(f"Prediction Error: {e}")
         logger.error(f"Prediction Error: {e}")  # full error stays in backend logs
         
         return JsonResponse({

@@ -58,12 +58,13 @@ def compute_solar_features(df_weather: pd.DataFrame, lat: float, lon: float) -> 
     location = pvlib.location.Location(latitude=lat, longitude=lon, tz=timezone_str)
     
     # pvlib needs the timestamps to be localized to the specific timezone to calculate zenith correctly
-    times_for_zenith = pd.DatetimeIndex(final_df['timestamp']).tz_localize(timezone_str)
-    
-    # Calculate position
+    times_for_zenith = pd.DatetimeIndex(final_df['timestamp']).tz_localize(
+        timezone_str,
+        nonexistent="shift_forward"
+    )
+
     solar_position = location.get_solarposition(times_for_zenith)
-    
-    # Assign zenith to the dataframe
-    final_df['solar_zenith'] = solar_position['zenith'].values
+    final_df['solar_zenith'] = solar_position['zenith'].values    
+
 
     return final_df
