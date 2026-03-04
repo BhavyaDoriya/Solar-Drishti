@@ -3,7 +3,7 @@
 Transforming atmospheric complexity into reliable clean energy foresight through end-to-end engineering.
 
 🌐 Live Demo: https://solar-drishti.onrender.com/
-
+> ⚠️ Note: This system is trained on U.S. NREL datasets and currently supports U.S. locations only.
 ---
 
 ## 📌 Overview
@@ -210,7 +210,6 @@ Please review that repository for attribution and usage policies related to NREL
 - ✅ Dataset pipeline complete
 - ✅ ML model trained & validated
 - ✅ Production deployment live
-- 🔄 Continuous performance refinement ongoing
 
 ## 📜 License
 
